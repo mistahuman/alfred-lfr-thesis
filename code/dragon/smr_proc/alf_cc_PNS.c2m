@@ -1,0 +1,123 @@
+*-----------------------------------------------------------------------
+* PROCEDURE CLE 2000 CONCENTRATIONS ISOTOPES BOUCHON                   *
+*-----------------------------------------------------------------------
+
+* Procedure appelee par :
+* 
+* N_Pb_PNS N_B10_PNS N_B11_PNS N_Fe54_EPNS N_Fe56_EPNS N_Fe57_EPNS
+* N_Fe58_EPNS N_Cr50_EPNS N_Cr52_EPNS N_Cr53_EPNS N_Cr54_EPNS
+* N_Ni58_EPNS N_Ni60_EPNS N_Ni61_EPNS N_Ni62_EPNS N_Ni64_EPNS
+* N_Mn55_EPNS N_Mo92_EPNS N_Mo94_EPNS N_Mo95_EPNS N_Mo96_EPNS
+* N_Mo97_EPNS N_Mo98_EPNS N_Mo100_EPNS N_C_EPNS N_Si_EPNS N_Ti_EPNS
+* := alfred_cc_PNS ::
+* >>p_Pb_PNS<< >>p_EPNS<< >>p_B_PNS<<
+* >>N_Fe54_E<< >>N_Fe56_E<< >>N_Fe57_E<< >>N_Fe58_E<<
+* >>N_Cr50_E<< >>N_Cr52_E<< >>N_Cr53_E<< >>N_Cr54_E<<
+* >>N_Ni58_E<< >>N_Ni60_E<< >>N_Ni61_E<< >>N_Ni62_E<<
+* >>N_Ni64_E<< >>N_Mn55_E<< >>N_Mo92_E<< >>N_Mo94_E<<
+* >>N_Mo95_E<< >>N_Mo96_E<< >>N_Mo97_E<< >>N_Mo98_E<<
+* >>N_Mo100_E<< >>N_C_E<< >>N_Si_E<< >>N_Ti_E<< >>N_Pb<<
+* >>T_Pb<< >>a_B<< ;
+
+MODULE END: ;
+
+*-----------------------------------------------------------------------
+* RECUPERATION DES DONNEES D ENTREE                                    *
+*-----------------------------------------------------------------------
+
+REAL
+ p_Pb_PNS p_EPNS p_B_PNS N_Fe54_E N_Fe56_E N_Fe57_E
+ N_Fe58_E N_Cr50_E N_Cr52_E N_Cr53_E N_Cr54_E N_Ni58_E N_Ni60_E N_Ni61_E 
+ N_Ni62_E N_Ni64_E N_Mn55_E N_Mo92_E N_Mo94_E N_Mo95_E N_Mo96_E N_Mo97_E
+ N_Mo98_E N_Mo100_E N_C_E N_Si_E N_Ti_E N_Pb T_Pb a_B
+;
+
+:: >>p_Pb_PNS<< >>p_EPNS<< >>p_B_PNS<<
+>>N_Fe54_E<< >>N_Fe56_E<< >>N_Fe57_E<< >>N_Fe58_E<< >>N_Cr50_E<<
+>>N_Cr52_E<< >>N_Cr53_E<< >>N_Cr54_E<< >>N_Ni58_E<< >>N_Ni60_E<<
+>>N_Ni61_E<< >>N_Ni62_E<< >>N_Ni64_E<< >>N_Mn55_E<< >>N_Mo92_E<<
+>>N_Mo94_E<< >>N_Mo95_E<< >>N_Mo96_E<< >>N_Mo97_E<< >>N_Mo98_E<<
+>>N_Mo100_E<< >>N_C_E<< >>N_Si_E<< >>N_Ti_E<< >>N_Pb<< >>T_Pb<<
+>>a_B<<
+;
+
+*-----------------------------------------------------------------------
+* TENEUR EN BORE                                                       *
+*-----------------------------------------------------------------------
+
+* NOMBRE D AVOGADRO
+
+ECHO "start calculation" ;
+REAL A := 6.022094E-1 ; ! Normalisation des concentrations par 10E-24
+
+* DENSITE NOMIPbLE A 20 C
+
+REAL rho0_B := 2.394 ; ! teneur : 90%
+
+
+* DENSITE A LA TEMPERATURE DU PLOMBE (g/cm3)
+
+REAL coeff_1 := T_Pb 20.0 - a_B * 1.0 + ;
+(*Hypothese : PNS a la temp du plombe*)
+REAL coeff_2 := coeff_1 coeff_1 * coeff_1 * ;
+REAL rho_B := rho0_B coeff_2 * ;
+
+* CONCENTRATION (cm-3)
+
+REAL M_B := 0.198 10.0129370 * 0.802 11.0093053 * + ;
+REAL N_B10 := 0.198 rho_B * A * M_B / ;
+REAL N_B11 := 0.802 rho_B * A * M_B / ;
+
+*-----------------------------------------------------------------------
+* CALCUL DES CONCENTRATIONS                                            *
+*-----------------------------------------------------------------------
+
+REAL N_Pb_PNS N_B10_PNS N_B11_PNS N_Fe54_EPNS N_Fe56_EPNS N_Fe57_EPNS
+ N_Fe58_EPNS N_Cr50_EPNS N_Cr52_EPNS N_Cr53_EPNS N_Cr54_EPNS N_Ni58_EPNS
+ N_Ni60_EPNS N_Ni61_EPNS N_Ni62_EPNS N_Ni64_EPNS N_Mn55_EPNS N_Mo92_EPNS
+ N_Mo94_EPNS N_Mo95_EPNS N_Mo96_EPNS N_Mo97_EPNS N_Mo98_EPNS
+ N_Mo100_EPNS N_C_EPNS N_Si_EPNS N_Ti_EPNS
+;
+
+EVALUATE N_Pb_PNS := N_Pb p_Pb_PNS * ;
+EVALUATE N_B10_PNS := N_B10 p_B_PNS * ;
+EVALUATE N_B11_PNS := N_B11 p_B_PNS * ;
+EVALUATE N_Fe54_EPNS := N_Fe54_E p_EPNS * ;
+EVALUATE N_Fe56_EPNS := N_Fe56_E p_EPNS * ;
+EVALUATE N_Fe57_EPNS := N_Fe57_E p_EPNS * ;
+EVALUATE N_Fe58_EPNS := N_Fe58_E p_EPNS * ;
+EVALUATE N_Cr50_EPNS := N_Cr50_E p_EPNS * ;
+EVALUATE N_Cr52_EPNS := N_Cr52_E p_EPNS * ;
+EVALUATE N_Cr53_EPNS := N_Cr53_E p_EPNS * ;
+EVALUATE N_Cr54_EPNS := N_Cr54_E p_EPNS * ;
+EVALUATE N_Ni58_EPNS := N_Ni58_E p_EPNS * ;
+EVALUATE N_Ni60_EPNS := N_Ni60_E p_EPNS * ;
+EVALUATE N_Ni61_EPNS := N_Ni61_E p_EPNS * ;
+EVALUATE N_Ni62_EPNS := N_Ni62_E p_EPNS * ;
+EVALUATE N_Ni64_EPNS := N_Ni64_E p_EPNS * ;
+EVALUATE N_Mn55_EPNS := N_Mn55_E p_EPNS * ;
+EVALUATE N_Mo92_EPNS := N_Mo92_E p_EPNS * ;
+EVALUATE N_Mo94_EPNS := N_Mo94_E p_EPNS * ;
+EVALUATE N_Mo95_EPNS := N_Mo95_E p_EPNS * ;
+EVALUATE N_Mo96_EPNS := N_Mo96_E p_EPNS * ;
+EVALUATE N_Mo97_EPNS := N_Mo97_E p_EPNS * ;
+EVALUATE N_Mo98_EPNS := N_Mo98_E p_EPNS * ;
+EVALUATE N_Mo100_EPNS := N_Mo100_E p_EPNS * ;
+EVALUATE N_C_EPNS := N_C_E p_EPNS * ;
+EVALUATE N_Si_EPNS := N_Si_E p_EPNS * ;
+EVALUATE N_Ti_EPNS := N_Ti_E p_EPNS * ;
+
+*-----------------------------------------------------------------------
+* AFFICHAGE DES RESULTATS                                              *
+*-----------------------------------------------------------------------
+
+:: <<N_Pb_PNS>> <<N_B10_PNS>> <<N_B11_PNS>> <<N_Fe54_EPNS>>
+<<N_Fe56_EPNS>> <<N_Fe57_EPNS>> <<N_Fe58_EPNS>> <<N_Cr50_EPNS>>
+<<N_Cr52_EPNS>> <<N_Cr53_EPNS>> <<N_Cr54_EPNS>> <<N_Ni58_EPNS>>
+<<N_Ni60_EPNS>> <<N_Ni61_EPNS>> <<N_Ni62_EPNS>> <<N_Ni64_EPNS>>
+<<N_Mn55_EPNS>> <<N_Mo92_EPNS>> <<N_Mo94_EPNS>> <<N_Mo95_EPNS>>
+<<N_Mo96_EPNS>> <<N_Mo97_EPNS>> <<N_Mo98_EPNS>> <<N_Mo100_EPNS>>
+<<N_C_EPNS>> <<N_Si_EPNS>> <<N_Ti_EPNS>>
+;
+
+END: ;

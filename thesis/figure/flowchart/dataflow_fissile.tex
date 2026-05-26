@@ -1,0 +1,39 @@
+\documentclass[crop,border=7pt]{standalone}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}       
+\usepackage{scalefnt}
+\usepackage[dvipsnames]{xcolor}
+%% TIKZ
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usetikzlibrary{decorations.pathmorphing,decorations.text,decorations.pathreplacing}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes,shapes.multipart,arrows,fit,calc,positioning,intersections,through}
+\usetikzlibrary{backgrounds,fadings}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+ \tikzstyle{rect} = [draw=black, thick, rectangle, fill=white!20, text width=16em, text centered, minimum height=2em]
+ \tikzstyle{elli} = [draw=black, thick, ellipse, fill= white!20, minimum height=2em, text width=10em]
+\tikzstyle{circ} = [draw=black, thick, circle, fill=white!20, text width=3em, text centered]
+\tikzstyle{diam} = [draw=black, thick, diamond, fill=white!20, text width=4.5em, text badly centered, inner sep=0pt]
+\tikzstyle{trap} = [draw=black, thick, trapezium, trapezium left angle=70, trapezium right angle=110, fill=white!20, text width=6em, text centered, minimum height=2em]
+\tikzstyle{arrow} = [thick, ->]
+\begin{tikzpicture}[>=latex, node distance=2.5cm]
+
+
+\node (microlib) [circ, left of= asm, yshift=1cm] {microlib};
+
+\node (asm) [diam] {modulo ASM};
+\node (pij) [circ, below of=asm] {$P_ij$};
+\node (flu) [diam, below of=pij] {modulo FLU};
+\node (flux) [circ, below of=flu] {Flux};
+
+
+\end{tikzpicture}
+\end{document}
+% pdflatex --shell-escape figure.tex

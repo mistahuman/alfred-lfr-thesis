@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+if [ $# = 0 ]
+then
+echo "usage: alf_solide.save directory" 1>&2
+exit 1
+fi
+echo access alf_solide.save
+MACH=`uname -s`
+Sysx="`echo $MACH | cut -b -6`"
+if [ $Sysx = "CYGWIN" ]; then
+MACH=`uname -o`
+elif [ $Sysx = "Darwin" ]; then
+MACH=`uname -sm`
+elif [ $Sysx = "SunOS" ]; then
+MACH=`uname -sm`
+elif [ $Sysx = "Linux" ]; then
+MACH=`uname -sm`
+fi
+ls -l
+
+# mv *.l2m $1/ALFcompo/
+mv ACOMPO4 $1/SMRcompo33/
+echo "alf_solide.save completed"

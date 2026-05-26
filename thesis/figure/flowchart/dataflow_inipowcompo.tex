@@ -1,0 +1,105 @@
+\documentclass[crop,border=7pt]{standalone}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}       
+\usepackage{scalefnt}
+\usepackage[dvipsnames]{xcolor}
+%% TIKZ
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usetikzlibrary{decorations.pathmorphing,decorations.text,decorations.pathreplacing}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes,shapes.multipart,arrows,fit,calc,positioning,intersections,through}
+\usetikzlibrary{backgrounds,fadings}
+
+ 
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+ \tikzstyle{rect} = [draw=black, thick, rectangle, fill=yellow!30, text width=8em, text centered, minimum height=2em]
+ \tikzstyle{elli} = [draw=black, thick, ellipse, fill= white!20, minimum height=2em]
+\tikzstyle{circ} = [draw=black, thick, circle, fill=red!30, text width=3em, text centered]
+\tikzstyle{diam} = [draw=black, thick, diamond, fill=green!30, text width=6em, text badly centered, inner sep=0pt]
+\tikzstyle{trap} = [draw=black, thick, trapezium, trapezium left angle=70, trapezium right angle=110, fill=white!20, text width=6em, text centered, minimum height=2em]
+\tikzstyle{arrow} = [thick, ->]
+\begin{tikzpicture}[>=latex, node distance=2.5cm]
+%     every node/.style = {thin, shape=rectangle, 
+%    rounded corners,
+%     draw, 
+%     align=center},
+%    ]   
+
+% \node (geom) [rect, rounded corners] {Caricamento della geometria complessiva del reattore};
+\node (geom) [circ] {Geom};
+
+\node (geo) [diam, above of=geom] {modulo \\ GEO};
+\node (geoco) [rect, rounded corners, left of=geo, xshift=-4.5cm] {\textbf{GeoCo}:\\ Creazione della geometria complessiva del reattore};
+
+\node (usplit) [diam, below of=geom, xshift=-2.5cm] {modulo\\ USPLIT};
+\node (trivat) [diam, below of=geom, xshift=2.5cm] {modulo \\ TRIVAT};
+\node (matex) [circ, below of=usplit] {Matex};
+\node (track) [circ,  below of=trivat] {Track};
+
+\node (resini) [diam, below of=matex] {modulo \\ RESINI};
+\node (setfuelparam) [rect, rounded corners, left of=resini, xshift=-2cm] {\textbf{SetFuelMap}:\\ Mappatura degli elementi che compongono il reattore.\\ \textbf{SetParam}:\\ Valori di bruciamento per gli assemblies di combustibile};
+% \node (setparam) [rect, below of=setfuelmap] {\textbf{SetParam.c2m} Valori di bruciamento per gli assemblies di combustibile};
+\node (fmap) [circ, below of=resini] {Fmap};
+
+\draw [arrow] (geoco) -- (geo);
+\draw [arrow] (geo) -- (geom);
+\draw [arrow] (geom) -- (usplit);
+\draw [arrow] (geom) -- (trivat);
+\draw [arrow] (usplit) -- (matex);
+\draw [arrow] (trivat) -- (track);
+\draw [arrow] (matex) -- (resini);
+\draw [arrow] (resini) -- (fmap);
+\draw [arrow] (setfuelparam) -- (resini);
+
+
+
+% \node[thin, shape=rectangle,rounded corners,draw,align=center, text width = 5cm ](point1)  {Dati dello stato iniziale del reattore};
+% \node[thin, shape=rectangle,draw,align=center, text width = 7cm, below=of point1 ](point2) {Solve the state system};
+% \node[thin, shape=rectangle,draw,align=center, text width = 7cm, below=of point2 ](point3) {Solve the adjoint system and evaluate functional gradient};
+% \node[thin, shape=rectangle,draw,align=center, text width = 7cm, below=of point3 ](point4) {Update the control variable using the gradient direction };
+% \node[thin, shape=rectangle,draw,align=center, text width = 7cm, below=of point4 ](point5) {Test for convergence of the optimization algorithm};
+% \node[thin, shape=rectangle,rounded corners,draw,align=center, text width = 5cm, below=of point5](point6) {Optimal states, adjoint and control variables};
+% \node[left=of point5.west, inner sep=0pt](point6) {};
+% \node[left=of point2.west, inner sep=0pt ](point8) {};
+% \draw[thin,dashed] (point5) -- node[near start,above, midway] {No} (point6);
+% \draw[thin,dashed] (point6) -| (point8);
+% \draw[thin, ->, dashed] (point8) |- (point2);
+% \draw[thin, ->] (point1) -- (point2);
+% \draw[thin, ->] (point2) -- (point3);
+% \draw[thin, ->] (point3) -- (point4);
+% \draw[thin, ->] (point4) -- (point5);
+% % \draw[thin, ->] (point5) -- (point6);
+% %\draw[thin,->] (0,0) -- (4.5,0);
+% 
+% %\draw[thin] (point9) -| node[near start,above] {} (point2);
+% % \draw[thin,->] (point7) -- (point9) node[] {};
+% \node[below=of point5.south ](point7) {};
+% \draw[thin,->] (point5) -- (point7) node[midway,right] {Yes};
+% \draw[->,>=latex] (point0.east) to[out=0,in=180]  (point1.west);
+% \node[right=of point1.east, xshift=-0.35cm, fill=corn, text width =2.2cm ](point11) {Calcolo $\mathcal{J}^0$};
+% \draw[->,>=latex] (point1.east) to[out=0,in=180]  (point11.west);
+% \node[below=of point1.south, yshift=0.8cm, fill=coral,text width = 3cm ](point2) {\textbf{Risoluzione equazioni aggiunte}\\$(\vect{u}_a^i,p_a^i,k_a^i,\omega_a^i,\nu_a^i)$};  
+% \node[below=of point0.south, left=of point2.west, fill=coral, text width=2cm ](for) {Ciclo esterno $i=1,\dots$};     
+% \node[below=of point2.south,yshift=0.8cm,xshift=0cm, fill=columbiablue,text width = 3cm ](agg) {$\vect{f}^i=\vect{f}^{i-1}+\rho^{i,j}\frac{\vect{u}_a^i}{\lambda}$};     
+% \node[below=of for.south, left=of agg.west, fill=columbiablue, text width=1.8cm ](for1) {\footnotesize Ciclo interno $j=0,\dots$};   
+% \node[below=of agg.south,yshift=1cm,xshift=0cm, fill=columbiablue,text width = 3.2cm ](RANS) {\textbf{Risoluzione sistema RANS} $k$-$\omega$\\$(\vect{u}^{i,j},p^{i,j},k^{i,j},\omega^{i,j},\nu_t^{i,j})$};
+% \node[below=of RANS.south, xshift=0cm,yshift=1cm,fill=columbiablue, text width =2.cm](Ji) {Calcolo $\mathcal{J}^{i,j}$};
+% \node[right=of Ji.east, xshift=1.8cm,yshift=0cm](A) {};
+% \node[right=of Ji.east, xshift=-1cm,yshift=-0.4cm](B) {se\\ $\mathcal{J}^{i,j}-\mathcal{J}^{i,j-1}>0$};
+% \node[right=of Ji.east, xshift=1.4cm, fill=columbiablue, text width=2cm ](for2) {$j=j+1$ \\$\rho^{i,j+1}=0.7\rho^{i,j}$};   
+% \draw[->,>=latex] (Ji.east) to[]  (for2.west);
+% \node[left=of Ji.west, xshift=1cm,yshift=-0.4cm](C) {se\\ $\mathcal{J}^{i,j}-\mathcal{J}^{i,j-1}<0$};  
+% \node[left=of Ji.west, xshift=-1.2cm,fill=coral, text width=1.5cm ](for3) {$i=i+1$};  
+% \draw[->,>=latex] (Ji.west) to[]  (for3.east);
+% \node[below=of Ji.south, yshift=-0.5cm, fill=etonblue](D) {$\vect{f}$ ottimo}; 
+% \draw[->,>=latex] (Ji.south) to[]  (D.north);
+% \node[right=of D.east,xshift=-1cm](E) {se $\dfrac{||\mathcal{J}^{i,j}-\mathcal{J}^{i,j-1}||}{\mathcal{J}^{i,j-1}}<toll$}; 
+\end{tikzpicture}
+\end{document}
+% pdflatex --shell-escape figure.tex

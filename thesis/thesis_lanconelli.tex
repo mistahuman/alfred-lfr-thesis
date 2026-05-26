@@ -1,0 +1,100 @@
+\documentclass[a4paper,12pt]{book}
+
+\usepackage{ucs}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amsfonts,amsmath,amssymb,amsthm,mathrsfs}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage[a4paper,top=3cm,bottom=2.5cm,left=2.5cm,right=2.5cm,bindingoffset=5mm]{geometry}
+ 
+\usepackage{bookmark}
+\usepackage{hypcap}
+\usepackage[nottoc]{}
+
+\usepackage{subfigure}
+
+
+% % \overfullrule=2cm
+
+\bibliographystyle{ieeetr}
+
+\linespread{1.5}
+\raggedbottom
+\title{}
+\author{}
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+\hbox{}
+  %Potresti voler togliere il commento dalla linea seguente
+  %Questa pagina è stata lasciata intenzionalmente vuota.
+\thispagestyle{empty}
+\newpage
+\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+%%%newcommand
+\renewcommand{\vec}{\boldsymbol}
+
+%%%%%%%%macro-graffe
+\newenvironment{sistema}% 
+{\left\lbrace\begin{array}{@{}l@{}}}% 
+{\end{array}\right.}
+
+%%%%%%%%%%%%%macro-figure
+\newcommand\Figure[4][width=0.4\textwidth]{%
+  \begin{figure}[!htb]
+    \centering
+    \includegraphics[#1]{#2}
+    \caption{#3}\label{#4}
+  \end{figure}
+}
+
+%%%%%%%%%%%%%%%%55
+\pdfsuppresswarningpagegroup=1
+% % % % % %%%%%%%%%%%%%%%%%%%
+\begin{document}
+\pagestyle{plain}
+	\input{capitoli/frontespizio}
+	\setcounter{page}{2}
+	\tableofcontents
+\pagestyle{headings}
+
+%%%%%%%%%%introduzione
+\input{capitoli/introduzione}
+%%%%%%%%%%capitolo reattoristico
+\input{capitoli/cap_reactor}
+%%%%%%%%%%capitolo neutronica
+\input{capitoli/cap_neutronic}
+%%%%%%%%%%capitolo termofluidodinamica
+\input{capitoli/cap_thermo}
+%%%%%%%%%%capitolo di piattaforma
+\input{capitoli/cap_platform}
+%%%%%%%%%%capitolo risultati
+\input{capitoli/progetto}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\backmatter
+%%%%%%%%%%conclusioni
+\input{capitoli/conclusioni}
+\cleardoublepage \phantomsection
+\addcontentsline{toc}{chapter}{Elenco delle figure}
+\listoffigures
+
+\cleardoublepage \phantomsection
+\addcontentsline{toc}{chapter}{Elenco delle tabelle}
+\listoftables
+%%%%%%%%%%bibliografia
+\cleardoublepage \phantomsection
+\addcontentsline{toc}{chapter}{Bibliografia}
+\bibliography{capitoli/bibliografia.bib}
+
+\end{document}          

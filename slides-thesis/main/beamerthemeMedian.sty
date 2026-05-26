@@ -1,0 +1,251 @@
+\RequirePackage{tikz, datetime, textpos}
+\DeclareOption{beteckna}{
+	\setsansfont[Ligatures=TeX, 
+				 Extension=.ttf,
+				 BoldFont=*Bold,
+				 ItalicFont=*Italic
+				 ]{BetecknaLowerCase}
+}
+\ProcessOptions
+\yyyymmdddate \renewcommand{\dateseparator}{.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%mycolor%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+\definecolor{blizzardblue}{rgb}{0.67, 0.9, 0.93}
+\definecolor{mygreen}{rgb}{.125,.5,.25}
+\definecolor{bleudefrance}{rgb}{0.19, 0.55, 0.91}
+\definecolor{ceruleanblue}{rgb}{0.16, 0.32, 0.75}
+\definecolor{bondiblue}{rgb}{0.0, 0.58, 0.71}
+\definecolor{celestialblue}{rgb}{0.29, 0.59, 0.82}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%mycolor%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+% \definecolor{MedianLightBlue}{rgb}{0.8, 0.33, 0.0}
+% \definecolor{MedianLightOrange}{rgb}{0.16, 0.67, 0.53} 
+% \definecolor{MedianUltraLightOrange}{rgb}{0.96, 0.96,0.96}
+% \definecolor{MedianOrange}{rgb}{0.0, 0.29, 0.29} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%mycolor%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+\setbeamertemplate{blocks}[rounded][shadow=true]
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5555
+% \definecolor{MedianLightBlue}{rgb}{0.72, 0.45, 0.2}%\definecolor{copper}
+% %{rgb}{0.82, 0.41, 0.12}%\definecolor{chocolate(web)}
+% \definecolor{MedianUltraLightOrange}{rgb}{1.0, 0.99, 0.82}
+% %{rgb}{1.0, 0.65, 0.0}%\definecolor{chromeyellow}
+% \definecolor{MedianOrange}{rgb}{0.48, 0.25, 0.0}%\definecolor{chocolate(traditional)}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%mycolor%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5555
+\definecolor{MedianLightBlue}{rgb}{0.0, 0.5, 0.0}
+
+%{rgb}{0.82, 0.41, 0.12}%\definecolor{chocolate(web)}
+\definecolor{MedianUltraLightOrange}{rgb}{0.97, 0.97, 1.0}%\definecolor{ghostwhite}{rgb}
+%{rgb}{1.0, 0.65, 0.0}%\definecolor{chromeyellow}
+\definecolor{MedianOrange}{rgb}{0.0, 0.28, 0.67}
+% \definecolor{MedianOrange}{rgb}{0.0, 0.42, 0.24}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%mycolor%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+\definecolor{ghostwhite}{rgb}{0.97, 0.97, 1.0}
+\setbeamercolor*{title page header}{fg=black}
+\setbeamercolor*{title}{fg=black}
+\setbeamercolor*{author}{fg=white}
+\setbeamercolor*{date}{fg=white}
+\setbeamercolor*{item}{fg=MedianOrange}
+\setbeamercolor*{frametitle}{fg=black}
+\setbeamercolor*{block title}{fg=white, bg=MedianOrange}
+\setbeamercolor*{block title example}{fg=white, bg=MedianLightOrange}
+\setbeamercolor*{block body}{bg=MedianUltraLightOrange}
+\setbeamercolor*{block body example}{bg=MedianUltraLightOrange}
+\setbeamercolor*{section in toc}{fg=black}
+\setbeamercolor*{section page}{fg=white}
+\definecolor{sfondo_copertina}{RGB}{220,220,254} 
+% \setbeamerfont{section page}{size=\LARGE}
+\setbeamercolor*{section in toc}{fg=black}
+\setbeamercolor*{section page}{fg=white}
+\setbeamerfont{section page}{size=\LARGE}
+
+\setbeamercolor*{subsection in toc}{fg=black}
+\setbeamercolor*{subsection page}{fg=white}
+\setbeamerfont{subsection page}{size=\Large}
+
+\setbeamerfont{title}{size=\LARGE}
+\setbeamerfont{author}{size=\LARGE}
+\setbeamerfont{date}{size=\Large}
+
+\renewcommand{\boxed}[3]{
+\textcolor{#2}{%
+\tikz[baseline={([yshift=-1ex]current bounding box.center)}] \node [rectangle, minimum width=1ex,rounded corners,draw, fill=#2!20, inner sep = 1.5pt,outer sep=0.pt] (#3) {\normalcolor\m@th$\displaystyle#1$};
+}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{items}[square]
+\setbeamertemplate{itemize item}{\tikz{\draw[color=MedianLightBlue, very thick] rectangle(.2,.2);}}
+\setbeamertemplate{itemize subitem}{\tikz{\draw[color=MedianOrange, ultra thick] rectangle(.2,.2);}}
+\setbeamertemplate{sections/subsections in toc}[square]
+
+\newenvironment{xplainframe}{\bgroup\setbeamertemplate{background}{}\begin{frame}[plain]}{\end{frame}\egroup}
+%\pgfdeclareimage[width=1.0\paperwidth]{alias-interno}{eddy-davinci}
+\setbeamertemplate{background}{
+  \begin{tikzpicture}
+  \useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+  \ifnum\thepage<101\relax%
+  \ifnum\thepage>1\relax% Not the title page
+ % \node (logo) at (12,0) {\includegraphics[width=8 cm]{figure/logogrey.png}};
+	    \fill[color=MedianOrange] (0,8) rectangle(0.8,8.3);
+	    \fill[color=MedianLightBlue] (0.9,8) rectangle(\the\paperwidth, 8.3);
+  \else% Title page
+% 	  \fill[color=MedianBrown] (0,1.2) rectangle (\the\paperwidth,\the\paperheight);
+	  \fill[color=MedianOrange] (0,0.1) rectangle(3.15,1.1);
+	  \fill[color=MedianLightBlue] (3.3,0.1) rectangle(\the\paperwidth,1.1); 
+	  \fill[color=MedianOrange] (0,7.9) rectangle(\the\paperwidth,\the\paperheight);
+% 	  \fill[color=MedianLightOrange] (2.2,4.2) rectangle(11.2,6);
+	  \node[rectangle, text width=11cm, fill=MedianUltraLightOrange] at (6.5,6) {\begin{center} \vspace{-0.4cm}\LARGE \inserttitle \\ \vspace{0.1cm}\end{center}};
+  \fi
+  \else%
+ % \node (logo) at (6.52,4.8) {\includegraphics[width=9.8 cm]{figure/logogrey.png}};
+  \fi
+     % \pgftext[at=\pgfpoint{0cm}{0cm},left,base]{\pgfuseimage{alias-interno}};
+  \end{tikzpicture}
+}
+
+
+\setbeamertemplate{title page}{
+\begin{textblock*}{11cm}(-0.8cm,-3.5cm)
+    \begin{minipage}{15cm}
+    \begin{beamercolorbox}{date}
+    \large
+    \textcolor{white}{Universit\`a di Bologna - Facolt\`a di Ingegneria} \\
+    \textcolor{white}{Tesi di Laurea Magistrale in} \\
+    \textcolor{white}{Tecniche di Modellistica e Simulazione per l'Energetica M}
+    \end{beamercolorbox}
+    \end{minipage}
+\end{textblock*}
+\begin{textblock*}{11cm}(1.2cm,0.1cm)
+    \begin{beamercolorbox}[wd=11cm]{title page header}
+      \centering
+%       \usebeamerfont{title}\usebeamercolor{title}\inserttitle%
+    \end{beamercolorbox}%
+\end{textblock*}
+%%%%%%%%%%%%%DATE
+\begin{textblock*}{9cm}(-0.9cm,5.05cm)
+		\begin{beamercolorbox}{date}
+	      \usebeamerfont{date}\insertdate%
+	    \end{beamercolorbox}
+\end{textblock*}
+\begin{textblock*}{6.8cm}(2.5cm,5.05cm)
+	    \begin{beamercolorbox}{author}
+	      \usebeamerfont{author}
+	      \begin{minipage}{0.4\textwidth}
+	      \vspace{-0.5cm}
+	      \raggedright{\texttt{Candidato:}}
+	      \end{minipage}%
+	      \begin{minipage}{0.8\textwidth}
+	      \vspace{-0.5cm}
+	      \raggedleft \textbf{\textit{\insertauthor}}%
+	      \end{minipage}
+           \end{beamercolorbox}
+\end{textblock*}
+
+\begin{textblock*}{9cm}(0cm,2cm)
+    \begin{beamercolorbox}[wd=9cm]{title page header}
+    \begin{center}
+    \vspace{-0.6cm}
+      \begin{minipage}[t]{0.5\textwidth}
+	\textbf{Relatore}
+      
+      Prof. Ing. Sandro Manservisi
+      \end{minipage}%
+      \hspace*{1.6cm}
+      \begin{minipage}[t]{0.5\textwidth}
+	\begin{flushright}
+	  \textbf{Correlatori}
+	  
+       Prof. Ing. Marco Sumini
+       
+       Prof. Ing. Ruben Scardovelli
+                  
+       Ing. Leonardo Chirco
+                 
+       Ing. Valentina Giovacchini
+                  
+       Ing. Andrea Chierici
+	\end{flushright}
+      \end{minipage}
+     \end{center}
+      
+    \end{beamercolorbox}%
+\end{textblock*}
+    
+    
+}
+
+\newcommand{\sectionframe}{{
+	\setbeamertemplate{background}{
+ 		\begin{tikzpicture}
+ 			\useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+			\fill[color=MedianOrange] (0,6) rectangle (1.5, 7);
+			\fill[color=MedianLightBlue] (1.6, 6) rectangle (\the\paperwidth, 7);
+ 		\end{tikzpicture}
+		
+	}
+	\frame{\sectionpage}
+}}
+\setbeamertemplate{section page}{
+	\begin{textblock*}{12cm}(0.8cm,-0.9cm)
+		\begin{beamercolorbox}{section page}
+			\insertsectionhead
+		\end{beamercolorbox}
+	\end{textblock*}
+}
+%%%%%%%%%%%%%%%%%%%%subsection
+\newcommand{\subsectionframe}{{
+	\setbeamertemplate{background}{
+ 		\begin{tikzpicture}
+ 			\useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+ 			\fill[color=MedianOrange] (0,6) rectangle (1.5, 7);
+ 			\fill[color=MedianLightBlue] (1.6, 6) rectangle (\the\paperwidth, 7);
+ 			\fill[color=MedianOrange] (1,3.8) rectangle (2.5, 4.5);
+ 			\fill[color=MedianLightBlue] (2.6, 3.8) rectangle (\the\paperwidth, 4.5);
+ 		\end{tikzpicture}
+	}
+	\frame{\subsectionpage}
+}}
+\setbeamertemplate{subsection page}{
+	\begin{textblock*}{12cm}(0.8cm,-0.9cm)
+		\begin{beamercolorbox}{section page}
+		\LARGE
+	\insertsectionhead
+		\end{beamercolorbox}
+	\end{textblock*}
+		\begin{textblock*}{12cm}(1.8cm,1.49cm)
+		\begin{beamercolorbox}{subsection page}
+			\insertsubsectionhead
+		\end{beamercolorbox}
+	\end{textblock*}
+}
+
+
+\setbeamertemplate{frametitle}{
+	\vspace{0.4cm}
+	\begin{beamercolorbox}{frametitle}
+	      \Large \textbf{\insertframetitle}
+	\end{beamercolorbox}
+}
+\tikzset{annotation/.style={}}
+\newcommand{\finalframe}[2]{
+	 \bgroup\setbeamertemplate{background}{	 
+	 \begin{tikzpicture}
+		\useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+		\fill[color=MedianOrange] (0,0)  rectangle(\the\paperwidth,1.2);
+		\fill[color=MedianOrange] (0,8.4) rectangle(\the\paperwidth,\the\paperheight);
+
+		\begin{pgfonlayer}{background}
+			\clip (0,1.2) rectangle ++(\the\paperwidth,7.9);
+			\fill[color=sfondo_copertina] (0,1.2) rectangle (\the\paperwidth,\the\paperheight);
+			\node[align=center] at ({0.5*\the\paperwidth},{0.5*\the\paperheight})               
+			      {\includegraphics[width=1.5\textwidth]{#2}};				%%% BACKGROUND IMAGE FOR FINAL FRAME
+		\end{pgfonlayer}
+		\node[annotation, color = MedianOrange, draw,thick, text width=10cm, 
+		     fill=sfondo_copertina!30,opacity=.70,text opacity=1,inner sep=1cm,
+		     align = center,font =  \fontsize{1.3cm}{1.3cm}\selectfont] 
+		     at ({0.5*\the\paperwidth},{0.5*\the\paperheight}) {#1};
+	 \end{tikzpicture}}
+	 \begin{frame}[plain]
+	 \end{frame}\egroup
+}	 

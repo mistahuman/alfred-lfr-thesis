@@ -1,0 +1,176 @@
+
+
+\section{Introduzione}
+
+% \begin{frame}
+%  \frametitle{Introduzione}
+%  \vspace{0.3cm}
+%     \begin{center}
+%      
+%    \large La piattaforma numerica consiste in un \textbf{ambiente computazionale semplificato e versatile}
+%    che permette l'integrazione e l'accoppiamento dei codici computazionali di \textbf{\textcolor{bleudefrance}{neutronica}} e
+%    di \textbf{\textcolor{mygreen}{termoidraulica}}.
+%    
+%     \end{center}
+% 
+% 
+%  \begin{columns}
+%   \begin{column}{0.48\textwidth}
+%   \begin{center}
+%   \begin{figure}
+%    \centering
+% %    \includegraphics[scale=0.2]{../../thesis/figure/result_tred/pacman}
+%    \includegraphics[scale=0.2]{../../thesis/figure/result_tred/morenew/tempassurda}
+%   \end{figure}
+%    
+%   \end{center}
+% 
+%   \end{column}
+%   \begin{column}{0.48\textwidth}
+%   \begin{figure}
+%    \centering
+% %       \includegraphics[scale=0.30]{../../thesis/figure/result_tred/pacman}
+%    \includegraphics[scale=0.2]{../../thesis/figure/result_tred/new/tred7-pw.png}
+%   \end{figure}
+%    % % % %      \begin{center}
+% % % % %        \includegraphics[scale=0.3]{../../thesis/figure/result_tred/new/tred-reactor}
+% % % % %    \end{center}
+%   \end{column}
+% 
+%  \end{columns}
+% 
+% \end{frame}
+
+
+
+
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reattore Nucleare}
+ \begin{frame}
+ \vspace{0.4cm}
+ \frametitle{ALFRED (Advanced Lead Fast REactor Demonstrator)}
+%  \framesubtitle{Advanced Lead Fast REactor Demonstrator}
+\begin{center}
+\large
+ Progetto europeo di reattore nucleare (300 MW$_{th}$) che ha il ruolo di dimostrare la 
+ \textbf{fattibilità della tecnologia dei reattori veloci raffreddati a piombo}, 
+ i quali hanno caratteristiche di \underline{affidabilità} e di \underline{sostenibilità}.
+\end{center}
+ \begin{center}
+ \begin{figure}
+ \centering
+ \includegraphics[scale=0.33]{../../thesis/figure/reactor/alfred.png}
+ \end{figure}
+ \end{center}
+ 
+ \begin{center}
+ \begin{itemize}
+  \item Combustibile ossidi misti di uranio e di plutonio (MOX)
+  \item Refrigerante Piombo Liquido
+ \end{itemize}
+ \end{center}
+ 
+ \end{frame}
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ \begin{frame}
+  \frametitle{Caratteristiche dei Reattori Veloci}
+  \vspace{0.4cm}
+  \begin{center}
+  \begin{itemize}
+  \item Prevalenza di reazioni di \textbf{fissione veloce}
+  \item Ogni evento di fissione veloce libera \textbf{più neutroni} rispetto alle fissioni termiche
+%   \item Tuttavia le reazioni di fissione alle alte energie sono \textbf{meno probabili} rispetto alle basse energie 
+  \item \textbf{Maggiori assorbimenti} da parte degli isotopi fertili che trasmutano in isotopi fissili
+  \begin{equation*}
+ ^{238}_{92}U + ^{1}_{0}n \, \longrightarrow ^{239}_{92}U  \xrightarrow{\beta^-}
+ \, ^{239}_{93}Np  \xrightarrow{\beta^-} \, ^{239}_{94}Pu
+ \end{equation*}
+  \item \textbf{Maggiore compattezza} dovuta all'assenza del moderatore di neutroni
+ \end{itemize}
+ \begin{block}{Sostenibilità}
+ Capacità di \textbf{\textcolor{red}{autofertilizzazione}} del combustibile (Breeder Reactor), con la possibilità di generare più combustibile di quello che brucia
+ \end{block}
+ 
+ \end{center}
+ \end{frame}
+
+ 
+ %%%%%%%%%%%%%%%%%
+% % %  \begin{frame}
+% % %  
+% % %  \frametitle{Reattori veloci raffreddati al piombo}
+% % %   \begin{minipage}[c]{0.48\linewidth} 
+% % %  \begin{center}
+% % %  \begin{figure}
+% % %  \includegraphics[scale=2.2]{../../thesis/figure/reactor/lfr.jpg}
+% % %  \end{figure}
+% % %  \end{center}
+% % %  \end{minipage}\hfill
+% % %  
+% % %  \end{frame}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ \begin{frame}
+ \frametitle{Vantaggi e svantaggi del piombo liquido come refrigerante}
+ \vspace{0.5cm}
+ % \begin{minipage}[c]{0.48\textwidth} 
+ \begin{block}{Vantaggi}
+ \begin{itemize}
+ \item[\checkmark] Mantiene uno spettro veloce dei neutroni
+ \item[\checkmark] Ottime proprietà termodinamiche
+ \item[\checkmark] Alta temperatura di ebollizione ($T_{ebollizione}=1739 ^\circ C$)
+ \item[\checkmark] Bassa reattività con acqua o aria (inerte)
+ \item[\checkmark] Schermaggio delle radiazioni dovute a decadimenti
+ \end{itemize}
+ \end{block}
+ 
+ %  \end{minipage}\hfill
+ 
+% \begin{minipage}[c]{0.48\textwidth} 
+ \begin{block}{Svantaggi}
+ \begin{itemize}
+ \item[\textbf{$\times$}] Elevata tendenza ad essere corrosivo nei confronti dell'acciaio
+ \item[\textbf{$\times$}] Opacità del piombo causa problematiche per l'ispezione e il monitoraggio
+ \item[\textbf{$\times$}] Sistema ausiliario per mantenere il piombo liquido ($T_{fusione}=327.5 ^\circ C$)
+ \end{itemize}
+ \end{block}
+ % \end{minipage}\hfill
+ \end{frame}
+ 
+ \begin{frame}
+ \frametitle{Scopo della tesi}
+ 
+%  \vspace{0.8cm}
+
+  \begin{columns}
+  \begin{column}{0.5\textwidth}
+  
+ \begin{block}{}
+ \begin{itemize}
+ \item Generare le \textbf{sezioni d'urto macroscopiche} mediate sulla composizione e sull'energia, partendo dalle librerie dei dati nucleari
+ \item Modellare il reattore nucleare ALFRED
+ \item Implementare il modello all'interno della piattaforma numerica
+ \item Consentire l'accoppiamento tra i codici di neutronica e i codici di termoidraulica
+ \item Simulare il comportamento multifisico
+ \end{itemize}
+ \end{block}
+ 
+  \end{column}
+  \begin{column}{0.44\textwidth}
+  \vspace{0.8cm}
+  \begin{figure}
+   \centering
+%       \includegraphics[scale=0.30]{../../thesis/figure/result_tred/pacman}
+   \includegraphics[scale=0.28]{../../thesis/figure/result_tred/new/tred-reactor}
+  \end{figure}
+   % % % %      \begin{center}
+% % % %        \includegraphics[scale=0.3]{../../thesis/figure/result_tred/new/tred-reactor}
+% % % %    \end{center}
+  \end{column}
+
+ \end{columns}
+% 
+ 
+\end{frame} 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

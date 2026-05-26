@@ -1,0 +1,45 @@
+\chapter*{Extended Abstract}
+%In this thesis, a preliminary hexagonal geometry of the  SMR model of the ALFRED (Advanced Lead Fast REactor Demonstrator) concept design for a lead cooled reactor is analyzed with a computational platform that integrates different computational tools into the common framework given by the SALOME platform software. The purpose of the paper is to investigate the multiphysics (thermal-hydraulic-neutronic) approach to this SMR model by coupling the DRAGON-DONJON codes, for lattice calculations and full core simulation, with a 3D-porous media thermal-hydraulic code, FEMUS. 
+
+%In particular, the lattice code, DRAGON, is used to evaluate the macroscopic cross sections over the hexagonal lattice devised for ALFRED, collapsing the microscopic cross section data into 33 groups, parametrized on fuel and moderator temperature, density and power distribution. With the macroscopic cross sections for the various lattice cells of the reactor defined, the distribution of neutron flux in the core is obtained by the full core simulation with the DONJON code, that may be used in the simulation of fuel management, reactor operation or accident scenarios. 
+
+%In transient simulations (in a quasi-static approach), at each time step, the neutron flux is computed with the corresponding thermal source while the thermal-hydraulic module (FEMUS) computes the distribution of the coolant velocity, pressure and temperature fields in the reactor core. Then the neutron modules can receive all the feedback variables, as fuel temperature, moderator temperature and density that can be cast in input to the DRAGON code, where macroscopic cross sections are interpolated and total neutron fluxes evaluated. 
+
+%In this way, one can obtain an iterative process for studying the transient evolution of the model of the ALFRED fast lead cooled reactor as SMR case-study and preliminary results about his time-dependent behavior can be fully analyzed.
+
+In questo progetto di tesi è stato implementato un modello di reattore nucleare LFR (Lead Fast Reactor) all'interno di una piattaforma numerica, la quale integra differenti strumenti computazionali allo scopo di investigare il comportamento multifisico ottenuto dall'accoppiamento di codici di neutronica e di termoidraulica.
+Il modello di reattore nucleare implementato è basato sul progetto ALFRED (Advanced Lead Fast REactor Demonstrator), il quale ha il ruolo di dimostrare la fattibilità della tecnologia dei reattori veloci raffreddati al piombo proposti dal GIF (Generation IV International Forum) come sistemi energetici nucleari appartenenti alla IV$^{th}$ generazione.
+I reattori veloci raffreddati al piombo possiedono caratteristiche innovative di sostenibilità e di affidabilità offerte dalla proprietà del piombo come refrigerante; quest'ultimo è in grado di mantenere uno spettro neutronico veloce che massimizza la fertilizzazione del combustibile, offrendo la possibilità di ottenere un ciclo chiuso di combustibile.
+
+La possibilità di studiare sistemi nucleari attraverso simulazioni numeriche presenta molteplici vantaggi durante la progettazione e allo stesso tempo l'integrazione di codici di neutronica e di termoidraulica all'interno di una piattaforma numerica permette di colmare le differenze tra essi e di assicurare un approcio multifisico completo.
+In particolare, all'interno di questa tesi è presentato l'accoppiamento del codice \textit{Donjon (Full-core simulation)}, inerente alla simulazione neutronica dell'intero reattore, e del codice \textit{FEMuS}, inerente alla simulazione termoidraulica, all'interno della piattaforma numerica.
+La piattaforma numerica, basata su \textit{Salom\'e}, permette la gestione e lo scambio delle strutture dati offerte da librerie e moduli in cui la distribuzione di potenza termica ottenuta dalla risoluzione del flusso neutronico all'interno dal codice di reattore è scambiata al codice di termoidraulica al fine di risolvere il campo di temperatura sul dominio del reattore.
+La distribuzione di temperatura è scambiata, a sua volta, al codice di neutronica al fine di interpolare sul database reattoristico e di ottenere le sezioni d'urto omogeneizzate e condensate a 33 gruppi energetici in funzione della temperatura del combustibile, temperatura del refrigerante e tempi di bruciamento isotopico del combustibile fissile.
+Il database reattoristico è stato realizzato attraverso il supporto del codice di cella \textit{Dragon (Lattice code)}, il quale risolve il problema del trasporto dei neutroni e ottenenendo le sezioni d'urto efficaci relative alle principali componenti del reattore come le barre di combustibile, le barre di controllo, elementi di protezione neutronica. I dati delle librerie nucleari associati alle sezioni d'urto microscopiche di ogni elemento sono stati estratti dalle \textit{Jeff3.1.2shem315}.
+
+Attraverso la versalità della piattaforma numerica è stato possibile realizzare un ciclo iterativo tra i codici di neutronica e di termoidraulica consentendo l'analisi multifisica del modello di ALFRED e la stampa della distribuzione del flusso neutronico, della potenza termica e della temperatura.
+L'analisi neutronica del reattore è stata investigata attraverso la valutazione del fattore moltiplicativo effettivo $k_{eff}$ e del coefficiente di reattività $\Delta \rho$ in funzione delle variazioni di temperatura, che incidono sulle proprietà nucleari dei materiali, e del bruciamento isotopico, considerando come il tempo di inizio ciclo (BOC) di 2 anni e il tempo di fine ciclo di 3 anni.
+Il campo di temperatura è stato ottenuto attraverso la risoluzione dell'equazione di conservazione dell'energia ipotizzando la velocità del refrigerante costante e la coefficiente di conducibilità termica mediata sul piombo.
+
+Sono stati ottenuti valori del fattore moltiplicativo effettivo compatibili con altri studi inerenti al progetto ALFRED e anche la temperatura di uscita del refrigerante ottenuta dalla potenza termica neutronica è risultata accettabile con i dati progettuali previsti.
+I risultati ottenuti soddisfano i parametri previsti per il progetto ALFRED, anche se è necessaria la raffinazione dei dati utilizzati durante la modellazione del reattore in riferimento ai cambiamenti apportati dagli enti di ricerca che operano nella costruzione del progetto dimostrativo ALFRED e l'introduzione di modelli più accurati e complessi nell'analisi termodinamica, come modelli per descrivere la turbolenza relativa al piombo liquido.
+
+In conclusione la possibilità di integrare l'accoppiamento neutronico-termoidraulica in un unica piattaforma numerica può essere un ottimo strumento per la progettazione e la valutazione della fattibilità della tecnologia LFR, aprendo a prospettive future per indagare il comportamento multifisico di sistemi energetici complessi. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

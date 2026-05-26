@@ -1,0 +1,28 @@
+\documentclass[a4paper,10pt,border=8pt]{report}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}       
+\usepackage{scalefnt}
+\usepackage[dvipsnames]{xcolor}
+%% TIKZ
+\usepackage{tikz}
+
+\usetikzlibrary{shapes.geometric, arrows}
+\begin{document}
+\tikzstyle{rect} = [draw, rectangle, fill=white!20, text width=6em, text centered, minimum height=2em]
+\tikzstyle(elli) = [draw, ellipse, fill= white!20, minimum height=2em]
+\tikzstyle(circ) = [draw, circle, fill=white!20, text width=em, text centered, inner sep=10pt]
+\tikzstyle(diam) = [draw, diamond, fill=white!20, text width=6em, text badly centered, inner sep=0pt]
+\tikzstyle{line} = [draw, -latex']
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[node distance = 1.5cm, auto]
+\node [rect,rounded corners] (step1) {start};
+\node [rect,below of=step1] (step2) {calculate};
+
+\path [line] (step1) -- (step2);
+\end{tikzpicture}
+\end{center}
+\end{figure}
+\end{document} 

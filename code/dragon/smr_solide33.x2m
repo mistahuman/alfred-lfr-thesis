@@ -1,0 +1,3908 @@
+*----
+*  Nom           : alf_solide.x2m
+*  Auteur        : Marco Lanconelli
+*  Date          : September 2018
+*  Calcul des solides pour un ALFRED et production d une Saphyb
+*----
+*
+************************************************************************
+* DECLARATION INITIALE                                                 *
+************************************************************************
+
+LINKED_LIST DONNEES MICROLIB MICROLIB2 GEOM TRACK PIJ FLUX BURNUP 
+ EDIOBJ COMPO ;
+
+SEQ_ASCII ACOMPO4 :: FILE './ACOMPO4' ;
+SEQ_ASCII ABURNUP :: FILE './ABURNUP' ;
+
+BURNUP := ABURNUP ;
+
+MODULE  LIB: GEO: SYBILT: FLU: COMPO: ASM: EVO: DELETE: END: UTL: USS:
+GREP: EDI: ABORT: ;
+
+PROCEDURE alf_cc alf_cc_na alf_cc_co alf_cc_a alf_cc_re alf_cc_PNL
+ alf_cc_PNS alf_cc_pln alf_cc_bo alf_cc_vs alf_cc_cl alf_interpol ;
+
+*STRING Library := "DLIBJ3p2_295" ;
+*STRING Library := "DLIBe7r1_281" ;
+*STRING Library := "DLIBJ312_281" ;
+STRING Library := "DLIBJ312_315" ;
+
+STRING Compo := "SOLIDE" ;
+
+************************************************************************
+* UOX/MOX MASS FRACTIONS                                               *
+************************************************************************
+
+REAL p_Pu p_U := 0.205 0.795 ; !inner enrichment
+
+************************************************************************
+* DECLARATION ET EVALUATION DES DONNEES                                *
+************************************************************************
+
+* PROPORTIONS DES ISOTOPES ET TEMPERATURES
+
+REAL 
+p_Pu38 p_Pu39 p_Pu40 p_Pu41 p_Pu42 p_Am p_U5 p_U8
+p_Fe_AIM1 p_Cr_AIM1 p_Ni_AIM1 p_Mn_AIM1
+p_Mo_AIM1 p_Si_AIM1 p_Ti_AIM1
+p_Fe_EM10 p_Cr_EM10 p_Ni_EM10 p_Mo_EM10
+p_Mn_EM10 p_C_EM10 p_Si_EM10 p_Ti_EM10
+p_Fe_F17 p_Cr_F17 p_Mn_F17 p_C_F17 p_S_F17 p_Si_F17
+:= 0.02348 0.57015 0.26951 0.06069 0.07616 0.00001 0.00412 0.99588
+0.6575 0.145 0.155 0.015 0.015 0.0085 0.004
+0.89 0.085 0.005 0.01 0.005 0.001 0.003 0.0002
+0.808 0.17 0.01 0.0008 0.0007 0.01
+;
+
+***********************
+*temperature in celsius
+***********************
+
+REAL 
+T_comb_0 T_clad_0 T_Pb_0
+:= 550.0 480.0 440.0
+;
+
+
+* Conversion des temperatures en Kelvin
+
+REAL T_comb_K T_clad_K T_Pb_K ;
+EVALUATE T_comb_K := T_comb_0 273.16 + ;
+EVALUATE T_clad_K := T_clad_0 273.16 + ;
+EVALUATE T_Pb_K := T_Pb_0 273.16 + ;
+
+* FRACTIONS VOLUMIQUES DES MATERIAUX
+
+REAL
+p_Pb_co p_Eco p_Aco p_B_co
+p_Pb_sv p_Esv
+p_Pb_a p_Ea p_Aa p_B_a
+p_Pb_Pre p_EPre p_B_Pre
+p_Pb_fre p_Efre p_Ffre
+p_Pb_PNL p_EPNL p_B_PNL
+p_Pb_PNS p_B_PNS p_EPNS
+p_Pb_pln p_Epln
+p_Pb_bo p_Ebo p_Abo
+p_Pb_vs p_Evs p_Avs
+p_Pb_cl p_Ecl p_Acl
+:= 0.3962 0.0976 0.1955 0.3107
+0.9024 0.0976
+0.4984 0.0976 0.1676 0.2365
+0.2472 0.2178 0.47
+0.2511 0.0976 0.6513
+0.26 0.23 0.40
+0.4021 0.4127 0.1852
+0.9024 0.0976
+0.2914 0.0976 0.6111
+0.2914 0.0976 0.1247
+0.2914 0.0976 0.5799
+;
+
+* INTERPOLATION DES COEFFICIENTS DE DIFFUSION
+
+REAL a_comb a_AIM1 a_AIM1_Pb a_EM10 a_F17 a_pb a_B ;
+
+alf_interpol :: <<T_comb_0>> <<T_clad_0>> <<T_Pb_0>>
+>>a_comb<< >>a_AIM1<< >>a_AIM1_Pb<< >>a_EM10<< >>a_F17<< >>a_pb<< 
+>>a_B<< ;
+
+************************************************************************
+*  FIN D EVALUATION DES DONNEES                                        *
+************************************************************************
+
+************************************************************************
+* ASSEMBLAGE FISSILE                                                   *
+************************************************************************
+
+* CALCUL DES CONCENTRATIONS
+
+REAL N_Pb N_Pb_void N_U5 N_U8 N_Pu38 N_Pu39 N_Pu40 N_Pu41 N_Pu42 N_Am
+ N_O N_U5_f N_U8_f N_O_f
+ N_Fe54_AIM1 N_Fe56_AIM1 N_Fe57_AIM1 N_Fe58_AIM1 N_Cr50_AIM1 N_Cr52_AIM1
+ N_Cr53_AIM1 N_Cr54_AIM1 N_Ni58_AIM1 N_Ni60_AIM1 N_Ni61_AIM1 N_Ni62_AIM1
+ N_Ni64_AIM1 N_Mn55_AIM1 N_Mo92_AIM1 N_Mo94_AIM1 N_Mo95_AIM1 N_Mo96_AIM1
+ N_Mo97_AIM1 N_Mo98_AIM1 N_Mo100_AIM1 N_Si_AIM1 N_Ti_AIM1 
+ N_Fe54_EM10 N_Fe56_EM10 N_Fe57_EM10 N_Fe58_EM10 N_Cr50_EM10 N_Cr52_EM10
+ N_Cr53_EM10 N_Cr54_EM10 N_Ni58_EM10 N_Ni60_EM10 N_Ni61_EM10 N_Ni62_EM10
+ N_Ni64_EM10 N_Mn55_EM10 N_Mo92_EM10 N_Mo94_EM10 N_Mo95_EM10 N_Mo96_EM10
+ N_Mo97_EM10 N_Mo98_EM10 N_Mo100_EM10 N_C12_EM10 N_Si_EM10 N_Ti_EM10
+ N_He_1 N_He_2 
+;
+
+alf_cc ::
+<<p_Pu38>> <<p_Pu39>> <<p_Pu40>> <<p_Pu41>> <<p_Pu42>> 
+<<p_Am>> <<p_U5>> <<p_U8>> <<p_Pu>> <<p_U>>
+<<p_Fe_AIM1>> <<p_Cr_AIM1>> <<p_Ni_AIM1>> <<p_Mo_AIM1>>
+<<p_Mn_AIM1>> <<p_Si_AIM1>> <<p_Ti_AIM1>>
+<<p_Fe_EM10>> <<p_Cr_EM10>> <<p_Ni_EM10>> <<p_Mo_EM10>> 
+<<p_Mn_EM10>> <<p_C_EM10>>  <<p_Si_EM10>> <<p_Ti_EM10>> 
+<<a_comb>> <<a_AIM1>> <<a_EM10>> <<a_pb>> 
+<<T_comb_0>> <<T_clad_0>> <<T_Pb_0>> 
+
+>>N_Pb<< >>N_U5<< >>N_U8<< >>N_Pu38<< >>N_Pu39<< >>N_Pu40<< 
+>>N_Pu41<< >>N_Pu42<< >>N_Am<< >>N_O<<  
+>>N_U5_f<< >>N_U8_f<< >>N_O_f<<  
+>>N_Fe54_AIM1<< >>N_Fe56_AIM1<< >>N_Fe57_AIM1<< >>N_Fe58_AIM1<< 
+>>N_Cr50_AIM1<< >>N_Cr52_AIM1<< >>N_Cr53_AIM1<< >>N_Cr54_AIM1<< 
+>>N_Ni58_AIM1<< >>N_Ni60_AIM1<< >>N_Ni61_AIM1<< >>N_Ni62_AIM1<< 
+>>N_Ni64_AIM1<< >>N_Mn55_AIM1<< >>N_Mo92_AIM1<< >>N_Mo94_AIM1<<
+>>N_Mo95_AIM1<< >>N_Mo96_AIM1<< >>N_Mo97_AIM1<< >>N_Mo98_AIM1<<
+>>N_Mo100_AIM1<< >>N_Si_AIM1<<  >>N_Ti_AIM1<<
+>>N_Fe54_EM10<< >>N_Fe56_EM10<< >>N_Fe57_EM10<< >>N_Fe58_EM10<< 
+>>N_Cr50_EM10<< >>N_Cr52_EM10<< >>N_Cr53_EM10<< >>N_Cr54_EM10<< 
+>>N_Ni58_EM10<< >>N_Ni60_EM10<< >>N_Ni61_EM10<< >>N_Ni62_EM10<< 
+>>N_Ni64_EM10<< >>N_Mn55_EM10<< >>N_Mo92_EM10<< >>N_Mo94_EM10<<
+>>N_Mo95_EM10<< >>N_Mo96_EM10<< >>N_Mo97_EM10<< >>N_Mo98_EM10<<
+>>N_Mo100_EM10<< >>N_C12_EM10<< >>N_Si_EM10<<   >>N_Ti_EM10<<
+>>N_He_1<< >>N_He_2<<  
+;
+
+REAL
+N_Fe54_APb N_Fe56_APb N_Fe57_APb N_Fe58_APb
+N_Cr50_APb N_Cr52_APb N_Cr53_APb N_Cr54_APb
+N_Ni58_APb N_Ni60_APb N_Ni61_APb N_Ni62_APb
+N_Ni64_APb N_Mn55_APb N_Mo92_APb N_Mo94_APb
+N_Mo95_APb N_Mo96_APb N_Mo97_APb N_Mo98_APb
+N_Mo100_APb N_Si_APb N_Ti_APb 
+N_Fe54_F17 N_Fe56_F17 N_Fe57_F17 N_Fe58_F17
+N_Cr50_F17 N_Cr52_F17 N_Cr53_F17 N_Cr54_F17 
+N_Mn55_F17 N_C_F17 N_S_F17 N_Si_F17
+;
+
+alf_cc_na ::
+<<p_Fe_AIM1>> <<p_Cr_AIM1>> <<p_Ni_AIM1>> <<p_Mn_AIM1>>
+<<p_Mo_AIM1>> <<p_Si_AIM1>> <<p_Ti_AIM1>>
+<<p_Fe_F17>> <<p_Cr_F17>> <<p_Mn_F17>> <<p_C_F17>> <<p_S_F17>>
+<<p_Si_F17>> <<a_AIM1_Pb>> <<a_F17>> <<T_Pb_0>>
+
+>>N_Fe54_APb<< >>N_Fe56_APb<<
+>>N_Fe57_APb<< >>N_Fe58_APb<< >>N_Cr50_APb<< 
+>>N_Cr52_APb<< >>N_Cr53_APb<< >>N_Cr54_APb<< 
+>>N_Ni58_APb<< >>N_Ni60_APb<< >>N_Ni61_APb<< 
+>>N_Ni62_APb<< >>N_Ni64_APb<< >>N_Mn55_APb<< 
+>>N_Mo92_APb<< >>N_Mo94_APb<< >>N_Mo95_APb<< >>N_Mo96_APb<<
+>>N_Mo97_APb<< >>N_Mo98_APb<< >>N_Mo100_APb<<
+>>N_Si_APb<< >>N_Ti_APb<< >>N_Fe54_F17<< 
+>>N_Fe56_F17<< >>N_Fe57_F17<< >>N_Fe58_F17<< >>N_Cr50_F17<< 
+>>N_Cr52_F17<< >>N_Cr53_F17<< >>N_Cr54_F17<< >>N_Mn55_F17<<
+>>N_C_F17<< >>N_S_F17<< >>N_Si_F17<< 
+;
+
+************************************************************************
+* DISPOSITIF DE COMMANDE PARTIE SUP (COSU)                             *
+************************************************************************
+
+* CALCUL DES CONCENTRATIONS
+
+REAL
+N_Pb_co N_B10_co_1 N_B10_co_2 N_B11_co_1 N_B11_co_2 N_Fe54_Eco
+N_Fe56_Eco N_Fe57_Eco N_Fe58_Eco
+N_Cr50_Eco N_Cr52_Eco N_Cr53_Eco N_Cr54_Eco N_Ni58_Eco
+N_Ni60_Eco N_Ni61_Eco N_Ni62_Eco N_Ni64_Eco N_Mn55_Eco N_Mo92_Eco
+N_Mo94_Eco N_Mo95_Eco N_Mo96_Eco N_Mo97_Eco N_Mo98_Eco N_Mo100_Eco
+N_C_Eco N_Si_Eco N_Ti_Eco
+N_Fe54_APbco N_Fe56_APbco N_Fe57_APbco N_Fe58_APbco N_Cr50_APbco
+N_Cr52_APbco N_Cr53_APbco N_Cr54_APbco N_Ni58_APbco N_Ni60_APbco
+N_Ni61_APbco N_Ni62_APbco N_Ni64_APbco N_Mn55_APbco N_Mo92_APbco
+N_Mo94_APbco N_Mo95_APbco N_Mo96_APbco N_Mo97_APbco N_Mo98_APbco
+N_Mo100APbco N_Si_APbco N_Ti_APbco
+N_Pb_svco N_Fe54_Esvco N_Fe56_Esvco N_Fe57_Esvco N_Fe58_Esvco
+N_Cr50_Esvco N_Cr52_Esvco N_Cr53_Esvco N_Cr54_Esvco N_Ni58_Esvco
+N_Ni60_Esvco N_Ni61_Esvco N_Ni62_Esvco N_Ni64_Esvco N_Mn55_Esvco
+N_Mo92_Esvco N_Mo94_Esvco N_Mo95_Esvco N_Mo96_Esvco N_Mo97_Esvco
+N_Mo98_Esvco N_Mo100Esvco N_C_Esvco N_Si_Esvco N_Ti_Esvco
+;
+
+alf_cc_co ::
+<<p_Pb_co>> <<p_Eco>> <<p_Aco>> <<p_B_co>> <<p_Pb_sv>> <<p_Esv>>
+<<N_Fe54_EM10>> <<N_Fe56_EM10>> <<N_Fe57_EM10>> <<N_Fe58_EM10>>
+<<N_Cr50_EM10>> <<N_Cr52_EM10>> <<N_Cr53_EM10>> <<N_Cr54_EM10>>
+<<N_Ni58_EM10>> <<N_Ni60_EM10>> <<N_Ni61_EM10>> <<N_Ni62_EM10>>
+<<N_Ni64_EM10>> <<N_Mn55_EM10>> <<N_Mo92_EM10>> <<N_Mo94_EM10>>
+<<N_Mo95_EM10>> <<N_Mo96_EM10>> <<N_Mo97_EM10>> <<N_Mo98_EM10>>
+<<N_Mo100_EM10>> <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>> <<N_Pb>>
+<<N_Fe54_APb>> <<N_Fe56_APb>> <<N_Fe57_APb>> <<N_Fe58_APb>>
+<<N_Cr50_APb>> <<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>>
+<<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> <<N_Ni62_APb>>
+<<N_Ni64_APb>> <<N_Mn55_APb>> <<N_Mo92_APb>> <<N_Mo94_APb>>
+<<N_Mo95_APb>> <<N_Mo96_APb>> <<N_Mo97_APb>> <<N_Mo98_APb>>
+<<N_Mo100_APb>> <<N_Si_APb>> <<N_Ti_APb>> <<T_Pb_0>> <<a_B>>
+
+* Partie superieure : bore enrichi (48%)   -> N_B10_co_1
+* Partie inferieure : bore naturel (19.8%) -> N_B10_co_2
+
+>>N_Pb_co<< >>N_B10_co_1<< >>N_B10_co_2<< >>N_B11_co_1<<
+>>N_B11_co_2<< >>N_Fe54_Eco<< >>N_Fe56_Eco<< >>N_Fe57_Eco<< 
+>>N_Fe58_Eco<< >>N_Cr50_Eco<< >>N_Cr52_Eco<< >>N_Cr53_Eco<< 
+>>N_Cr54_Eco<< >>N_Ni58_Eco<< >>N_Ni60_Eco<< >>N_Ni61_Eco<< 
+>>N_Ni62_Eco<< >>N_Ni64_Eco<< >>N_Mn55_Eco<< >>N_Mo92_Eco<<
+>>N_Mo94_Eco<< >>N_Mo95_Eco<< >>N_Mo96_Eco<< >>N_Mo97_Eco<<
+>>N_Mo98_Eco<< >>N_Mo100_Eco<< >>N_C_Eco<< >>N_Si_Eco<< >>N_Ti_Eco<<
+>>N_Fe54_APbco<< >>N_Fe56_APbco<< >>N_Fe57_APbco<< >>N_Fe58_APbco<< 
+>>N_Cr50_APbco<< >>N_Cr52_APbco<< >>N_Cr53_APbco<< >>N_Cr54_APbco<< 
+>>N_Ni58_APbco<< >>N_Ni60_APbco<< >>N_Ni61_APbco<< >>N_Ni62_APbco<< 
+>>N_Ni64_APbco<< >>N_Mn55_APbco<< >>N_Mo92_APbco<< >>N_Mo94_APbco<<
+>>N_Mo95_APbco<< >>N_Mo96_APbco<< >>N_Mo97_APbco<< >>N_Mo98_APbco<<
+>>N_Mo100APbco<< >>N_Si_APbco<< >>N_Ti_APbco<< 
+>>N_Pb_svco<< >>N_Fe54_Esvco<< >>N_Fe56_Esvco<< >>N_Fe57_Esvco<< 
+>>N_Fe58_Esvco<< >>N_Cr50_Esvco<< >>N_Cr52_Esvco<< >>N_Cr53_Esvco<< 
+>>N_Cr54_Esvco<< >>N_Ni58_Esvco<< >>N_Ni60_Esvco<< >>N_Ni61_Esvco<< 
+>>N_Ni62_Esvco<< >>N_Ni64_Esvco<< >>N_Mn55_Esvco<< >>N_Mo92_Esvco<<
+>>N_Mo94_Esvco<< >>N_Mo95_Esvco<< >>N_Mo96_Esvco<< >>N_Mo97_Esvco<<
+>>N_Mo98_Esvco<< >>N_Mo100Esvco<< >>N_C_Esvco<< >>N_Si_Esvco<<
+>>N_Ti_Esvco<<
+;
+
+
+*******************************************************************
+* GEOMETRIE GENERIQUE POUR TOUS LES SOLIDES
+* geometria generica per tutti i solidi
+*******************************************************************
+************************************************************************
+*Geometria FA-alfred
+*****
+REAL Rcomb1 Rcomb2 Rcomb3 Rcomb4 Rcomb5 Rcomb6 Rcomb7
+   := 0.1 0.1875 0.275 0.3625 0.45 0.465 0.525 ;
+*0-r1: gas plenum
+*r1-r2: fuel mox
+*r2-r3: fuel mox
+*r3-r4: fuel mox
+*r4-r5: fuel mox
+*r5-r6: helium gap
+*r6-r7: cladding
+
+
+GEOM := GEO: :: HEX 81 (*ASSEMBLAGE SOLIDE ENTOURE PAR FISSILES*)
+EDIT 2
+HBC S30 SYME
+CELL  
+C1 
+C1 
+C1 C1 
+C1 C1 
+C1 C1 C1 
+C1 C1 C1 
+C1 C1 C1 C1 
+C1 C1 C1 C1 
+C2 C4 C2 C4 C2 
+C3 C3 C3 C3 C4
+C3 C3 C3 C3 C3 C4
+C3 C3 C3 C3 C3 C4
+C3 C3 C3 C3 C3 C3 C4 
+C3 C3 C3 C3 C3 C3 C4
+C3 C3 C3 C3 C3 C3 C3 C4
+C3 C3 C3 C3 C3 C3 C3 C4
+C3 C3 C3 C3 C3 C3 C3 C3 C4
+MERGE 
+ 1 
+ 2 
+ 3  4 
+ 5  6 
+ 7  8  9 
+10 11 12 
+13 14 15 16 
+17 18 19 20 
+21 22 23 24 25 
+26 27 28 29 30
+31 32 33 34 35 36
+37 37 37 37 37 38
+37 37 37 37 37 37 38 
+37 37 37 37 37 37 38
+37 37 37 37 37 37 37 38
+37 37 37 37 37 37 37 38
+37 37 37 37 37 37 37 37 38
+::: C1 := GEO: HEXCEL 0 (*SOLIDE*)
+  SIDE 0.8002074731
+  MIX 10 ;
+::: C2 := GEO: HEXCEL 0 (*BOTIER MOX*)
+  SIDE 0.8002074731
+  MIX 7 ;
+::: C3 := GEO: HEXCEL 7 (*COMBUSTIBLE*)
+SIDE 0.8002074731
+  RADIUS 0.0 <<Rcomb1>> <<Rcomb2>> <<Rcomb3>> <<Rcomb4>> <<Rcomb5>>
+             <<Rcomb6>> <<Rcomb7>>
+MIX 8 2 3 4 5 9 6 1 ;
+::: C4 := GEO: HEXCEL 0 (*BOTIER MOX*)
+  SIDE 0.8002074731
+  MIX 7 ;
+;
+
+***********************
+* TRACKING
+***********************
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* MICROLIB
+***********************
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+
+MIX 10 (*DISPOSITIF DE COMMANDE PARTIE SUP*) <<T_Pb_K>> NOEV
+ B10 = 'B10' <<N_B10_co_1>>
+ B11 = 'B11' <<N_B11_co_1>>
+ Pb = 'Pb208' <<N_Pb_co>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Eco>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Eco>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Eco>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Eco>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Eco>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Eco>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Eco>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Eco>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Eco>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Eco>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Eco>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Eco>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Eco>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Eco>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Eco>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Eco>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Eco>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Eco>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Eco>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Eco>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Eco>>
+ C_EM10 = 'C0' <<N_C_Eco>>
+ Si_EM10 = 'Si28' <<N_Si_Eco>>
+ Ti_EM10 = 'Ti48' <<N_Ti_Eco>>
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_APbco>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_APbco>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_APbco>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_APbco>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_APbco>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_APbco>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_APbco>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_APbco>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_APbco>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_APbco>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_APbco>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_APbco>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_APbco>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_APbco>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_APbco>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_APbco>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_APbco>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_APbco>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_APbco>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_APbco>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100APbco>>
+ Si_AIM1 = 'Si28' <<N_Si_APbco>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_APbco>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+***********************
+* COMPO initialize
+***********************
+
+COMPO := COMPO: MICROLIB ::
+EDIT 10
+STEP UP <<Compo>>
+MAXCAL 5
+COMM 'solid Assembly' ENDC
+PARA 'TCA' TEMP MICROLIB 1
+PARA 'DCA' VALU REAL
+PARA 'LEGO' VALU CHAR
+INIT
+;
+
+!CHAI: keyword used to indicate that the user-defined global parameter is a character*12 value
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO  ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+***********************
+* COMPO FEEDING                                                      
+***********************
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'COSU'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+***********************
+* VOIDED LEAD BRANCH POINT                                          
+***********************
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_co := N_Pb_co 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*DISPOSITIF DE COMMANDE PARTIE SUP*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_co>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'COSU'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul COSU acheve" ;
+
+************************************************************************
+* DISPOSITIF DE COMMANDE PARTIE INF (COIN)                             *
+************************************************************************
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+
+MIX 10 (*DISPOSITIF DE COMMANDE PARTIE INF*) <<T_Pb_K>> NOEV
+ B10 = 'B10' <<N_B10_co_2>>
+ B11 = 'B11' <<N_B11_co_2>>
+ Pb = 'Pb208' <<N_Pb_co>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Eco>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Eco>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Eco>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Eco>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Eco>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Eco>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Eco>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Eco>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Eco>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Eco>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Eco>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Eco>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Eco>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Eco>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Eco>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Eco>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Eco>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Eco>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Eco>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Eco>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Eco>>
+ C_EM10 = 'C0' <<N_C_Eco>>
+ Si_EM10 = 'Si28' <<N_Si_Eco>>
+ Ti_EM10 = 'Ti48' <<N_Ti_Eco>>
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_APbco>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_APbco>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_APbco>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_APbco>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_APbco>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_APbco>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_APbco>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_APbco>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_APbco>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_APbco>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_APbco>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_APbco>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_APbco>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_APbco>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_APbco>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_APbco>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_APbco>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_APbco>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_APbco>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_APbco>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100APbco>>
+ Si_AIM1 = 'Si28' <<N_Si_APbco>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_APbco>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'COIN'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_co := N_Pb_co 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*DISPOSITIF DE COMMANDE PARTIE INF*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_co>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'COIN'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul COIN acheve" ;
+
+************************************************************************
+* SUIVEUR DE COMMANDE (COSV)                                           *
+************************************************************************
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*SUIVEUR DE BARRE COMMANDE*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_svco>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Esvco>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Esvco>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Esvco>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Esvco>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Esvco>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Esvco>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Esvco>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Esvco>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Esvco>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Esvco>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Esvco>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Esvco>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Esvco>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Esvco>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Esvco>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Esvco>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Esvco>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Esvco>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Esvco>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Esvco>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100Esvco>>
+ C_EM10 = 'C0' <<N_C_Esvco>>
+ Si_EM10 = 'Si28' <<N_Si_Esvco>>
+ Ti_EM10 = 'Ti48' <<N_Ti_Esvco>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'COSV'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_svco := N_Pb_svco 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*SUIVEUR DE COMMANDE*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_svco>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'COSV'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul COSV acheve" ;
+
+************************************************************************
+* DISPOSITIF D ARRET (ARRE)                                            *
+************************************************************************
+
+* CALCUL DES CONCENTRATIONS 
+
+REAL
+N_Pb_a N_B10_a N_B11_a N_Fe54_Ea N_Fe56_Ea N_Fe57_Ea N_Fe58_Ea N_Cr50_Ea
+N_Cr52_Ea N_Cr53_Ea N_Cr54_Ea N_Ni58_Ea N_Ni60_Ea N_Ni61_Ea N_Ni62_Ea
+N_Ni64_Ea N_Mn55_Ea N_Mo92_Ea N_Mo94_Ea N_Mo95_Ea N_Mo96_Ea N_Mo97_Ea
+N_Mo98_Ea N_Mo100_Ea N_C_Ea N_Si_Ea N_Ti_Ea
+N_Fe54_APba N_Fe56_APba N_Fe57_APba N_Fe58_APba N_Cr50_APba
+N_Cr52_APba N_Cr53_APba N_Cr54_APba N_Ni58_APba N_Ni60_APba
+N_Ni61_APba N_Ni62_APba N_Ni64_APba N_Mn55_APba N_Mo92_APba
+N_Mo94_APba N_Mo95_APba N_Mo96_APba N_Mo97_APba N_Mo98_APba
+N_Mo100_APba N_Si_APba N_Ti_APba
+;
+
+alf_cc_a ::
+<<p_Pb_a>> <<p_Ea>> <<p_Aa>> <<p_B_a>>
+<<N_Fe54_EM10>> <<N_Fe56_EM10>> <<N_Fe57_EM10>> <<N_Fe58_EM10>>
+<<N_Cr50_EM10>> <<N_Cr52_EM10>> <<N_Cr53_EM10>> <<N_Cr54_EM10>>
+<<N_Ni58_EM10>> <<N_Ni60_EM10>> <<N_Ni61_EM10>> <<N_Ni62_EM10>>
+<<N_Ni64_EM10>> <<N_Mn55_EM10>> <<N_Mo92_EM10>> <<N_Mo94_EM10>>
+<<N_Mo95_EM10>> <<N_Mo96_EM10>> <<N_Mo97_EM10>> <<N_Mo98_EM10>>
+<<N_Mo100_EM10>> <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>>
+<<N_B10_co_1>> <<N_B11_co_1>> <<N_Pb>>
+<<N_Fe54_APb>> <<N_Fe56_APb>> <<N_Fe57_APb>> <<N_Fe58_APb>>
+<<N_Cr50_APb>> <<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>>
+<<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> <<N_Ni62_APb>>
+<<N_Ni64_APb>> <<N_Mn55_APb>> <<N_Mo92_APb>> <<N_Mo94_APb>>
+<<N_Mo95_APb>> <<N_Mo96_APb>> <<N_Mo97_APb>> <<N_Mo98_APb>>
+<<N_Mo100_APb>> <<N_Si_APb>> <<N_Ti_APb>> 
+
+>>N_Pb_a<< >>N_B10_a<< >>N_B11_a<< >>N_Fe54_Ea<< >>N_Fe56_Ea<<
+>>N_Fe57_Ea<< >>N_Fe58_Ea<< >>N_Cr50_Ea<< >>N_Cr52_Ea<< >>N_Cr53_Ea<<
+>>N_Cr54_Ea<< >>N_Ni58_Ea<< >>N_Ni60_Ea<< >>N_Ni61_Ea<< >>N_Ni62_Ea<<
+>>N_Ni64_Ea<< >>N_Mn55_Ea<< >>N_Mo92_Ea<< >>N_Mo94_Ea<< >>N_Mo95_Ea<<
+>>N_Mo96_Ea<< >>N_Mo97_Ea<< >>N_Mo98_Ea<< >>N_Mo100_Ea<< >>N_C_Ea<<
+>>N_Si_Ea<< >>N_Ti_Ea<<
+>>N_Fe54_APba<< >>N_Fe56_APba<< >>N_Fe57_APba<< >>N_Fe58_APba<< 
+>>N_Cr50_APba<< >>N_Cr52_APba<< >>N_Cr53_APba<< >>N_Cr54_APba<< 
+>>N_Ni58_APba<< >>N_Ni60_APba<< >>N_Ni61_APba<< >>N_Ni62_APba<<
+>>N_Ni64_APba<< >>N_Mn55_APba<< >>N_Mo92_APba<< >>N_Mo94_APba<<
+>>N_Mo95_APba<< >>N_Mo96_APba<< >>N_Mo97_APba<< >>N_Mo98_APba<<
+>>N_Mo100_APba<< >>N_Si_APba<< >>N_Ti_APba<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*DISPOSITIF D ARRET*) <<T_Pb_K>> NOEV
+ B10 = 'B10' <<N_B10_a>>
+ B11 = 'B11' <<N_B11_a>>
+ Pb = 'Pb208' <<N_Pb_a>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Ea>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Ea>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Ea>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Ea>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Ea>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Ea>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Ea>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Ea>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Ea>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Ea>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Ea>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Ea>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Ea>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Ea>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Ea>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Ea>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Ea>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Ea>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Ea>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Ea>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Ea>>
+ C_EM10 = 'C0' <<N_C_Ea>>
+ Si_EM10 = 'Si28' <<N_Si_Ea>>
+ Ti_EM10 = 'Ti48' <<N_Ti_Ea>>
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_APba>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_APba>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_APba>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_APba>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_APba>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_APba>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_APba>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_APba>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_APba>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_APba>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_APba>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_APba>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_APba>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_APba>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_APba>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_APba>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_APba>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_APba>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_APba>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_APba>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_APba>>
+ Si_AIM1 = 'Si28' <<N_Si_APba>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_APba>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'ARRE'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_a := N_Pb_a 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*DISPOSITIF D ARRET*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_a>>
+  ;
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'ARRE'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul ARRE acheve" ;
+
+************************************************************************
+* SUIVEUR D ARRET (ARSV)                                               *
+************************************************************************
+
+* CONCENTRATION LEAD NON VIDANGE
+
+EVALUATE N_Pb_svco := N_Pb_svco 100.0 * ;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*SUIVEUR DE BARRE ARRET*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_svco>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Esvco>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Esvco>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Esvco>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Esvco>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Esvco>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Esvco>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Esvco>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Esvco>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Esvco>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Esvco>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Esvco>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Esvco>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Esvco>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Esvco>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Esvco>>
+ C_EM10 = 'C0' <<N_C_Esvco>>
+ Si_EM10 = 'Si28' <<N_Si_Esvco>>
+ Ti_EM10 = 'Ti48' <<N_Ti_Esvco>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'ARSV'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_svco := N_Pb_svco 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*SUIVEUR D ARRET*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_svco>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'ARSV'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul ARSV acheve" ;
+
+************************************************************************
+* PNS REFLECTEUR (REPN)                                                *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+N_Pb_Pre N_B10_Pre N_B11_Pre N_Fe54_EPre N_Fe56_EPre N_Fe57_EPre
+N_Fe58_EPre N_Cr50_EPre N_Cr52_EPre N_Cr53_EPre N_Cr54_EPre
+N_Ni58_EPre N_Ni60_EPre N_Ni61_EPre N_Ni62_EPre N_Ni64_EPre
+N_Mn55_EPre N_Mo92_EPre N_Mo94_EPre N_Mo95_EPre N_Mo96_EPre
+N_Mo97_EPre N_Mo98_EPre N_Mo100_EPre
+N_C_EPre N_Si_EPre N_Ti_EPre N_Pb_fre N_Fe54_Efre N_Fe56_Efre
+N_Fe57_Efre N_Fe58_Efre N_Cr50_Efre N_Cr52_Efre N_Cr53_Efre
+N_Cr54_Efre N_Ni58_Efre N_Ni60_Efre N_Ni61_Efre N_Ni62_Efre
+N_Ni64_Efre N_Mn55_Efre N_Mo92_Efre  N_Mo94_Efre  N_Mo95_Efre
+N_Mo96_Efre  N_Mo97_Efre  N_Mo98_Efre  N_Mo100_Efre
+N_C_Efre N_Si_Efre N_Ti_Efre
+N_Fe54_Ff N_Fe56_Ff N_Fe57_Ff N_Fe58_Ff N_Cr50_Ff N_Cr52_Ff N_Cr53_Ff
+N_Cr54_Ff N_Mn55_Ff N_C_Ff N_S_Ff N_Si_Ff
+;
+
+alf_cc_re ::
+<<p_Pb_Pre>> <<p_EPre>> <<p_B_Pre>> <<p_Pb_fre>> <<p_Efre>> <<p_Ffre>>
+<<N_Fe54_EM10>> <<N_Fe56_EM10>> <<N_Fe57_EM10>> <<N_Fe58_EM10>>
+<<N_Cr50_EM10>> <<N_Cr52_EM10>> <<N_Cr53_EM10>> <<N_Cr54_EM10>>
+<<N_Ni58_EM10>> <<N_Ni60_EM10>> <<N_Ni61_EM10>> <<N_Ni62_EM10>>
+<<N_Ni64_EM10>> <<N_Mn55_EM10>> <<N_Mo92_EM10>> <<N_Mo94_EM10>> 
+<<N_Mo95_EM10>> <<N_Mo96_EM10>> <<N_Mo97_EM10>> <<N_Mo98_EM10>>
+<<N_Mo100_EM10>> <<N_C12_EM10>>
+<<N_Si_EM10>> <<N_Ti_EM10>> <<N_B10_co_2>> <<N_B11_co_2>> <<N_Pb>>
+<<N_Fe54_F17>> <<N_Fe56_F17>> <<N_Fe57_F17>> <<N_Fe58_F17>>
+<<N_Cr50_F17>> <<N_Cr52_F17>> <<N_Cr53_F17>> <<N_Cr54_F17>>
+<<N_Mn55_F17>> <<N_C_F17>> <<N_S_F17>> <<N_Si_F17>>
+
+>>N_Pb_Pre<< >>N_B10_Pre<< >>N_B11_Pre<< >>N_Fe54_EPre<< >>N_Fe56_EPre<<
+>>N_Fe57_EPre<< >>N_Fe58_EPre<< >>N_Cr50_EPre<< >>N_Cr52_EPre<<
+>>N_Cr53_EPre<< >>N_Cr54_EPre<< >>N_Ni58_EPre<< >>N_Ni60_EPre<<
+>>N_Ni61_EPre<< >>N_Ni62_EPre<< >>N_Ni64_EPre<< >>N_Mn55_EPre<<
+>>N_Mo92_EPre<< >>N_Mo94_EPre<< >>N_Mo95_EPre<< >>N_Mo96_EPre<<
+>>N_Mo97_EPre<< >>N_Mo98_EPre<<  >>N_Mo100_EPre<< >>N_C_EPre<<
+>>N_Si_EPre<< >>N_Ti_EPre<< >>N_Pb_fre<< >>N_Fe54_Efre<< >>N_Fe56_Efre<<
+>>N_Fe57_Efre<< >>N_Fe58_Efre<< >>N_Cr50_Efre<< >>N_Cr52_Efre<<
+>>N_Cr53_Efre<< >>N_Cr54_Efre<< >>N_Ni58_Efre<< >>N_Ni60_Efre<<
+>>N_Ni61_Efre<< >>N_Ni62_Efre<< >>N_Ni64_Efre<< >>N_Mn55_Efre<<
+>>N_Mo92_Efre<< >>N_Mo94_Efre<< >>N_Mo95_Efre<< >>N_Mo96_Efre<<
+>>N_Mo97_Efre<< >>N_Mo98_Efre<< >>N_Mo100_Efre<<
+>>N_C_Efre<< >>N_Si_Efre<< >>N_Ti_Efre<<
+>>N_Fe54_Ff<< >>N_Fe56_Ff<< >>N_Fe57_Ff<< >>N_Fe58_Ff<< >>N_Cr50_Ff<<
+>>N_Cr52_Ff<< >>N_Cr53_Ff<< >>N_Cr54_Ff<< >>N_Mn55_Ff<< >>N_C_Ff<<
+>>N_S_Ff<< >>N_Si_Ff<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+
+MIX 10 (*PNS REFLECTEUR*) <<T_Pb_K>> NOEV
+ B10 = 'B10' <<N_B10_Pre>>
+ B11 = 'B11' <<N_B11_Pre>>
+ Pb = 'Pb208' <<N_Pb_Pre>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EPre>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EPre>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EPre>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EPre>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EPre>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EPre>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EPre>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EPre>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EPre>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EPre>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EPre>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EPre>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EPre>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EPre>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EPre>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EPre>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EPre>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EPre>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EPre>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EPre>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EPre>>
+ C_EM10 = 'C0' <<N_C_EPre>>
+ Si_EM10 = 'Si28' <<N_Si_EPre>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'REPN'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_Pre := N_Pb_Pre 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*PNS REFLECTEUR*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_Pre>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'REPN'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul REPN acheve" ;
+
+************************************************************************
+* FAISCEAU REFLECTEUR (REFS)                                           *
+************************************************************************
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*FAISCEAU REFLECTEUR*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_fre>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Efre>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Efre>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Efre>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Efre>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Efre>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Efre>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Efre>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Efre>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Efre>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Efre>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Efre>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Efre>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Efre>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Efre>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Efre>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Efre>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Efre>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Efre>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Efre>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Efre>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Efre>>
+ C_EM10 = 'C0' <<N_C_Efre>>
+ Si_EM10 = 'Si28' <<N_Si_Efre>>
+ Fe54_F17 = 'Fe54' <<N_Fe54_Ff>>
+ Fe56_F17 = 'Fe56' <<N_Fe56_Ff>>
+ Fe57_F17 = 'Fe57' <<N_Fe57_Ff>>
+ Fe58_F17 = 'Fe58' <<N_Fe58_Ff>>
+ Cr50_F17 = 'Cr50' <<N_Cr50_Ff>>
+ Cr52_F17 = 'Cr52' <<N_Cr52_Ff>>
+ Cr53_F17 = 'Cr53' <<N_Cr53_Ff>>
+ Cr54_F17 = 'Cr54' <<N_Cr54_Ff>>
+ Mn55_F17 = 'Mn55' <<N_Mn55_Ff>>
+ C_F17 = 'C0' <<N_C_Ff>>
+ S_F17 = 'S32' <<N_S_Ff>>
+ Si_F17 = 'Si28' <<N_Si_Ff>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'REFS'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_fre := N_Pb_fre 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*FAISCEAU REFLECTEUR*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_fre>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'REFS'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul REFS acheve" ;
+
+************************************************************************
+* PROTECTION NEUTRONIQUE LATERALE (PRNL)                               *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+N_Pb_PNL N_B10_PNL N_B11_PNL N_Fe54_EPNL N_Fe56_EPNL N_Fe57_EPNL
+N_Fe58_EPNL N_Cr50_EPNL N_Cr52_EPNL N_Cr53_EPNL N_Cr54_EPNL
+N_Ni58_EPNL N_Ni60_EPNL N_Ni61_EPNL N_Ni62_EPNL N_Ni64_EPNL
+N_Mn55_EPNL N_Mo92_EPNL N_Mo94_EPNL N_Mo95_EPNL N_Mo96_EPNL
+N_Mo97_EPNL N_Mo98_EPNL N_Mo100_EPNL N_C_EPNL N_Si_EPNL N_Ti_EPNL
+;
+
+alf_cc_PNL :: 
+<<p_Pb_PNL>> <<p_EPNL>> <<p_B_PNL>>
+<<N_Fe54_EM10>> <<N_Fe56_EM10>> <<N_Fe57_EM10>> <<N_Fe58_EM10>> 
+<<N_Cr50_EM10>> <<N_Cr52_EM10>> <<N_Cr53_EM10>> <<N_Cr54_EM10>> 
+<<N_Ni58_EM10>> <<N_Ni60_EM10>> <<N_Ni61_EM10>> <<N_Ni62_EM10>> 
+<<N_Ni64_EM10>> <<N_Mn55_EM10>> <<N_Mo92_EM10>> <<N_Mo94_EM10>>
+<<N_Mo95_EM10>> <<N_Mo96_EM10>> <<N_Mo97_EM10>> <<N_Mo98_EM10>>
+<<N_Mo100_EM10>> <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>>
+<<N_B10_co_2>> <<N_B11_co_2>> <<N_Pb>>
+
+>>N_Pb_PNL<< >>N_B10_PNL<< >>N_B11_PNL<< >>N_Fe54_EPNL<< >>N_Fe56_EPNL<<
+>>N_Fe57_EPNL<< >>N_Fe58_EPNL<< >>N_Cr50_EPNL<< >>N_Cr52_EPNL<<
+>>N_Cr53_EPNL<< >>N_Cr54_EPNL<< >>N_Ni58_EPNL<< >>N_Ni60_EPNL<<
+>>N_Ni61_EPNL<< >>N_Ni62_EPNL<< >>N_Ni64_EPNL<< >>N_Mn55_EPNL<<
+>>N_Mo92_EPNL<< >>N_Mo94_EPNL<< >>N_Mo95_EPNL<< >>N_Mo96_EPNL<<
+>>N_Mo97_EPNL<< >>N_Mo98_EPNL<< >>N_Mo100_EPNL<< >>N_C_EPNL<<
+>>N_Si_EPNL<< >>N_Ti_EPNL<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*PROTECTION NEUTRONIQUE LATERALE*) <<T_Pb_K>> NOEV
+ B10 = 'B10' <<N_B10_PNL>>
+ B11 = 'B11' <<N_B11_PNL>>
+ Pb = 'Pb208' <<N_Pb_PNL>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EPNL>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EPNL>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EPNL>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EPNL>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EPNL>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EPNL>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EPNL>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EPNL>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EPNL>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EPNL>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EPNL>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EPNL>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EPNL>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EPNL>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EPNL>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EPNL>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EPNL>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EPNL>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EPNL>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EPNL>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EPNL>>
+ C_EM10 = 'C0' <<N_C_EPNL>>
+ Si_EM10 = 'Si28' <<N_Si_EPNL>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EPNL>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'PRNL'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_PNL := N_Pb_PNL 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*PNL*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_PNL>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'PRNL'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul PRNL acheve" ;
+
+************************************************************************
+* PROTECTION NEUTRONIQUE SUPERIEURE COMBUSTIBLE (PRNS)                 *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+ N_Pb_PNS N_B10_PNS N_B11_PNS N_Fe54_EPNS N_Fe56_EPNS N_Fe57_EPNS
+ N_Fe58_EPNS N_Cr50_EPNS N_Cr52_EPNS N_Cr53_EPNS N_Cr54_EPNS
+ N_Ni58_EPNS N_Ni60_EPNS N_Ni61_EPNS N_Ni62_EPNS N_Ni64_EPNS
+ N_Mn55_EPNS N_Mo92_EPNS N_Mo94_EPNS N_Mo95_EPNS N_Mo96_EPNS
+ N_Mo97_EPNS N_Mo98_EPNS N_Mo100_EPNS N_C_EPNS N_Si_EPNS N_Ti_EPNS
+;
+
+alf_cc_PNS ::
+ <<p_Pb_PNS>> <<p_EPNS>> <<p_B_PNS>> <<N_Fe54_EM10>> <<N_Fe56_EM10>>
+ <<N_Fe57_EM10>> <<N_Fe58_EM10>> <<N_Cr50_EM10>> <<N_Cr52_EM10>>
+ <<N_Cr53_EM10>> <<N_Cr54_EM10>> <<N_Ni58_EM10>> <<N_Ni60_EM10>>
+ <<N_Ni61_EM10>> <<N_Ni62_EM10>> <<N_Ni64_EM10>> <<N_Mn55_EM10>>
+ <<N_Mo92_EM10>> <<N_Mo94_EM10>> <<N_Mo95_EM10>> <<N_Mo96_EM10>>
+ <<N_Mo97_EM10>> <<N_Mo98_EM10>> <<N_Mo100_EM10>> 
+ <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>>
+ <<N_Pb>> <<T_Pb_0>> <<a_B>>
+
+ >>N_Pb_PNS<< >>N_B10_PNS<< >>N_B11_PNS<< >>N_Fe54_EPNS<<
+ >>N_Fe56_EPNS<< >>N_Fe57_EPNS<< >>N_Fe58_EPNS<< >>N_Cr50_EPNS<<
+ >>N_Cr52_EPNS<< >>N_Cr53_EPNS<< >>N_Cr54_EPNS<< >>N_Ni58_EPNS<<
+ >>N_Ni60_EPNS<< >>N_Ni61_EPNS<< >>N_Ni62_EPNS<< >>N_Ni64_EPNS<<
+ >>N_Mn55_EPNS<< >>N_Mo92_EPNS<< >>N_Mo94_EPNS<< >>N_Mo95_EPNS<<
+ >>N_Mo96_EPNS<< >>N_Mo97_EPNS<< >>N_Mo98_EPNS<< >>N_Mo100_EPNS<<
+ >>N_C_EPNS<< >>N_Si_EPNS<< >>N_Ti_EPNS<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*PNS COMBUSTIBLE*) <<T_Pb_K>> NOEV
+ B10 = 'B10' <<N_B10_PNS>>
+ B11 = 'B11' <<N_B11_PNS>>
+ Pb = 'Pb208' <<N_Pb_PNS>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EPNS>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EPNS>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EPNS>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EPNS>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EPNS>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EPNS>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EPNS>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EPNS>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EPNS>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EPNS>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EPNS>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EPNS>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EPNS>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EPNS>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EPNS>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EPNS>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EPNS>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EPNS>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EPNS>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EPNS>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EPNS>>
+ C_EM10 = 'C0' <<N_C_EPNS>>
+ Si_EM10 = 'Si28' <<N_Si_EPNS>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'PRNS'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_PNS := N_Pb_PNS 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*PNS*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_PNS>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'PRNS'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul PRNS acheve" ;
+
+************************************************************************
+* PLENUM LEAD (PLPb)                                                 *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+ N_Pb_pln N_Fe54_Epln N_Fe56_Epln N_Fe57_Epln N_Fe58_Epln 
+ N_Cr50_Epln N_Cr52_Epln N_Cr53_Epln N_Cr54_Epln N_Ni58_Epln 
+ N_Ni60_Epln N_Ni61_Epln N_Ni62_Epln N_Ni64_Epln N_Mn55_Epln
+ N_Mo92_Epln N_Mo94_Epln N_Mo95_Epln N_Mo96_Epln N_Mo97_Epln
+ N_Mo98_Epln N_Mo100_Epln N_C_Epln N_Si_Epln N_Ti_Epln
+;
+
+alf_cc_pln ::
+ <<p_Pb_pln>> <<p_Epln>> <<N_Fe54_EM10>> <<N_Fe56_EM10>>
+ <<N_Fe57_EM10>> <<N_Fe58_EM10>> <<N_Cr50_EM10>> <<N_Cr52_EM10>>
+ <<N_Cr53_EM10>> <<N_Cr54_EM10>> <<N_Ni58_EM10>> <<N_Ni60_EM10>>
+ <<N_Ni61_EM10>> <<N_Ni62_EM10>> <<N_Ni64_EM10>> <<N_Mn55_EM10>>
+ <<N_Mo92_EM10>> <<N_Mo94_EM10>> <<N_Mo95_EM10>> <<N_Mo96_EM10>>
+ <<N_Mo97_EM10>> <<N_Mo98_EM10>> <<N_Mo100_EM10>>
+ <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>> <<N_Pb>>
+
+ >>N_Pb_pln<< >>N_Fe54_Epln<< >>N_Fe56_Epln<< >>N_Fe57_Epln<<
+ >>N_Fe58_Epln<< >>N_Cr50_Epln<< >>N_Cr52_Epln<< >>N_Cr53_Epln<<
+ >>N_Cr54_Epln<< >>N_Ni58_Epln<< >>N_Ni60_Epln<< >>N_Ni61_Epln<<
+ >>N_Ni62_Epln<< >>N_Ni64_Epln<< >>N_Mn55_Epln<< >>N_Mo92_Epln<<
+ >>N_Mo94_Epln<< >>N_Mo95_Epln<< >>N_Mo96_Epln<< >>N_Mo97_Epln<<
+ >>N_Mo98_Epln<< >>N_Mo100_Epln<< >>N_C_Epln<< >>N_Si_Epln<<
+ >>N_Ti_Epln<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*PLENUM LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_pln>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Epln>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Epln>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Epln>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Epln>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Epln>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Epln>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Epln>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Epln>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Epln>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Epln>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Epln>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Epln>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Epln>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Epln>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Epln>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Epln>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Epln>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Epln>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Epln>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Epln>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Epln>>
+ C_EM10 = 'C0' <<N_C_Epln>>
+ Si_EM10 = 'Si28' <<N_Si_Epln>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'PLPb'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_pln := N_Pb_pln 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*PLENUM LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_pln>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'PLPb'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul PLPb acheve" ;
+
+************************************************************************
+* BOUCHON (BCHN)                                                       *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+ N_Pb_bo N_Fe54_Ebo N_Fe56_Ebo N_Fe57_Ebo N_Fe58_Ebo
+ N_Cr50_Ebo N_Cr52_Ebo N_Cr53_Ebo N_Cr54_Ebo N_Ni58_Ebo
+ N_Ni60_Ebo N_Ni61_Ebo N_Ni62_Ebo N_Ni64_Ebo N_Mn55_Ebo
+ N_Mo92_Ebo N_Mo94_Ebo N_Mo95_Ebo N_Mo96_Ebo N_Mo97_Ebo
+ N_Mo98_Ebo N_Mo100_Ebo N_C_Ebo N_Si_Ebo N_Ti_Ebo
+ N_Fe54_APbbo N_Fe56_APbbo N_Fe57_APbbo N_Fe58_APbbo N_Cr50_APbbo
+ N_Cr52_APbbo N_Cr53_APbbo N_Cr54_APbbo N_Ni58_APbbo N_Ni60_APbbo
+ N_Ni61_APbbo N_Ni62_APbbo N_Ni64_APbbo N_Mn55_APbbo N_Mo92_APbbo
+ N_Mo94_APbbo N_Mo95_APbbo N_Mo96_APbbo N_Mo97_APbbo N_Mo98_APbbo
+ N_Mo100APbbo N_Si_APbbo N_Ti_APbbo
+;
+
+alf_cc_bo ::
+ <<p_Pb_bo>> <<p_Ebo>> <<p_Abo>> <<N_Fe54_EM10>> <<N_Fe56_EM10>>
+ <<N_Fe57_EM10>> <<N_Fe58_EM10>> <<N_Cr50_EM10>> <<N_Cr52_EM10>>
+ <<N_Cr53_EM10>> <<N_Cr54_EM10>> <<N_Ni58_EM10>> <<N_Ni60_EM10>>
+ <<N_Ni61_EM10>> <<N_Ni62_EM10>> <<N_Ni64_EM10>> <<N_Mn55_EM10>>
+ <<N_Mo92_EM10>> <<N_Mo94_EM10>> <<N_Mo95_EM10>> <<N_Mo96_EM10>> 
+ <<N_Mo97_EM10>> <<N_Mo98_EM10>> <<N_Mo100_EM10>> 
+ <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>> <<N_Pb>>
+ <<N_Fe54_APb>> <<N_Fe56_APb>> <<N_Fe57_APb>> <<N_Fe58_APb>>
+ <<N_Cr50_APb>> <<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>>
+ <<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> <<N_Ni62_APb>>
+ <<N_Ni64_APb>> <<N_Mn55_APb>> <<N_Mo92_APb>> <<N_Mo94_APb>>
+ <<N_Mo95_APb>> <<N_Mo96_APb>> <<N_Mo97_APb>> <<N_Mo98_APb>>
+ <<N_Mo100_APb>> <<N_Si_APb>> <<N_Ti_APb>>
+
+ >>N_Pb_bo<< >>N_Fe54_Ebo<< >>N_Fe56_Ebo<< >>N_Fe57_Ebo<< >>N_Fe58_Ebo<<
+ >>N_Cr50_Ebo<< >>N_Cr52_Ebo<< >>N_Cr53_Ebo<< >>N_Cr54_Ebo<<
+ >>N_Ni58_Ebo<< >>N_Ni60_Ebo<< >>N_Ni61_Ebo<< >>N_Ni62_Ebo<<
+ >>N_Ni64_Ebo<< >>N_Mn55_Ebo<< >>N_Mo92_Ebo<< >>N_Mo94_Ebo<<
+ >>N_Mo95_Ebo<< >>N_Mo96_Ebo<< >>N_Mo97_Ebo<< >>N_Mo98_Ebo<<
+ >>N_Mo100_Ebo<< >>N_C_Ebo<< >>N_Si_Ebo<<
+ >>N_Ti_Ebo<< >>N_Fe54_APbbo<< >>N_Fe56_APbbo<< >>N_Fe57_APbbo<<
+ >>N_Fe58_APbbo<< >>N_Cr50_APbbo<< >>N_Cr52_APbbo<< >>N_Cr53_APbbo<<
+ >>N_Cr54_APbbo<< >>N_Ni58_APbbo<< >>N_Ni60_APbbo<< >>N_Ni61_APbbo<<
+ >>N_Ni62_APbbo<< >>N_Ni64_APbbo<< >>N_Mn55_APbbo<< >>N_Mo92_APbbo<<
+ >>N_Mo94_APbbo<< >>N_Mo95_APbbo<< >>N_Mo96_APbbo<< >>N_Mo97_APbbo<<
+ >>N_Mo98_APbbo<< >>N_Mo100APbbo<< >>N_Si_APbbo<< >>N_Ti_APbbo<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*BOUCHON*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_bo>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Ebo>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Ebo>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Ebo>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Ebo>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Ebo>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Ebo>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Ebo>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Ebo>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Ebo>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Ebo>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Ebo>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Ebo>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Ebo>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Ebo>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Ebo>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Ebo>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Ebo>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Ebo>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Ebo>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Ebo>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Ebo>>
+ C_EM10 = 'C0' <<N_C_Ebo>>
+ Si_EM10 = 'Si28' <<N_Si_Ebo>>
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_APbbo>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_APbbo>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_APbbo>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_APbbo>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_APbbo>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_APbbo>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_APbbo>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_APbbo>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_APbbo>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_APbbo>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_APbbo>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_APbbo>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_APbbo>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_APbbo>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_APbbo>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_APbbo>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_APbbo>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_APbbo>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_APbbo>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_APbbo>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100APbbo>>
+ Si_AIM1 = 'Si28' <<N_Si_APbbo>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_APbbo>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'BCHN'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_bo := N_Pb_bo 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*BOUCHON*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_bo>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'BCHN'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul BCHN acheve" ;
+
+************************************************************************
+* VASES D EXPANSION (VSXP)                                             *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+ N_Pb_vs N_Fe54_Evs N_Fe56_Evs N_Fe57_Evs N_Fe58_Evs
+ N_Cr50_Evs N_Cr52_Evs N_Cr53_Evs N_Cr54_Evs N_Ni58_Evs
+ N_Ni60_Evs N_Ni61_Evs N_Ni62_Evs N_Ni64_Evs N_Mn55_Evs
+ N_Mo92_Evs N_Mo94_Evs N_Mo95_Evs N_Mo96_Evs N_Mo97_Evs
+ N_Mo98_Evs N_Mo100_Evs N_C_Evs N_Si_Evs N_Ti_Evs
+ N_Fe54_APbvs N_Fe56_APbvs N_Fe57_APbvs N_Fe58_APbvs N_Cr50_APbvs
+ N_Cr52_APbvs N_Cr53_APbvs N_Cr54_APbvs N_Ni58_APbvs N_Ni60_APbvs
+ N_Ni61_APbvs N_Ni62_APbvs N_Ni64_APbvs N_Mn55_APbvs N_Mo92_APbvs
+ N_Mo94_APbvs N_Mo95_APbvs N_Mo96_APbvs N_Mo97_APbvs N_Mo98_APbvs
+ N_Mo100APbvs N_Si_APbvs N_Ti_APbvs
+;
+
+alf_cc_vs ::
+ <<p_Pb_vs>> <<p_Evs>> <<p_Avs>> <<N_Fe54_EM10>> <<N_Fe56_EM10>>
+ <<N_Fe57_EM10>> <<N_Fe58_EM10>> <<N_Cr50_EM10>> <<N_Cr52_EM10>>
+ <<N_Cr53_EM10>> <<N_Cr54_EM10>> <<N_Ni58_EM10>> <<N_Ni60_EM10>>
+ <<N_Ni61_EM10>> <<N_Ni62_EM10>> <<N_Ni64_EM10>> <<N_Mn55_EM10>>
+ <<N_Mo92_EM10>> <<N_Mo94_EM10>> <<N_Mo95_EM10>> <<N_Mo96_EM10>>
+ <<N_Mo97_EM10>> <<N_Mo98_EM10>> <<N_Mo100_EM10>>
+ <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>> <<N_Pb>>
+ <<N_Fe54_APb>> <<N_Fe56_APb>> <<N_Fe57_APb>> <<N_Fe58_APb>>
+ <<N_Cr50_APb>> <<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>>
+ <<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> <<N_Ni62_APb>>
+ <<N_Ni64_APb>> <<N_Mn55_APb>> <<N_Mo92_APb>> <<N_Mo94_APb>>
+ <<N_Mo95_APb>> <<N_Mo96_APb>> <<N_Mo97_APb>> <<N_Mo98_APb>>
+ <<N_Mo100_APb>> <<N_Si_APb>> <<N_Ti_APb>>
+
+ >>N_Pb_vs<< >>N_Fe54_Evs<< >>N_Fe56_Evs<< >>N_Fe57_Evs<< >>N_Fe58_Evs<<
+ >>N_Cr50_Evs<< >>N_Cr52_Evs<< >>N_Cr53_Evs<< >>N_Cr54_Evs<<
+ >>N_Ni58_Evs<< >>N_Ni60_Evs<< >>N_Ni61_Evs<< >>N_Ni62_Evs<<
+ >>N_Ni64_Evs<< >>N_Mn55_Evs<< >>N_Mo92_Evs<< >>N_Mo94_Evs<< 
+ >>N_Mo95_Evs<< >>N_Mo96_Evs<< >>N_Mo97_Evs<< >>N_Mo98_Evs<<
+ >>N_Mo100_Evs<< >>N_C_Evs<< >>N_Si_Evs<<
+ >>N_Ti_Evs<< >>N_Fe54_APbvs<< >>N_Fe56_APbvs<< >>N_Fe57_APbvs<<
+ >>N_Fe58_APbvs<< >>N_Cr50_APbvs<< >>N_Cr52_APbvs<< >>N_Cr53_APbvs<<
+ >>N_Cr54_APbvs<< >>N_Ni58_APbvs<< >>N_Ni60_APbvs<< >>N_Ni61_APbvs<<
+ >>N_Ni62_APbvs<< >>N_Ni64_APbvs<< >>N_Mn55_APbvs<< >>N_Mo92_APbvs<< 
+ >>N_Mo94_APbvs<< >>N_Mo95_APbvs<< >>N_Mo96_APbvs<< >>N_Mo97_APbvs<<
+ >>N_Mo98_APbvs<< >>N_Mo100APbvs<< >>N_Si_APbvs<< >>N_Ti_APbvs<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*VASE D EXPANSION*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_vs>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Evs>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Evs>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Evs>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Evs>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Evs>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Evs>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Evs>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Evs>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Evs>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Evs>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Evs>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Evs>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Evs>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Evs>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Evs>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Evs>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Evs>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Evs>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Evs>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Evs>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_Evs>>
+ C_EM10 = 'C0' <<N_C_Evs>>
+ Si_EM10 = 'Si28' <<N_Si_Evs>>
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_APbvs>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_APbvs>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_APbvs>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_APbvs>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_APbvs>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_APbvs>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_APbvs>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_APbvs>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_APbvs>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_APbvs>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_APbvs>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_APbvs>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_APbvs>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_APbvs>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_APbvs>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_APbvs>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_APbvs>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_APbvs>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_APbvs>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_APbvs>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100APbvs>>
+ Si_AIM1 = 'Si28' <<N_Si_APbvs>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_APbvs>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'VSXP'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_vs := N_Pb_vs 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*VASE D EXOPANSION*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_vs>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'VSXP'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul VSXP acheve" ;
+
+************************************************************************
+* CALE (CALE)                                                          *
+************************************************************************
+
+* CALCUL CONCENTRATIONS
+
+REAL
+ N_Pb_cl N_Fe54_Ecl N_Fe56_Ecl N_Fe57_Ecl N_Fe58_Ecl
+ N_Cr50_Ecl N_Cr52_Ecl N_Cr53_Ecl N_Cr54_Ecl N_Ni58_Ecl
+ N_Ni60_Ecl N_Ni61_Ecl N_Ni62_Ecl N_Ni64_Ecl N_Mn55_Ecl N_Mo92_Ecl
+ N_Mo94_Ecl N_Mo95_Ecl N_Mo96_Ecl N_Mo97_Ecl N_Mo98_Ecl N_Mo100_Ecl
+ N_C_Ecl N_Si_Ecl N_Ti_Ecl
+ N_Fe54_APbcl N_Fe56_APbcl N_Fe57_APbcl N_Fe58_APbcl N_Cr50_APbcl
+ N_Cr52_APbcl N_Cr53_APbcl N_Cr54_APbcl N_Ni58_APbcl N_Ni60_APbcl
+ N_Ni61_APbcl N_Ni62_APbcl N_Ni64_APbcl N_Mn55_APbcl N_Mo92_APbcl
+ N_Mo94_APbcl N_Mo95_APbcl N_Mo96_APbcl N_Mo97_APbcl N_Mo98_APbcl
+ N_Mo100APbcl N_Si_APbcl N_Ti_APbcl
+;
+
+alf_cc_cl ::
+ <<p_Pb_cl>> <<p_Ecl>> <<p_Acl>> <<N_Fe54_EM10>> <<N_Fe56_EM10>>
+ <<N_Fe57_EM10>> <<N_Fe58_EM10>> <<N_Cr50_EM10>> <<N_Cr52_EM10>>
+ <<N_Cr53_EM10>> <<N_Cr54_EM10>> <<N_Ni58_EM10>> <<N_Ni60_EM10>>
+ <<N_Ni61_EM10>> <<N_Ni62_EM10>> <<N_Ni64_EM10>> <<N_Mn55_EM10>>
+ <<N_Mo92_EM10>> <<N_Mo94_EM10>> <<N_Mo95_EM10>> <<N_Mo96_EM10>>
+ <<N_Mo97_EM10>> <<N_Mo98_EM10>> <<N_Mo100_EM10>>
+ <<N_C12_EM10>> <<N_Si_EM10>> <<N_Ti_EM10>> <<N_Pb>>
+ <<N_Fe54_APb>> <<N_Fe56_APb>> <<N_Fe57_APb>> <<N_Fe58_APb>>
+ <<N_Cr50_APb>> <<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>>
+ <<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> <<N_Ni62_APb>>
+ <<N_Ni64_APb>> <<N_Mn55_APb>> <<N_Mo92_APb>> <<N_Mo94_APb>>
+ <<N_Mo95_APb>> <<N_Mo96_APb>> <<N_Mo97_APb>> <<N_Mo98_APb>>
+ <<N_Mo100_APb>> <<N_Si_APb>> <<N_Ti_APb>>
+
+ >>N_Pb_cl<< >>N_Fe54_Ecl<< >>N_Fe56_Ecl<< >>N_Fe57_Ecl<< >>N_Fe58_Ecl<<
+ >>N_Cr50_Ecl<< >>N_Cr52_Ecl<< >>N_Cr53_Ecl<< >>N_Cr54_Ecl<<
+ >>N_Ni58_Ecl<< >>N_Ni60_Ecl<< >>N_Ni61_Ecl<< >>N_Ni62_Ecl<<
+ >>N_Ni64_Ecl<< >>N_Mn55_Ecl<< >>N_Mo92_Ecl<< >>N_Mo94_Ecl<<
+ >>N_Mo95_Ecl<< >>N_Mo96_Ecl<< >>N_Mo97_Ecl<< >>N_Mo98_Ecl<<
+ >>N_Mo100_Ecl<< >>N_C_Ecl<< >>N_Si_Ecl<<
+ >>N_Ti_Ecl<< >>N_Fe54_APbcl<< >>N_Fe56_APbcl<< >>N_Fe57_APbcl<<
+ >>N_Fe58_APbcl<< >>N_Cr50_APbcl<< >>N_Cr52_APbcl<< >>N_Cr53_APbcl<<
+ >>N_Cr54_APbcl<< >>N_Ni58_APbcl<< >>N_Ni60_APbcl<< >>N_Ni61_APbcl<<
+ >>N_Ni62_APbcl<< >>N_Ni64_APbcl<< >>N_Mn55_APbcl<< >>N_Mo92_APbcl<<
+ >>N_Mo94_APbcl<< >>N_Mo95_APbcl<< >>N_Mo96_APbcl<< >>N_Mo97_APbcl<<
+ >>N_Mo98_APbcl<< >>N_Mo100APbcl<< >>N_Si_APbcl<< >>N_Ti_APbcl<<
+;
+
+* MICROLIB
+
+ECHO "call LIB with" Library ;
+
+MICROLIB := LIB: ::
+EDIT 1 NMIX 10 PT
+DEPL LIB: DRAGON FIL: <<Library>>  
+MIXS LIB: DRAGON FIL: <<Library>>  
+
+MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb>>
+
+MIX 2 (*COMBUSTIBLE MOX*) <<T_comb_K>>
+ U5 = 'U235' 0.0 1 IRSET PT 1
+ U8 = 'U238' 0.0 1 IRSET PT 1
+ Pu38 = 'Pu238' 0.0 1 IRSET PT 1
+ Pu39 = 'Pu239' 0.0 1 IRSET PT 1
+ Pu40 = 'Pu240' 0.0 1 IRSET PT 1
+ Pu41 = 'Pu241' 0.0 1 IRSET PT 1
+ Pu42 = 'Pu242' 0.0 1 IRSET PT 1
+ Am = 'Am241' 0.0 1 IRSET PT 1
+ O = 'O16' <<N_O>> NOEV
+MIX 3
+ COMB 2 1.0
+MIX 4
+ COMB 2 1.0
+MIX 5
+ COMB 2 1.0
+
+MIX 6 (*ACIER AIM1 GAINE COMBUSTIBLE*) <<T_clad_K>> NOEV
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_AIM1>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_AIM1>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_AIM1>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_AIM1>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_AIM1>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_AIM1>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_AIM1>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_AIM1>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_AIM1>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_AIM1>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_AIM1>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_AIM1>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_AIM1>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_AIM1>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_AIM1>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_AIM1>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_AIM1>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_AIM1>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_AIM1>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_AIM1>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100_AIM1>>
+ Si_AIM1 = 'Si28' <<N_Si_AIM1>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_AIM1>>
+
+MIX 7 (*ACIER EM10 BOITIER*) <<T_Pb_K>> NOEV
+ Fe54_EM10 = 'Fe54' <<N_Fe54_EM10>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_EM10>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_EM10>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_EM10>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_EM10>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_EM10>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_EM10>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_EM10>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_EM10>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_EM10>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_EM10>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_EM10>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_EM10>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_EM10>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_EM10>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_EM10>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_EM10>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_EM10>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_EM10>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_EM10>>
+ Mo100_EM10 = 'Mo100' <<N_Mo100_EM10>>
+ Si_EM10 = 'Si28' <<N_Si_EM10>>
+ Ti_EM10 = 'Ti48' <<N_Ti_EM10>>
+ C_EM10 = 'C0' <<N_C12_EM10>>
+
+MIX 8 (*GAZ INERTE INTERIEUR PASTILLE*) <<T_comb_K>> NOEV
+ He4int = 'He4' <<N_He_1>>
+
+MIX 9 (*GAZ INERTE ENTRE PASTILLE ET GAINE*) <<T_clad_K>> NOEV
+ He4ext = 'He4' <<N_He_2>>
+ 
+MIX 10 (*CALE*) <<T_Pb_K>> NOEV
+ Pb = 'Pb208' <<N_Pb_cl>>
+ Fe54_EM10 = 'Fe54' <<N_Fe54_Ecl>>
+ Fe56_EM10 = 'Fe56' <<N_Fe56_Ecl>>
+ Fe57_EM10 = 'Fe57' <<N_Fe57_Ecl>>
+ Fe58_EM10 = 'Fe58' <<N_Fe58_Ecl>>
+ Cr50_EM10 = 'Cr50' <<N_Cr50_Ecl>>
+ Cr52_EM10 = 'Cr52' <<N_Cr52_Ecl>>
+ Cr53_EM10 = 'Cr53' <<N_Cr53_Ecl>>
+ Cr54_EM10 = 'Cr54' <<N_Cr54_Ecl>>
+ Ni58_EM10 = 'Ni58' <<N_Ni58_Ecl>>
+ Ni60_EM10 = 'Ni60' <<N_Ni60_Ecl>>
+ Ni61_EM10 = 'Ni61' <<N_Ni61_Ecl>>
+ Ni62_EM10 = 'Ni62' <<N_Ni62_Ecl>>
+ Ni64_EM10 = 'Ni64' <<N_Ni64_Ecl>>
+ Mn55_EM10 = 'Mn55' <<N_Mn55_Ecl>>
+ Mo92_EM10 = 'Mo92' <<N_Mo92_Ecl>>
+ Mo94_EM10 = 'Mo94' <<N_Mo94_Ecl>>
+ Mo95_EM10 = 'Mo95' <<N_Mo95_Ecl>>
+ Mo96_EM10 = 'Mo96' <<N_Mo96_Ecl>>
+ Mo97_EM10 = 'Mo97' <<N_Mo97_Ecl>>
+ Mo98_EM10 = 'Mo98' <<N_Mo98_Ecl>>
+ Mo100_EM10 = 'Mo96' <<N_Mo100_Ecl>>
+ C_EM10 = 'C0' <<N_C_Ecl>>
+ Si_EM10 = 'Si28' <<N_Si_Ecl>>
+ Fe54_AIM1 = 'Fe54' <<N_Fe54_APbcl>>
+ Fe56_AIM1 = 'Fe56' <<N_Fe56_APbcl>>
+ Fe57_AIM1 = 'Fe57' <<N_Fe57_APbcl>>
+ Fe58_AIM1 = 'Fe58' <<N_Fe58_APbcl>>
+ Cr50_AIM1 = 'Cr50' <<N_Cr50_APbcl>>
+ Cr52_AIM1 = 'Cr52' <<N_Cr52_APbcl>>
+ Cr53_AIM1 = 'Cr53' <<N_Cr53_APbcl>>
+ Cr54_AIM1 = 'Cr54' <<N_Cr54_APbcl>>
+ Ni58_AIM1 = 'Ni58' <<N_Ni58_APbcl>>
+ Ni60_AIM1 = 'Ni60' <<N_Ni60_APbcl>>
+ Ni61_AIM1 = 'Ni61' <<N_Ni61_APbcl>>
+ Ni62_AIM1 = 'Ni62' <<N_Ni62_APbcl>>
+ Ni64_AIM1 = 'Ni64' <<N_Ni64_APbcl>>
+ Mn55_AIM1 = 'Mn55' <<N_Mn55_APbcl>>
+ Mo92_AIM1 = 'Mo92' <<N_Mo92_APbcl>>
+ Mo94_AIM1 = 'Mo94' <<N_Mo94_APbcl>>
+ Mo95_AIM1 = 'Mo95' <<N_Mo95_APbcl>>
+ Mo96_AIM1 = 'Mo96' <<N_Mo96_APbcl>>
+ Mo97_AIM1 = 'Mo97' <<N_Mo97_APbcl>>
+ Mo98_AIM1 = 'Mo98' <<N_Mo98_APbcl>>
+ Mo100_AIM1 = 'Mo100' <<N_Mo100APbcl>>
+ Si_AIM1 = 'Si28' <<N_Si_APbcl>>
+ Ti_AIM1 = 'Ti48' <<N_Ti_APbcl>>
+;
+
+* SET FISSILE ASSEMBLIES (MIX 2) AT MID-BURNUP                         
+
+MICROLIB := LIB: MICROLIB BURNUP ::
+    EDIT 1
+    BURN 0.0 (*DAYS*)
+    MIX 2 (*COMBUSTIBLE MOX*) NOEV
+    MIX 3 (*COMBUSTIBLE MOX*) NOEV
+    MIX 4 (*COMBUSTIBLE MOX*) NOEV
+    MIX 5 (*COMBUSTIBLE MOX*) NOEV
+;
+
+* TRACKING
+
+TRACK := SYBILT: GEOM ::
+EDIT 1
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                      
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb>>
+'LEGO' 'CALE'
+;
+EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+
+* VOIDED LEAD BRANCH POINT                                          
+
+EVALUATE N_Pb_void := N_Pb 100.0 / ;
+EVALUATE N_Pb_cl := N_Pb_cl 100.0 / ;
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+      EDIT 1
+      MIXS LIB: DRAGON FIL: <<Library>>  
+      MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_void>>
+      MIX 10 (*CALE*) <<T_Pb_K>> NOEV
+       Pb = 'Pb208' <<N_Pb_cl>>
+  ;
+  
+***********************
+* SELF SHIELDING
+***********************
+
+MICROLIB2 := USS: MICROLIB TRACK :: EDIT 0 PASS 1 PIJ TRAN ;
+
+* MATRICE PIJ
+
+PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+
+FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+PIJ := DELETE: PIJ ;
+
+* HOMOGENIZATION/CONDENSATION
+
+EDIOBJ := EDI:  FLUX MICROLIB2 TRACK ::
+EDIT 1
+MICR RES
+MERG MIX 0 0 0 0 0 0 0 0 0 1
+COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+106 131 149 157 180 193 205 215 230 283 299 315
+!COND 19 
+ *COND 30 59 99 193 315 
+
+SAVE
+;
+
+* COMPO FEEDING                                                       
+
+COMPO := COMPO: COMPO EDIOBJ MICROLIB ::
+EDIT 5
+STEP UP <<Compo>>
+'DCA' <<N_Pb_void>>
+'LEGO' 'CALE'
+;
+EDIOBJ MICROLIB MICROLIB2 := DELETE: EDIOBJ MICROLIB MICROLIB2 ;
+
+* End of calculation - Memory release                                 
+
+TRACK := DELETE: TRACK ;
+
+ECHO "Calcul CALE acheve" ;
+
+BURNUP := DELETE: BURNUP ;
+************************************************************************
+* CONVERSION COMPO EN FORMAT ASCII                                    *
+************************************************************************
+ACOMPO4 := COMPO ;
+
+*----
+*  End of calculation
+*----
+
+ECHO "Calcul acheve" ;
+END: ;

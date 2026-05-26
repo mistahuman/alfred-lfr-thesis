@@ -1,0 +1,71 @@
+\chapter*{Conclusioni}
+\addcontentsline{toc}{chapter}{Conclusioni}
+In ambito nucleare, le simulazioni numeriche che integrano calcoli neutronici e 
+termoidraulici sono di notevole importanza se si considera la complessità delle 
+equazioni che governano la fisica del reattore nucleare.
+Inoltre le possibilità offerte dalla piattaforma numerica di garantire 
+flessibilità e versatilità attraverso la gestione e lo scambio di informazioni tra 
+codici differenti consentono di analizzare il comportamento multifisico nel suo 
+complesso.
+
+In questa tesi è stato affrontato lo studio dell'accoppiamento neutronico e 
+termoidraulico al fine di ottenere una valutazione accurata della distribuzione 
+di flusso neutronico, di potenza termica e di temperatura all'interno del 
+nocciolo del reattore nucleare LFR.
+In particolare, il reattore nucleare preso in considerazione per 
+l'implementazione è il reattore dimostrativo ALFRED che si pone lo scopo di 
+dimostrare la fattibilità dei reattori veloci raffreddati al piombo; 
+quest'ultimi possiedono caratteristiche di sostenibilità e di affidabilità, 
+grazie all'utilizzo di uno spettro neutronico veloce e alle proprietà offerte 
+dall'uso del piombo liquido come refrigerante.
+
+Al fine di realizzare il modello del reattore, il primo passo è stato la 
+creazione del database combustibile contenente le sezioni d'urto 
+omogeneizzate sul dominio di un assembly e condensate in 33 gruppi energetici in 
+funzione dei principali parametri quali: la temperatura del combustibile, la 
+temperatura del refrigerante e il tempo di bruciamento isotopico.
+Il database reattoristico è stato ottenuto dalla risoluzione dell'equazione del 
+trasporto su ogni assembly che compone il reattore attraverso l'uso del codice 
+di cella \textit{Dragon} e delle relative librerie sulle sezioni d'urto 
+microscopiche \textit{Jeff3.1.2shem315}.
+Il codice di reattore \textit{Donjon} e il codice di termoidraulica 
+\textit{FEMuS} cooperano, grazie all'integrazione sulla piattaforma numerica, al 
+fine di ottenere un processo iterativo dove avviene lo scambio di informazioni. 
+La potenza termica generata nel combustibile è trasferita ai moduli 
+di termoidraulica che ne risolvono il campo di temperatura e la nuova 
+distribuzione di temperatura è utilizzata per rivalutare il flusso neutronico a 
+seguito delle variazioni sulle sezioni d'urto.
+
+Il flusso neutronico è ottenuto dalla risoluzione del sistema di equazioni
+$SP_N$ discretizzato a 33 gruppi di energie per ottenere una accurata analisi neutronica. 
+Sono stati analizzati i diversi valori della costante moltiplicativa effettiva $k_{eff}$ e 
+confrontati con altri studi di ricerca al fine di verificare la validità del 
+modello implementato. 
+In particolare sono stati valutati in base alle variazioni di temperatura del 
+combustibile e all'evoluzione temporale degli isotopi presenti nel combustibile 
+a seguito del bruciamento, ottenendo così le variazioni di reattività.
+La distribuzione di temperatura sul reattore è stata risolta attraverso 
+l'equazione di conservazione dell'energia, in cui si son considerate le diverse 
+assembly chiuse e mediate rispetto alla conducibilità termica del piombo.
+La temperatura di uscita del refrigerante è risultata accettabile in confronto a quella prevista dal progetto 
+ALFRED.
+
+In conclusione i risultati ottenuti sono stati soddisfacenti sia durante le simulazioni di neutronica
+sia durante quelle di termoidraulica; in questo contesto l'accoppiamento ha garantito una 
+simulazione comprensiva dei principali fenomeni concernenti la fisica del reattore.
+Il progetto di tesi può essere sviluppato ulteriormente perfezionando il modello  
+termoidraulico che è stato considerato, implementando modelli CFD più sofisticati 
+comprendenti anche fenomeni di 
+turbolenza per metalli liquidi.
+Inoltre si sottolinea che i parametri progettuali reali del progetto ALFRED sono ancora in fase 
+preliminare e in continuo cambiamento. In questo contesto, il progetto di tesi
+non ha la pretesa di essere una valutazione accurata per il reattore considerato ma si pone piuttosto 
+lo scopo di presentare un approccio multifisico computazionale in grado di 
+effettuare una simulazione complessiva in ambito reattoristico.
+Infatti la possibilità di integrare l'accoppiamento neutronico-termoidraulico 
+in un'unica piattaforma numerica può essere un ottimo strumento per la progettazione 
+e la valutazione della fattibilità della tecnologia LFR, aprendo prospettive 
+future per l'indagine del comportamento multifisico di sistemi energetici complessi. 
+
+
+

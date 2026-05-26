@@ -1,0 +1,77 @@
+\documentclass[crop,border=7pt]{standalone}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}       
+\usepackage{scalefnt}
+\usepackage[dvipsnames]{xcolor}
+%% TIKZ
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usetikzlibrary{decorations.pathmorphing,decorations.text,decorations.pathreplacing}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes,shapes.multipart,arrows,fit,calc,positioning,intersections,through}
+\usetikzlibrary{backgrounds,fadings}
+
+\begin{document}
+%  \tikzsetnextfilename{flow_chart}
+ 
+ 
+ \tikzstyle{rect1} = [draw=red, ultra thick, rectangle, rounded corners, fill=red!20, text width=7 em, text centered]
+ 
+ \tikzstyle{rect2} = [draw=blue, ultra thick, rectangle, rounded corners, fill=blue!20, text width=7 em, text centered]
+ 
+ \tikzstyle{rect3} = [draw=green, ultra thick, rectangle, rounded corners, fill=green!20, text width=7 em, text centered]
+ 
+ 
+ \tikzstyle{elli} = [draw=black, thick, ellipse, fill= white!20, minimum height=2em]
+\tikzstyle{circ} = [draw=black, thick, circle, fill=white!20, text width=3em, text centered]
+\tikzstyle{diam} = [draw=black, thick, diamond, fill=white!20, text width=4.5em, text badly centered, inner sep=0pt]
+\tikzstyle{trap} = [draw=black, thick, trapezium, trapezium left angle=70, trapezium right angle=110, fill=white!20, text width=6em, text centered, minimum height=2em]
+\tikzstyle{arrow} = [ultra thick,->,>=stealth]
+
+
+\begin{tikzpicture}[>=latex, node distance=3cm,xshift=-2cm]
+
+\node (ini) [rect2] {Inizializzazione della geometria 3D complessiva del reattore};
+
+\node (macro) [rect2, below of=ini] {Interpolazione sulle sezioni d'urto e assemblaggio reattore};
+
+\node (pow) [rect2, below of=macro] {Risoluzione del problema neutronico};
+
+\node (flux) [rect2, below of=pow, xshift=-2cm] {Distribuzione del flusso neutronico};
+\node (power) [rect2, below of=pow,  xshift=2cm] {Distribuzione della potenza termica};
+
+\node (pot) [rect3, right of=power, xshift=1cm] {Assegnazione sorgente termica negli assembly di combustibile};
+\node (femus) [rect3, above of=pot] {Risoluzione del problema termodinamico};
+
+
+\node (temp) [rect3, above of=femus] {Distribuzione di Temperatura};
+% \node (compo1) [trap, right of=dragon] {sezioni d'urto del fissile interno};
+
+
+\node (dragon) [rect1, left of=ini, xshift=-1cm] {\textbf{Creazione database reattoristico}};
+
+\node (compo) [rect1, below of=dragon] {\textbf{$\Sigma^T$ \\ omogeneizzate e condensate}};
+
+\node (librerie) [rect1, draw=orange, fill=orange!20, above of=dragon] {Librerie di dati nucleari};
+
+
+\draw [arrow,orange] (librerie) -- (dragon);
+\draw [arrow, red] (dragon) -- (compo);
+\draw [arrow, red] (compo) -- (macro);
+\draw [arrow, blue] (ini) -- (macro);
+\draw [arrow, blue] (macro) -- (pow);
+\draw [arrow, blue] (pow) |- (flux);
+\draw [arrow,blue] (pow) |- (power);
+
+\draw [arrow, green] (power) -- (pot);
+\draw [arrow, green] (pot) -- (femus);
+\draw [arrow, green] (femus) -- (temp);
+\draw [arrow, green] (temp) -- (macro);
+
+
+\end{tikzpicture}
+\end{document}
+% pdflatex --shell-escape figure.tex

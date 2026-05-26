@@ -1,0 +1,93 @@
+\documentclass[crop,border=7pt]{standalone}
+\usepackage{tikz}
+\usepackage{ifthen}
+\usetikzlibrary{shapes.geometric}
+\tikzset{
+  hexagone/.style={
+    draw, thick,
+    fill=blue!20,
+    shape=regular polygon,
+    regular polygon sides=6,
+    outer sep=0, inner sep=0,
+    minimum size=1cm,
+   % label={[red]center:#1}
+  }
+}
+\begin{document}
+  \begin{tikzpicture}[
+  blacknode/.style={shape=circle, draw=black, line width=1, fill=gray },
+  bluenode/.style={shape=circle, draw=black, line width=1, fill=blue },
+  greennode/.style={shape=circle, draw=black, line width=1, fill=green },
+  rednode/.style={shape=circle, draw=black, line width=1, fill=red },
+  yellownode/.style={shape=circle, draw=black, line width=1, fill=yellow },
+  violetnode/.style={shape=circle, draw=black, line width=1, fill=violet },   
+  graynode/.style={shape=circle, draw=black, line width=1, fill=blue!10 },  
+]
+    \node[hexagone=0, fill=blue] at (0,0){};
+    \foreach \r in {1,...,1}
+      \foreach \t in {0,...,5}
+        \foreach[evaluate={\l=int(\r*(\r-1)*3+\r*\t+\u)}] \u in {1,...,\r}
+          \scoped[rotate=-\t*60]
+            \node[hexagone=\l, fill=yellow] at (0+.75*\u,{0.43301270189*(2*\r-\u)}){};
+            
+   \foreach \r in {2,...,2}
+      \foreach \t in {0,...,5}
+        \foreach[evaluate={\l=int(\r*(\r-1)*3+\r*\t+\u)}] \u in {1,...,\r}
+        \ifthenelse{\l=9 \OR \l=12 \OR \l=15 \OR \l=18}{\def\mycolor{violet}}{\def\mycolor{yellow}}
+          \scoped[rotate=-\t*60]
+            \node[hexagone=\l, fill=\mycolor] at (0+.75*\u,{0.43301270189*(2*\r-\u)}){}; 
+            
+            \foreach \r in {3,...,4}
+      \foreach \t in {0,...,5}
+        \foreach[evaluate={\l=int(\r*(\r-1)*3+\r*\t+\u)}] \u in {1,...,\r}
+   %     \ifthenelse{\l=9 \OR \l=12 \OR \l=15 \OR \l=18}{\def\mycolor{violet}}{\def\mycolor{yellow}}
+          \def\mycolor{yellow}
+          \scoped[rotate=-\t*60]
+            \node[hexagone=\l, fill=\mycolor] at (0+.75*\u,{0.43301270189*(2*\r-\u)}){};
+            
+            
+           
+         \foreach \r in {5,...,6}
+      \foreach \t in {0,...,5}
+        \foreach[evaluate={\l=int(\r*(\r-1)*3+\r*\t+\u)}] \u in {1,...,\r}
+      \ifthenelse{\l=90 \OR \l=85 \OR \l=80 \OR \l=75 \OR \l=70 \OR \l=65 \OR \l=123 \OR \l=117 \OR \l=111 \OR \l=105 \OR \l=99 \OR \l=93}{\def\mycolor{green}}{\def\mycolor{red}}
+          \scoped[rotate=-\t*60]
+            \node[hexagone=\l, fill=\mycolor] at (0+.75*\u,{0.43301270189*(2*\r-\u)}){};
+          
+   
+   \foreach \r in {7,...,7}
+      \foreach \t in {0,...,5}
+        \foreach[evaluate={\l=int(\r*(\r-1)*3+\r*\t+\u)}] \u in {1,...,\r}
+      \ifthenelse{\l=132 \OR \l=133 \OR \l=134 \OR \l=139 \OR \l=140 \OR \l=141 \OR \l=146 \OR \l=147 \OR \l=148 \OR \l=153 \OR \l=154 \OR \l=155 \OR \l=160 \OR \l=161 \OR \l=162 \OR \l=167 \OR \l=168 \OR \l=127}{\def\mycolor{blue!10}}{\def\mycolor{red}}
+          \scoped[rotate=-\t*60]
+            \node[hexagone=\l, fill=\mycolor] at (0+.75*\u,{0.43301270189*(2*\r-\u)}){};
+            
+            \foreach \r in {8,...,9}
+      \foreach \t in {0,...,5}
+        \foreach[evaluate={\l=int(\r*(\r-1)*3+\r*\t+\u)}] \u in {1,...,\r}
+    %  \ifthenelse{\l=132 \OR \l=133 \OR \l=134 \OR \l=139 \OR \l=140 \OR \l=141 \OR \l=146 \OR \l=147 \OR \l=148 \OR \l=153 \OR \l=154 \OR \l=155 \OR \l=160 \OR \l=161 \OR \l=162 \OR \l=167 \OR \l=168 \OR \l=127}{\def\mycolor{blue!10}}{\def\mycolor{red}}
+    \def\mycolor{blue!10}
+          \scoped[rotate=-\t*60]
+            \node[hexagone=\l, fill=\mycolor] at (0+.75*\u,{0.43301270189*(2*\r-\u)}){};
+   
+   
+   
+   
+    %Legend
+%         \node[anchor=east] at (-9,-6) (leg1) {$1$. PSU};
+%         \node[below=1mm of leg1] (leg2) {$2$. Sputter Source};
+%         \node[right=6mm of leg1,anchor=west] (leg8) {$8$. Pumps};
+
+% %%LEGEND
+% \draw (7,5.5) rectangle (12,10);
+% \matrix [below left] at (current bounding box.north east) {
+%   \node [bluenode, label=right:\LARGE In-Pile Section] {}; \\  
+%   \node [violetnode, label=right:\LARGE Safety Rod] {}; \\
+%   \node [yellownode, label=right:\LARGE Inner MOX Fuel] {}; \\
+%   \node [rednode, label=right:\LARGE Outer MOX Fuel ] {}; \\
+%   \node [greennode, label=right:\LARGE Control Rod] {}; \\  
+%   \node [graynode, label=right:\LARGE Dummy Section] {}; \\  
+% };
+
+  \end{tikzpicture}
+\end{document}

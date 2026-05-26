@@ -1,0 +1,1059 @@
+\chapter[Equazione del trasporto]{Tecniche e metodi per la soluzione dell'equazione per il trasporto dei neutroni 
+\label{cap2}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In questo capitolo saranno affrontate le principali equazioni della neutronica 
+che governano la fisica del reattore. Le caratteristiche della fisica del 
+reattore associate all'interazione dei neutroni con tutti i componenti materiali 
+di un reattore nucleare, influenza e in alcuni casi determina la progettazione e 
+le operazioni del sistema nucleare considerato.
+Uno dei più importanti parametri è il tasso di reazione con isotopi fissili che 
+possono essere usati nella valutazione del rateo di fissione e la conseguente 
+produzione di calore all'interno del nocciolo del reattore. Questa sorgente di 
+calore determina, a sua volta, la potenza uscente dal reattore e influenza 
+fortemente la temperatura dei materiali che spesso determinano le condizioni di 
+sicurezza del reattore.
+% % % Il tasso di reazione è determinato da una specifica sezione d'urto la quale è la 
+% % % probabilità che diverse reazioni abbiano luogo quando i neutroni interagiscono 
+% % % con i nuclei del materiale investito dal flusso neutronico.
+Nel corso di questo capitolo saranno affrontati in un primo momento i 
+concetti generali della teoria del trasporto, per assicurare una giusta 
+comprensione dei concetti che portano alla definizione della equazione di 
+Boltzmann per il trasporto dei neutroni.
+Successivamente saranno introdotte le principali approssimazioni fisiche, usate 
+nei modelli computazionali, per la risoluzione dell'equazione del trasporto 
+semplificata.  
+I codici computazionali che risolvono il flusso neutronico stazionario si 
+possono dividere in deterministici e stocastici. 
+I metodi stocastici (MonteCarlo) risolvono il flusso neutronico simulando il 
+trasporto di particelle che risolve l'equazione del 
+trasporto di Boltzmann mediante diversi flussi collisionali. 
+Le simulazioni di particelle MonteCarlo usano un 
+algoritmo, il quale assume decisioni riguardo la vita delle particelle che sono 
+determinate secondo una densità di probabilità matematica.
+I metodi deterministici invece coinvolgono la suddivisione numerica di variabili 
+indipendenti di spazio, energia e direzione in sottodomini spaziali
+con la  conseguente riformulazione dell'equazione di Boltzmann in un insieme di 
+equazioni discretizzate basate sugli elementi finiti o volumi finiti. 
+La risoluzione dell'insieme di equazioni discretizzate richiede tecniche e 
+metodi computazionali iterativi per ottenere la convergenza della soluzione 
+per ottenere il flusso neutronico, da cui deriva la determinazione di altri 
+importanti parametri come la costante di criticit\`a  e la potenza neutronica.
+
+Saranno affrontati il metodo delle caratteristiche basato sul 
+concetto di traiettoria del neutrone, metodi di discretizzazione angolare quale 
+il metodo $P_N$ secondo lo sviluppo in armoniche sferiche e il metodo $S_N$ 
+secondo la scomposizione in formule di quadratura ed infine il metodo delle 
+probabilità di collisione che deriva dall'approssimazione multigruppo 
+dell'equazione integrale di Boltzmann.
+In particolare i libri di riferimento da cui sono state elaborate le informazioni 
+sono contenute nelle referenze \cite{lamarsh}, \cite{stacey} e soprattutto 
+\cite{hebertreact}. 
+
+\section{Teoria del trasporto}
+In questa sezione saranno enunciati i concetti più importanti che descrivono la 
+teoria del trasporto. Lo sviluppo della teoria del trasporto deriva dalla 
+necessità di conoscere nei dettagli la distribuzione in spazio, energia e tempo 
+dei neutroni all'interno dei reattori nucleari. Il trasporto dei neutroni in 
+mezzi moderanti o moltiplicanti costituisce una parte della meccanica 
+statistica di non equilibrio termodinamico, che studia in generale l'evoluzione 
+dinamica dei sistemi formati da molte particelle. Il comportamento dinamico di 
+un sistema formato da un elevato numero di particelle, quali possono essere i 
+neutroni all'interno di un reattore nucleare, viene studiato attraverso la 
+definizione dei processi di trasporto, processi irreversibili che 
+caratterizzano la teoria del trasporto \cite{molin}.
+Pertanto in fisica del reattore è di estremo interesse l'equazione del trasporto 
+di Boltzmann, da cui derivano altre importanti equazioni, come l'equazione della 
+diffusione opportunamente ricavata attraverso alcune ipotesi con lo scopo di 
+semplificare il problema.
+
+
+\subsection{Spazio delle fasi e densità di probabilità}
+Un sistema dinamico è definito come un insieme costituito da $N$ particelle 
+interagenti tra loro, quali possono essere neutroni, atomi o molecole, che per 
+semplicità sono considerate tutte uguali e ciascuna di esse ha $l$ gradi 
+di libertà. 
+Sono descritte tre tipi di variabili che servono per caratterizzare il 
+comportamento del sistema; quantità riguardante le particelle stesse (come per 
+esempio la massa), parametri esterni che determinano le condizioni al 
+contorno e le forze esterne, ed infine le cosiddette variabili dinamiche che 
+descrivono il moto delle particelle.
+
+Un particolare insieme di queste ultime variabili all'istante di tempo $t$ 
+costituisce lo \textit{stato dinamico} o \textit{fase} del sistema al tempo $t$.
+Infatti lo stato del sistema è completamente determinato dalla conoscenza della 
+posizione $\vec{r}$ e della velocità $\vec{v}$ di ciascuna particella, e 
+pertanto è necessario conoscere $6N$ numeri. 
+In ogni caso questi $6N$ variabili possono essere rappresentati da un punto in 
+uno spazio a $6N$ dimensioni, denominato spazio delle fasi; tuttavia la 
+conoscenza esatta di tale numero è impossibile sia per l'elevato numero di 
+particelle considerate sia per indeterminazioni quantistiche.
+Per questo motivo si ricorre a metodi e concetti di natura statistica; infatti 
+si considerano un elevato numero di sistemi uguali (ovvero stesse particelle e 
+stesso numero) che differiscono tra loro solo per il micro-stato che hanno ad un 
+certo istante. In questo modo questi insiemi possono essere rappresentati da una 
+nube di punti nello spazio delle fasi. 
+Si introduce la funzione densità di probabilità come
+\begin{equation}
+D_N (\vec{r_1},..,\vec{r_N}, \vec{v_1},..,\vec{v_N},t) \,,
+\end{equation}
+che rappresenta la probabilità di trovare lo stato del sistema in un determinato 
+punto dello spazio delle fasi $\Gamma$. Infatti tale funzione $D_N$ contiene il 
+massimo delle informazioni che si possono avere sul sistema.
+
+Si introduce lo spazio delle fasi $\mu$, lo spazio a 6 dimensioni in cui lo stato 
+dinamico di una particella è determinato dalle sue tre coordinate spaziali e 
+dalle sue tre componenti di velocità. In questo modo, considerando tutte le 
+particelle, che compongono il sistema, indistinguibili tra di loro è possibile 
+introdurre la funzione di distribuzione per una particella
+\begin{equation}
+f_1=f(\vec{r_1},\vec{v_1},t)=\int N D_N(\vec{r_1},..,\vec{r_N}, 
+\vec{v_1},..,\vec{v_N},t)\: d\vec{r_2}..d\vec{r_N}d\vec{v_2}..d\vec{v_N} \,,
+\end{equation}
+chiamata anche \textit{funzione di distribuzione semplice} poiché la posizione e la 
+velocità di ogni data particella non è correlata a quella di un altra. Il 
+principio di non correlazione equivale ad ipotizzare che funzione di densità di 
+probabilità di ogni particella all'interno del sistema non è influenzata dalla 
+funzione di densità di probabilità di quella di un'altra particella.
+
+E' importante anche introdurre la funzione di distribuzione doppia, in cui due 
+particelle sono correlate tra di loro,  semplicemente si ha
+\begin{equation}
+f_2 =\frac{N-1}{N}f_1(1)f_1(2) \,,
+\end{equation}
+dove $f_1(1)$ rappresenta la funzione di distribuzione semplice corrispondente 
+alla particella 1, mentre $f_1(2)$ alla particella 2.
+
+
+\subsection{Equazione del trasporto}
+L'equazione di Louville parte dall'ipotesi che il volumetto nello spazio delle 
+fasi $\Gamma$ si comporti come un fluido incomprimibile sotto l'azione di una 
+hamiltoniana, ossia
+\begin{equation}
+\label{louville}
+\frac{\partial D_N}{\partial t} + \sum_{i=1}^N \vec{v_i} \cdot \frac{\partial 
+D_N}{\partial \vec{r_i}} + \sum_{i=1}^N \frac{\vec{F_i}+\sum_{i=1}^N 
+\vec{F_{ij}}}{m} \cdot \frac{\partial D_N}{\partial \vec{v_i}} = 0 \,.
+\end{equation} 
+Da questa equazione scritta per la funzione di densità di probabilità, che 
+governa il moto di una nube di sistemi dinamici, si può integrare ottenendo 
+un sistema di equazioni, denominato gerarchia di equazioni di "BBGKY" per la 
+funzione di distribuzione semplice. L'idea alla base di questo sistema di 
+equazioni è che le quantità di interesse pratico non dipendono dalla densità di 
+probabilità nello spazio delle fasi $\Gamma$ ma solo dalla probabilità di una 
+singola particella di essere in un certo elemento dello spazio delle fasi $\mu$.
+Quindi integrando dall'equazione \eqref{louville} e sostituendo il termine di 
+collisione che si ottiene, si può scrivere l'equazione di Boltzmann con 
+collisione
+\begin{equation}
+\label{boltzmann}
+\frac{\partial f_1}{\partial t} + \vec{v_i} \cdot \frac{\partial f_1}{\partial 
+\vec{r_1}} + \frac{\vec{F_1}}{m} \cdot \frac{\partial f_1}{\partial \vec{v_1}} = 
+\biggl(\frac{\partial f_1}{\partial t}\biggr)_{coll} = \bigl[\Gamma (+)-\Gamma 
+(-)\bigr] \,,
+\end{equation}
+in cui è stata introdotta nel termine di collisione l'ipotesi di urti binari 
+(ovvero di durata praticamente nulla), secondo un termine di guadagno e uno di 
+perdita.
+
+\section{Equazione di Boltzmann per il trasporto di neutroni}
+L'equazione del trasporto è introdotta per descrivere una popolazione di 
+particelle neutre, come i neutroni, in un certo dominio chiuso, sotto condizioni 
+transitorie o stazionarie.
+Come già detto, l'equazione del trasporto descrive il comportamento statistico 
+di un popolazione di particelle; in particolare l'esatto numero di particelle 
+per unità di volume è in continuo mutamento con il tempo, e anche sotto 
+condizioni stazionarie, il numero di densità di particelle oscilla attorno un 
+valore medio dell'equazione stazionaria del trasporto.
+Saranno enunciati diversi approcci per risolvere l'equazione del trasporto, 
+ovvero il metodo delle armoniche sferiche, il metodo della probabilità di 
+collisione, il metodo delle ordinate discrete e il metodo delle caratteristiche.
+Partendo dalle equazioni generali del trasporto, la distribuzione dei neutroni 
+in spazio $\vec{r}$, in direzione angolare $\vec{\Omega}$ e in energia $E$ 
+all'istante di tempo $t$ viene descritta secondo una particolare funzione di 
+distribuzione $n(\vec{r},\vec{\Omega},E,t)$, denominata funzione di densità 
+neutronica o più genericamente densità di popolazione. 
+Il numero atteso di neutroni, considerati in un elemento di volume $d\vec{r}$ 
+alla posizione $\vec{r}$, che si muovono in un cono di direzione $d\vec{\Omega}$ 
+secondo la direzione $\vec{\Omega}$ e che abbiano energia compresa tra $E$ e 
+$E+dE$ in un certo instante di tempo, è rappresentato da
+\begin{equation}
+n(\vec{r},\vec{\Omega},E,t)\, d\vec{r}d\vec{\Omega}dE \,.
+\end{equation}
+Integrando rispetto l'angolo solido $d\vec{\Omega}$, si ottiene il numero atteso 
+di neutroni medio nel volumetto $d\vec{r}$ in un intorno di $\vec{r}$ 
+all'istante $t$ con energia in $dE$ in un intorno di $E$ come
+\begin{equation}
+N(\vec{r},E,t) \: d\vec{\Omega} = 
+d\vec{r}dE\int_{4\pi}n(\vec{r},\vec{\Omega},E,t) \: d\vec{\Omega} \,.
+\end{equation}
+La variabile maggiormente usata in fisica del reattore risulta essere tuttavia 
+il flusso scalare $\phi$ e il flusso angolare $\psi$ definiti come
+\begin{equation}
+\phi(\vec{r},E,t) = v N(\vec{r},E,t) \,,
+\end{equation}
+e
+\begin{equation}
+\psi(\vec{r},\vec{\Omega},E,t)= v n(\vec{r},\vec{\Omega},E,t) \,,
+\end{equation}
+dove $v=|\vec{v}|$ rappresenta il modulo della velocità che possiede il 
+neutrone. Inoltre è giusto sottolineare che $\vec{\Omega}$ rappresenta il 
+versore dell'angolo solido della velocità $\vec{v}$ definito come
+\begin{equation}
+\vec{\Omega}=\frac{\vec{v}}{|\vec{v}|} \,.
+\end{equation}
+
+Il flusso angolare definisce il massimo delle informazione riguardo la 
+popolazione neutronica. Tuttavia questa quantità per come è definita risulta 
+difficilmente maneggiabile durante i calcoli e sarà necessario apportare delle 
+semplificazioni fisiche e matematiche al fine di ricavare la soluzione con meno 
+difficoltà.
+Attraverso la definizione di flusso è possibile definire il rateo di interazioni 
+$R$, già definita in \eqref{tasso_di_reazione}, relativa alla sezione d'urto 
+macroscopica $\Sigma$
+\begin{equation}
+R=v\Sigma(\vec{r}.E)N(\vec{r},E,t)=\Sigma(\vec{r}.E)\phi(\vec{r},E,t) \,.
+\end{equation}
+ 
+Un'altra importante distribuzione, correlata alla definizione di flusso 
+angolare, è il vettore di corrente angolare $\vec{J}(\vec{r},\vec{\Omega},E,t)$ 
+definito come
+\begin{equation}
+\vec{J}(\vec{r},\vec{\Omega},E,t)=v \vec{\Omega} 
+n(\vec{r},\vec{\Omega},E,t)=\vec{\Omega} \psi(\vec{r},\vec{\Omega},E,t) \,.
+\end{equation}
+Si nota che la quantità
+\begin{equation}
+\vec{J}(\vec{r},\vec{\Omega},E,t)d\vec{A}dEd\vec{\Omega} \,,
+\end{equation}
+rappresenta il numero atteso di neutroni che transitano attraverso l'area 
+$d\vec{A}$ in un intorno di $\vec{r}$ all'istante $t$, con energia $E$ in $dE$ e 
+velocità nell'angolo solido $d\vec{\Omega}$ nel tempo $t$.
+In analogia al flusso integrato, si può definire la corrente integrata sulla 
+distribuzione angolare
+\begin{equation}
+\vec{J}(\vec{r},E,t)=\int_{4\pi}\vec{J}(\vec{r},\vec{\Omega},E,t)\, 
+d\vec{\Omega}=\vec{\Omega}\,\phi(\vec{r},E,t) \,.
+\end{equation}
+
+Secondo l'ipotesi di assenza di interazioni tra particella e particella, ovvero 
+tra neutrone e neutrone, è possibile enunciare la forma lineare dell'equazione 
+di Boltzmann. In ambito reattoristico tale ipotesi è ben supportata dall'idea 
+che l'interazione tra neutrone e nucleo sia molto più probabile dell'interazione 
+tra neutrone e neutrone, in quanto le dimensioni del neutrone sono più piccoli 
+di qualche ordine di grandezza rispetto al nucleo.
+
+L'equazione del trasporto è ottenuta come una relazione di bilancio tra 
+particelle in un volumetto di controllo $V$ dello spazio delle fasi. In questo 
+caso invece dell'energia viene utilizzata l'equivalente modulo di velocità, 
+semplicemente secondo le leggi della fisica di $v=\sqrt{2E/m}$ dove $m$ è la 
+massa della particella considerata, in questo caso il neutrone che ha una massa di 1.67$\cdot$10$^{-27}$kg. Questo permette uno sviluppo più logico dal 
+punto di visto concettuale ma formalmente risulta equivalente.
+Il bilancio, tra termini di guadagno e di perdita, risulta così strutturato:
+\begin{itemize}
+\item[-] Variazione di neutroni in $V$ durante il $\Delta t$
+\begin{equation}
+\int_V [n(\vec{r},\vec{\Omega},v,t+\Delta t)-n(\vec{r},\vec{\Omega},v,t)]\, 
+d\vec{r}dvd\vec{\Omega} \,,
+\end{equation}
+\item[-] Numero netto di particelle uscenti da $V$ durante il $\Delta t$ 
+ottenuto integrando la corrente di particelle sopra la superficie $\partial V$, 
+dove $\hat{n}$ è il versore normale uscente a $\partial V$ in cui 
+successivamente è stato introdotto il teorema della divergenza
+\begin{equation}
+\int_{\partial V} (\vec{\Omega} \cdot 
+\hat{n})\psi(\vec{r},\vec{\Omega},v,t+\Delta t)\, d\vec{r}dvd\vec{\Omega}\Delta 
+t=\int_V \nabla \cdot \Omega \psi(\vec{r},\vec{\Omega},v,t+\Delta t)\, 
+d\vec{r}dvd\vec{\Omega}\Delta t \,,
+\end{equation} 
+\item[-] Numero di interazioni in $d\vec{r}$ durante il $\Delta t$, dove 
+$\Sigma$ è la sezione d'urto macroscopica totale considerata indipendente da 
+$\vec{\Omega}$ e $t$
+\begin{equation}
+\int_V \Sigma(\vec{r},v)vN(\vec{r},\vec{\Omega},v,t)]\, 
+d\vec{r}dvd\vec{\Omega}\Delta t \,,
+\end{equation}
+\item[-] Numero di particelle generate in $d\vec{r}$ durante il $\Delta t$, dove 
+$Q(\vec{r},\vec{\Omega},v,t)$ rappresenta la sorgente
+\begin{equation}
+\int_V Q(\vec{r},\vec{\Omega},v,t)\, d\vec{r}dvd\vec{\Omega}\Delta t \,.
+\end{equation}
+
+\end{itemize}
+Assemblando questi quattro termini si ottiene un equazione del bilancio, dove la 
+variazione di particelle all'interno del volumetto di controllo $V$ è 
+rappresenta tra il bilancio tra i neutroni quelli uscenti e entranti,
+\begin{multline}
+\frac{n(\vec{r},\vec{\Omega},v,t+\Delta t) - n(\vec{r},\vec{\Omega},v,t)}{\Delta 
+t}= \\= - \nabla \cdot \Omega \psi(\vec{r},\vec{\Omega},v,t) 
+-\Sigma(\vec{r},v)[vn(\vec{r},\vec{\Omega},v,t)]+ \\
++Q(\vec{r},\vec{\Omega},v,t) \,.
+\end{multline}
+Ponendo il limite di $\Delta t \rightarrow 0$, e introducendo il flusso angolare 
+come variabile indipendente si ottiene l'equazione del trasporto nella sua forma 
+differenziale
+\begin{equation}
+\frac{1}{v}\frac{\partial \psi}{\partial t}(\vec{r},\vec{\Omega},v,t)+\Omega 
+\cdot \nabla \psi(\vec{r},\vec{\Omega},v,t)+ 
+\Sigma(\vec{r},v)\psi(\vec{r},\vec{\Omega},v,t)=Q(\vec{r},\vec{\Omega},v,t) \,.
+\end{equation}
+Nelle condizioni stazionarie l'equazione si semplifica come segue
+\begin{equation}
+\vec{\Omega} \cdot \nabla \psi(\vec{r},\vec{\Omega},v)+ 
+\Sigma(\vec{r},v)\psi(\vec{r},\vec{\Omega},v)=Q(\vec{r},\vec{\Omega},v) \,.
+\end{equation}
+La forma differenziale dell'equazione stazionaria del trasporto può essere 
+ottenuta sostituendo la velocità del neutrone con l'energia come variabile indipendente
+\begin{equation}
+\label{eqtrasta}
+\vec{\Omega} \cdot \nabla \psi(\vec{r},\vec{\Omega},E)+ 
+\Sigma(\vec{r},E)\psi(\vec{r},\vec{\Omega},E)=Q(\vec{r},\vec{\Omega},E) \,.
+\end{equation}
+
+\subsection{Densità di sorgente stazionaria}
+Assumendo che le reazioni di fissione siano isotrope nel sistema di riferimento 
+del laboratorio, la densità di sorgente stazionaria $Q(\vec{r},\vec{\Omega},E)$ 
+può essere scritta come
+\begin{equation}
+\label{denssorg}
+Q(\vec{r},\vec{\Omega},E)=\frac{Q^{fiss}(\vec{r},E)}{4\pi}+\int_{4\pi}d\vec{
+\Omega}'\int_0^\infty \Sigma^S(\vec{r},E'\rightarrow E,\vec{\Omega}'\rightarrow 
+\vec{\Omega})\phi(\vec{r},E',\vec{\Omega}')\, dE' \,,
+\end{equation}
+dove $\Sigma^S(\vec{r},E'\rightarrow E,\vec{\Omega}'\rightarrow \vec{\Omega})$ è 
+la sezione d'urto macroscopica differenziale di scattering mentre $ 
+Q^{fiss}(\vec{r},E)$ è la sorgente isotropa di fissione.
+
+In un mezzo isotropo, la sezione d'urto di scattering è solamente in funzione 
+dell'angolo di scattering
+\begin{equation}
+\label{sorgfiss}
+\Sigma^S(\vec{r},E'\rightarrow E,\vec{\Omega}'\rightarrow 
+\vec{\Omega})=\frac{1}{2\pi}\Sigma^S(\vec{r},E'\rightarrow E,\vec{\Omega}'\cdot 
+\vec{\Omega}) \,.
+\end{equation}
+Se si assume che la sorgente isotropa di fissione sia indipendente dall'energia 
+del neutrone incidente, per ogni nuclide fissionabile $i$, l'energia dei 
+neutroni emessi è distribuita in accordo alla densità di probabilità conosciuta 
+come spettro di fissione $\chi_i(E)$. 
+Pertanto la sorgente di fissione può essere scritta come
+\begin{equation}
+Q^{fiss}(\vec{r},E)=\sum_{j=1}^{J^{fiss}} \chi_j(E) \int_0^\infty dE'\, \nu(E') 
+\Sigma_{f,j}(\vec{r},E')\phi(\vec{r},E')   \,,
+\end{equation}
+dove $J^{fiss}$ rappresenta il numero totale di isotopi fissionabili, $\nu 
+\Sigma_{f,j}(\vec{r},E)$ il numero di neutroni emessi per fissione.
+
+
+
+\subsection{Equazione di Boltzmann integro-differenziale}
+L'equazione del trasporto per neutroni di Boltzmann in forma 
+integro-differenziale lineare descrive l'evoluzione temporale del flusso 
+angolare e viene generalmente presentata nella seguente forma, attraverso la 
+sostituzione della densità di sorgente in \eqref{denssorg} e in \eqref{sorgfiss} 
+nell'equazione \eqref{eqtrasta},
+\begin{multline}
+\biggl[ \frac{1}{v} \frac{\partial}{\partial{t}} + \vec{\Omega} \cdot \nabla + 
+\Sigma^T(\vec{r},E)
+\biggr] \psi(\vec{r},\vec{\Omega},E,t) \\
+= \int_{0}^{\infty} dE' \int_{4\pi} 
+d\vec{\Omega}'\,\Sigma^S(\vec{r},{E'\rightarrow E},
+{\vec{\Omega}'\rightarrow\vec{\Omega}}) 
+\psi(\vec{r},\vec{\Omega}',E',t) \\
++ \frac{\chi(\vec{r},E)}{4\pi} \int_{0}^{\infty} dE'\,
+\nu(E')\Sigma_f(\vec{r},E') \int_{4\pi} d\vec{\Omega}'\,
+\psi(\vec{r},\vec{\Omega}',E',t) \,.
+\end{multline}
+L'incognita in sette variabili è il flusso angolare 
+$\psi(\vec{r},\vec{\Omega},E,t)$, e per la soluzione è necessario che vengano 
+definite appropriate condizioni iniziali, alle interfacce e al contorno. 
+Per quanto riguarda la condizione iniziale è necessario fissare il flusso 
+angolare al $t=0$ per tutte le posizioni, energie e direzioni come
+\begin{equation}
+\psi(\vec{r},\vec{\Omega},E,0)=\psi_0(\vec{r},\vec{\Omega},E) \,.
+\end{equation} 
+Le condizioni al contorno dipendono dallo specifico problema considerato, e 
+quindi bisogna appunto conoscere la distribuzione del flusso angolare al 
+contorno $\partial V$ che entra nel dominio spaziale
+\begin{equation}
+\psi(\vec{r_0},\vec{\Omega},E,t)=\beta \psi(\vec{r_0},\vec{\Omega}',E,t) \qquad 
+\text{per} \quad \vec{r_0}\in \partial V,\quad\vec{\Omega}\cdot\hat{n}<0 \,.
+\end{equation}
+La condizione di vuoto è determinata da $\beta = 0$, ovvero dove il neutrone che 
+attraversa la superficie è perso, la condizione di completa riflessione da 
+$\beta=1$ mentre un valore intermedio di $\beta$ rappresenta una riflessione 
+parziale. Queste condizione così espressa è detta anche condizione al contorno 
+di albedo. Inoltre all'interno di un reattore nucleare sono presenti molti 
+materiali diversi, e la configurazione geometrica del core può essere davvero 
+complessa. Mentre le sezioni d'urto posso essere assunte funzioni continue in 
+ogni materiale, all'interfaccia tra regioni spaziali differenti possono essere 
+discontinue. Di conseguenza l'equazione del trasporto neutronico deve essere 
+applicata in entrambi i lati dell'interfaccia, imponendo condizioni di 
+continuità sul flusso angolare.
+
+Se si considera l'equazione del trasporto di Boltzmann stazionaria si può 
+introdurre il concetto di criticità di un sistema moltiplicante che è legato 
+intrinsecamente al concetto di stazionarietà
+\begin{multline}
+\label{eq_boltzmann_staz_estesa}
+\biggl[\vec{\Omega} \cdot \nabla + \Sigma^T(\vec{r},E)
+\biggr] \psi(\vec{r},\vec{\Omega},E) \\
+= \int_{0}^{\infty} dE' \int_{4\pi} 
+d\vec{\Omega}'\,\Sigma_s(\vec{r},{E'\rightarrow E},
+{\vec{\Omega}'\rightarrow\vec{\Omega}}) 
+\psi(\vec{r},\vec{\Omega}',E') \\
++ \frac{\chi(\vec{r},E)}{4\pi
+k_{eff}} \int_{0}^{\infty} dE'\,
+\nu(E')\Sigma_f(\vec{r},E') \int_{4\pi} d\vec{\Omega}'\,
+\psi(\vec{r},\vec{\Omega}',E') \,.
+\end{multline}
+Si possono introdurre operatori per esprimere l'equazione come un problema agli autovalori ed
+evidenziare come l'autovalore sia
+oppurtanamento inserito per ottenere la criticità del sistema moltiplicativo, 
+ovvero
+\begin{equation}
+\begin{split}
+\vec{T}\psi & = \biggl[\vec{\Omega} \cdot \nabla + \Sigma^T(\vec{r},E)
+\biggr] \psi(\vec{r},\vec{\Omega},E), \\
+\vec{S}\psi &= \int_{0}^{\infty} dE' \int_{4\pi} 
+d\vec{\Omega}'\,\Sigma_s(\vec{r},{E'\rightarrow E},
+{\vec{\Omega}'\rightarrow\vec{\Omega}}) 
+\psi(\vec{r},\vec{\Omega}',E'),\\
+\vec{F}\psi &= \frac{\chi(\vec{r},E)}{4\pi} \int_{0}^{\infty} dE'\,
+\nu(E')\Sigma_f(\vec{r},E') \int_{4\pi} d\vec{\Omega}'\,
+\psi(\vec{r},\vec{\Omega}',E') \,,
+\end{split}
+\end{equation}
+dove gli operatori sono definiti, rispettivamente, di trasporto $\vec{T}$, di 
+scattering $\vec{S}$ e di fissione $\vec{F}$. Nella progettazione di reattori 
+nucleari si cerca la soluzione di un problema agli autovalori ottenuto inserendo 
+nell’ equazione un parametro di valutazione per lo scostamento dalla condizione 
+di criticità.
+Introducendo l'autovalore $\frac{1}{k_{eff}}$ in forma operatoriale il problema agli autovalori diventa
+\begin{equation}
+(\vec{T}-\vec{S})\psi = \frac{1}{k_{eff}} \vec{F}\psi \,.
+\end{equation}
+La costante moltiplicativa effettiva $k_{eff}$ rappresenta quindi la criticità 
+del sistema, e se $k_{eff}<1$ il sistema sarà sottocritico ovvero la 
+popolazione neutronica andrà estinguendosi con il tempo (cioè la produzione 
+di neutroni è inferiore alle perdite) mentre se $k_{eff}>1$ il sistema sarà 
+sovracritico e la popolazione neutronica aumenterà ad ogni passo temporale.
+La condizione di criticità è invece data da $k_{eff}=1$, in cui la popolazione 
+rimane stabile, la produzione di neutroni è compensata dalle perdite e 
+la reazione a catena di fissione è in grado di autosostenersi senza estinguersi 
+o esplodere.
+Infatti nel caso reale di reattore nucleare, questo parametro viene 
+continuamente aggiustato attraverso inserzioni di reattività attraverso 
+l'inserimento di barre di controllo o attraverso l'iniezione di veleni 
+neutronici.
+
+
+\subsection{Metodo delle caratteristiche \label{metcaratt}}
+Attraverso la rappresentazione dell'inversione dell'operatore del trasporto 
+lungo la direzione di volo dei neutroni $\vec{\Omega}$, è possibile riformulare 
+il problema del trasporto in forma integrale. Questa procedura è conosciuta come 
+metodo delle caratteristiche \cite{askew}.
+
+La forma caratteristica dell'equazione del trasporto corrisponde ad un'
+integrazione dell'operatore di streaming $\vec{\Omega}\cdot\nabla\psi$ lungo la 
+caratteristica, in linea diretta lungo la direzione $\vec{\Omega}$ 
+corrispondente alla traiettoria della particella. 
+Ad ogni istante di tempo del suo moto, la particella è assunta essere alla 
+distanza $s$ dalla posizione di riferimento $\vec{r_0}$ sulla propria 
+caratteristica, che è l'intersezione con l'intera superficie $\partial V$, così 
+che l'attuale posizione di ogni punto lungo $\vec{\Omega}$ può essere espressa 
+come
+\begin{equation}
+\vec{r}= (x(s),y(s),z(s))=(x_0+s\Omega_x, y_0+s\Omega_y, 
+z_0+s\Omega_z)=\vec{r_0}+s\,\vec{\Omega} \,,
+\end{equation}
+dove $s$ è la lunghezza del segmento lungo la caratteristica. In altre parole si 
+è ottenuta la parametrizzazione di $\vec{r}$ rispetto a una posizione di 
+riferimento $\vec{r_0}$.
+
+Questo segmento può essere misurato in termini di libero cammino, portando alla 
+definizione di cammino ottico, come segue
+\begin{equation}
+\label{cammino_ottico}
+\tau (s,E) =\int_0^s ds'\, \Sigma(\vec{r_0}+s'\,\vec{\Omega},E) \,.
+\end{equation}
+Allo stesso tempo, il tempo generico $t$ può essere riferito alla velocità del 
+neutrone $v$
+\begin{equation}
+t=t_0+\frac{s}{v} \,,
+\end{equation}
+dove $t_0$ è l'istante con il quale il neutrone considerato giace sul punto di 
+riferimento $\vec{r_0}$.
+Esprimendo il termine $\nabla\cdot\vec{\Omega}$ usando il concetto di derivata 
+totale si può scrivere
+\begin{equation}
+\frac{d}{ds}=\Omega_x\frac{\partial}{\partial 
+x}+\Omega_y\frac{\partial}{\partial y}+\Omega_z\frac{\partial}{\partial 
+z}=\frac{dt}{dl}\frac{\partial}{\partial 
+t}+\frac{dx}{dl}\frac{\partial}{\partial 
+x}+\frac{dy}{dl}\frac{\partial}{\partial 
+y}+\frac{dz}{dl}\frac{\partial}{\partial z}+\frac{1}{v}\frac{\partial}{\partial 
+t} \,,
+\end{equation}
+dove $ds\,\vec{\Omega}$ è stato scomposto secondo un sistema di coordinate cartesiane
+\begin{equation}
+ds\,\vec{\Omega}=d\vec{r}=dx \, \hat{i}+dy \, \hat{j}+dz \, \hat{k} \,.
+\end{equation} 
+Si deduce che 
+\begin{equation}
+\frac{d}{ds}=(\vec{\Omega}\cdot \hat{i})\frac{\partial}{\partial 
+x}+(\vec{\Omega}\cdot \hat{j})\frac{\partial}{\partial y}+(\vec{\Omega}\cdot 
+\hat{k})\frac{\partial}{\partial z}+\frac{1}{v}\frac{\partial}{\partial t} \,.
+\end{equation}
+Con questa definizione è possibile riformulare l'equazione del trasporto come
+\begin{multline}
+\frac{d}{ds}\psi\biggl(\vec{r_0}+s\,\vec{\Omega},\vec{\Omega},E,t_0+\frac{s}{v}
+\biggr)\\
++\Sigma\biggl(\vec{r_0}+s\,\vec{\Omega},\vec{\Omega},E,t_0+\frac{s}{v}
+\biggr)\psi\biggl(\vec{r_0}+s\,\vec{\Omega},\vec{\Omega},E,t_0+\frac{s}{v}
+\biggr)\\
+=Q\biggl(\vec{r_0}+s\,\vec{\Omega},\vec{\Omega},E,t_0+\frac{s}{v}\biggr) \,.
+\end{multline}
+Quest'ultima, che è un'equazione differenziale lineare del primo ordine, può essere 
+integrata da $0$ a $\infty$ così da ottenere
+\begin{equation}
+\psi(\vec{r},\vec{\Omega},E,t)=\int_0^\infty ds\, e^{-\tau 
+(s,E)}Q\biggl(\vec{r_0}+s\,\vec{\Omega},\vec{\Omega},E,t_0+\frac{s}{v}\biggr) 
+\,.
+\end{equation}
+Se il dominio è finito, è possibile integrare solo lungo il valore $s$ che 
+corrisponde al valore $r'$ dentro al dominio dove il flusso angolare al 
+$(\vec{r_0},t_0)$ è assunto come flusso al contorno, ottenendo
+\begin{equation}
+\psi(\vec{r},\vec{\Omega},E,t)= \psi(\vec{r_0},\vec{\Omega},E,t_0)e^{-\tau(l,E)}
++\int_0^l ds\, e^{-\tau 
+(s,E)}Q\biggl(\vec{r_0}+s\,\vec{\Omega},\vec{\Omega},E,t_0+\frac{s}{v}\biggr) 
+\,.
+\end{equation}
+
+Allo stesso modo è possibile definire la trasformazione caratteristica 
+dell'equazione stazionaria del trasporto nella seguente forma
+\begin{equation}
+\vec{\Omega}\cdot\nabla \psi 
+(\vec{r_0}+s\vec{\Omega},\vec{\Omega},E)+\Sigma^T(\vec{r_0}+s\vec{\Omega},E) 
+\psi(\vec{r_0}+s\vec{\Omega},\vec{\Omega},E) = 
+Q(\vec{r_0}+s\vec{\Omega},\vec{\Omega},E) \,.
+\end{equation}
+Successivamente il problema pu\`o essere semplificato assumendo la sola dipendenza da $s$, 
+relativa alla posizione di riferimento $\vec{r_0}$ e dalla direzione angolare 
+$\vec{\Omega}$, ottenendo così l'equazione 
+\begin{equation}
+\label{eqcarat}
+\frac{d}{ds}\psi(s,\vec{\Omega},E)+\Sigma^T(s,E)\psi(s,\vec{\Omega},E)=Q(s,\vec{
+\Omega},E) \,.
+\end{equation}
+Tale equazione può essere risolta attraverso l'uso di un fattore integrativo
+\begin{equation}
+e^{-\int^s_0 ds' \, \Sigma^T(s',E)} \,,
+\end{equation}
+ottenendo così la soluzione analitica dell'equazione caratteristica del 
+trasporto
+\begin{equation}
+\label{soluz_caratteristica}
+\psi(s,\vec{\Omega},E)=\psi(\vec{r_0},\vec{\Omega},E) e^{-\int^s_0 ds' \, 
+\Sigma^T(s',E)} +\int_0^s ds'' \, Q(s'',\vec{\Omega},E) e^{-\int^s_{s''} ds' \, 
+\Sigma^T(s',E)} \,.
+\end{equation}
+Dall'equazione \eqref{soluz_caratteristica} derivano importanti approssimazioni, 
+come per esempio il metodo della probabilità di collisione.
+
+
+
+\section{Discretizzazione dell'equazione del trasporto}
+La soluzione numerica dell'equazione del trasporto stazionaria richiede la 
+discretizzazione delle variabili che descrivono le caratteristiche (posizione, 
+direzione angolare, e energetica) dei neutroni nello spazio delle fasi. 
+
+\subsection{Discretizzazione energetica}
+La discretizzazione energetica, o approssimazione multigruppo o anche 
+condensazione energetica, consiste nella partizione dell'intero intervallo 
+energetico di interesse in $G$ gruppi di energia definiti come 
+\begin{equation}
+\Delta E_g = [E_g,E_{g-1}] \quad \text{per} \quad g=1,\dots ,G \,,
+\end{equation}
+dove $g=1$ corrisponde al gruppo energetico più alto, e $g=G$ a quello più 
+basso.
+In questo modo il flusso angolore e scalare in forma multigruppo sono esprimibili
+\begin{equation}
+\psi_g(\vec{r},\vec{\Omega})=\int_{E_g}^{E_{g-1}} 
+dE\,\psi(\vec{r},\vec{\Omega},E) \,,
+\end{equation}
+\begin{equation}
+\phi_g(\vec{r})=\int_{E_g}^{E_{g-1}} dE\,\phi(\vec{r},E) \,.
+\end{equation}
+La definizione formale della sezione d'urto mediata sui gruppi è fondata sul 
+ tasso di reazione di ogni gruppo. Si pu\`o scrivere
+\begin{equation}
+\Sigma_g(\vec{r})=\frac{\int_{\Delta E_g} dE \, 
+\Sigma(\vec{r},E)\phi(\vec{r},E)}{\phi_g(\vec{r})} \,.
+\end{equation}
+In questo modo le sezioni d'urto e il flusso angolare non sono più funzioni 
+continue dell'energia, ma sono costanti nel dominio energetico dentro ogni gruppo 
+e si rimuove dall'equazione del trasporto la dipendenza dell'energia, ottenendo 
+una serie di equazioni accoppiate tra loro.
+Partendo dall'equazione \eqref{eqcarat} si ottiene l'approssimazione multigruppo
+\begin{equation}
+\label{eq_multigrup}
+\vec{\Omega}\cdot \nabla	
+\psi_g(s,\vec{\Omega})+\Sigma_g^T(s)\psi_g(s,\vec{\Omega})=Q_g(s,\vec{\Omega}) 
+\,,
+\end{equation}
+dove la sorgente è definita,
+\begin{multline}
+Q_g(s,\vec{\Omega})=\sum_{g'=1}^G \int_{4\pi} d\vec{\Omega}'\, \Sigma_{g' 
+\rightarrow g}^S (s,\vec{\Omega}'\rightarrow 
+\vec{\Omega})\psi_{g'}(s,\vec{\Omega}')\\
++\frac{\chi_g(s)}{4\pi k_{eff}}\sum_{g'=1}^G\nu \Sigma_{g'}^F (s) 
+\int_{4\pi}d\vec{\Omega}'\, \psi_{g'}(s,\vec{\Omega}') \,.
+\end{multline}
+
+L'approssimazione multigruppo trasforma l'equazione del trasporto di neutroni in 
+un sistema di $G$ equazioni, dove ogni gruppo di energia descrive un bilancio 
+neutronico in un unico intervallo di energia.
+L'accoppiamento tra questi gruppi è ottenuto attraverso l'integrale di 
+scattering e il termine di fissione, in accordo con la fisica dei processi di 
+collisione.
+
+La soluzione dell'equazione del trasporto neutronico  in Eq. \eqref{soluz_caratteristica} lungo la caratteristica  in forma multigruppo risulta essere
+\begin{equation}
+\psi_g(s,\vec{\Omega})=\psi_g(\vec{r_0},\vec{\Omega})e^{-\int_0^s 
+ds'\,\Sigma_g^T(s')}+\int_0^s ds'' \, Q_g(s'',\vec{\Omega})e^{-\int_{s''}^s 
+ds'\,\Sigma_g^T(s')} \,,
+\end{equation}
+in cui le sono state usate le condensazioni in energia delle sezioni d'urto 
+$\Sigma^T$, $\Sigma^F$ e $\Sigma^S$ e dello spettro di fissione $\chi$ definite
+\begin{equation}
+\Sigma_g^T(s)=\frac{\int^{E_{g-1}}_{E_g} 
+dE'\,\Sigma^T(s,E')\psi(s,\vec{\Omega},E')}{\int^{E_{g-1}}_{E_g} 
+dE'\,\psi(s,\vec{\Omega},E')} \,,
+\end{equation}
+\begin{equation}
+\Sigma_g^F(s)=\frac{\int^{E_{g-1}}_{E_g} 
+dE'\,\Sigma^F(s,E')\psi(s,\vec{\Omega},E')}{\int^{E_{g-1}}_{E_g} 
+dE'\,\psi(s,\vec{\Omega},E')} \,,
+\end{equation}
+\begin{multline}
+\Sigma_{g'\rightarrow g}^S(s,\vec{\Omega}'\rightarrow \vec{\Omega})= \\
+=\frac{\int^{E_{g'-1}}_{E_{g'}} dE'\, \int^{E_{g-1}}_{E_g} 
+dE''\,\Sigma^S(s,\vec{\Omega}'\rightarrow \vec{\Omega},E'\rightarrow 
+E'')\psi(s,\vec{\Omega},E'')}{\int^{E_{g-1}}_{E_g} 
+dE'\,\psi(s,\vec{\Omega}',E')} \,,
+\end{multline}
+\begin{equation}
+\chi_{g'\rightarrow g}(s)=\frac{\int^{E_{g'-1}}_{E_{g'}} dE'\, 
+\int^{E_{g-1}}_{E_g} dE''\,\chi(s,E'\rightarrow E'')\nu 
+\Sigma^F(s,E')\psi(s,\vec{\Omega},E')}{\int^{E_{g-1}}_{E_g} dE'\,\nu 
+\Sigma^F(s,E')\psi(s,\vec{\Omega},E')} \,.
+\end{equation}
+Nonostante si assume una dipendenza di $\chi$ su entrambe le energie del 
+neutrone che causa fissione $g'$ e del neutrone emesso da fissione $g$, 
+tipicamente viene approssimato attraverso una sommatoria su tutti i gruppi
+\begin{equation}
+\chi_g(s)=\sum_{g=1}^G \chi_{g'\rightarrow g}(s) \,.
+\end{equation}
+Ricordando, sono definite generalmente tre zone di energia: zona veloce da 10MeV a 300keV, 
+zona epitermica da 300keV a 0.625eV e zona termica da 0.625eV a 0.001eV. Mentre 
+nella zona veloce e epitermica lo scattering diminuisce maggiormente l'energia 
+dei neutroni (down-scattering), nella zona termina il neutrone può acquisire 
+energia dalle collisioni (up-scattering). 
+
+
+\subsection{Discretizzazione angolare}
+L'approssimazione numerica dell'equazione del trasporto richiede una 
+discretizzazione angolare. I metodi più comuni per discretizzare la variabile 
+angolare sono: il metodo delle armoniche sferiche ($P_N$) e il metodo delle 
+ordinate discrete ($S_N$).
+
+
+\subsubsection{Armoniche sferiche}
+
+Il metodo delle armoniche sferiche, o metodo $P_N$, consiste nella 
+discretizzazione angolare dell'equazione differenziale del trasporto; si basa 
+infatti sull'espansione in serie di $\psi_g(\vec{r},\vec{\Omega})$ e 
+$Q_g(\vec{r},\vec{\Omega})$ in armoniche sferiche, dove il pedice $g$ indica 
+l'approssimazione multigruppo. Attraverso l'espansione in serie è possibile 
+separare la variabili dipendenti. Le armoniche sferiche sono definite di 
+seguito
+\begin{equation}
+f(\vec{\Omega})=\sum_{l=0}^L \frac{2l+1}{4\pi} \sum_{m=-l}^l f_l^m 
+R_l^m(\vec{\Omega}) \,.
+\end{equation}
+dove $f(\vec{\Omega})$ è una funzione continua nella variabile angolare 
+$\vec{\Omega}$ e $R_l^m(\vec{\Omega}$ la componente reale dell'armonica sferica, 
+dove $f_l^m$ è definito come 
+\begin{equation}
+f_l^m=\int_{4\pi}d\vec{\Omega}\, R_l^m(\vec{\Omega}) f(\vec{\Omega}) \,.
+\end{equation}
+Tale espansione è troncata dopo alcuni termini, portando all'approssimazione 
+$P_N$. Si può scrivere quindi l'espansione in armoniche sferiche
+\begin{equation}
+\psi_g(\vec{r},\vec{\Omega})=\sum_{l=0}^n \frac{2l+1}{4\pi}\sum_{m=-l}^l 
+\psi_{g,l}^m(\vec{r})R_l^m(\vec{\Omega}) \,,
+\end{equation}
+\begin{equation}
+Q_g(\vec{r},\vec{\Omega})=\sum_{l=0}^L\frac{2l+1}{4\pi}\sum_{m=-l}^l 
+Q_{g,l}^m(\vec{r})R_l^m(\vec{\Omega}) \,,
+\end{equation}
+dove $R_l^m(\Omega)$ rappresenta l'armonica sferica considerata e 
+$\phi_l^m(\vec{r},E)$, $Q_l^m(\vec{r},E)$ sono rispettivamente
+\begin{equation}
+\phi_{g,l}^m(\vec{r})= \int_{4\pi}d\vec{\Omega}\, 
+R_l^m(\vec{\Omega})\psi_g(\vec{r},\vec{\Omega}) \,,
+\end{equation}
+\begin{equation}
+Q_{g,l}^m(\vec{r})= \int_{4\pi}d\vec{\Omega}\, 
+R_l^m(\vec{\Omega})Q_g(\vec{r},\vec{\Omega}) \,,
+\end{equation}
+dove $n$ è dispari e $L\leq n$. 
+Sostituendo all'equazione del trasporto stazionaria si ottiene così un insieme 
+di equazioni accoppiate tra loro, la cui risoluzione è tuttavia complessa e 
+generalmente son attuate semplificazioni di geometria e fisiche per semplificare 
+ulteriormente il problema matematico.
+
+Richiamando brevemente l'equazione del trasporto multigruppo \eqref{eq_multigrup} e considerando alcune semplificazioni, si può scrivere
+\begin{equation}
+\vec{\Omega}\cdot\nabla \psi_g(\vec{r},\vec{\Omega})+\Sigma^T_g 
+\psi_g(\vec{r},\vec{\Omega}) = 
+\int_{4\pi}d\vec{\Omega}'\,\Sigma_g^S(\vec{\Omega}'\rightarrow 
+\vec{\Omega})\psi_g(\vec{r},\vec{\Omega}') + Q^{fiss}_g(\vec{r},\vec{\Omega}) 
+\,,
+\end{equation}
+dove si è scomposta la sorgente $Q_g(\vec{r},\vec{\Omega})$ in sorgente di 
+scattering e sorgente di fissione.
+Pertanto è stato considerato un mezzo isotropo ed omogeneo così che le sezioni 
+d'urto  $\Sigma_g^T$ e $\Sigma_g^S$ dipendono solamente dal coseno dell'angolo 
+di scattering, denominato anche angolo di deviazione, definito come
+\begin{equation}
+\vec{\Omega}'\rightarrow 
+\vec{\Omega}=\vec{\Omega}'\cdot\vec{\Omega}=\cos(\theta_0)=\mu_0=\mu\mu'+\sqrt{
+1-\mu^2}\sqrt{1-{\mu'}^2}cos(\phi-\phi') \,,
+\end{equation}
+dove $\mu=\vec{\Omega}\cdot \hat{k}$ rappresenta il coseno nel centro di massa, 
+$\theta$ l'angolo polare e $\phi$ l'angolo azimutale.
+Inoltre considerando una simmetria azimutale, è possibile semplificare il 
+problema tridimensionale ad una sola coordinata, studiando così il problema 
+unidimensionale
+\begin{equation}
+\mu \frac{\partial}{\partial z}\psi_g(z,\mu)+\Sigma_g^T \psi_g(z,\mu) = 
+\int_{-1}^{+1}\int_0^{2\pi}d\mu'd\phi'\,\Sigma_g^S(\mu_0)\psi_g(z,\mu ') 
++Q^{fiss}_g(z,\mu) \,.
+\end{equation}
+In questo modo si ottiene un'equazione sviluppabile secondo i polinomi di 
+Legendre, un insieme completo di funzioni ortogonali nell'intervallo $[-1,+1]$, 
+che godono di proprietà di ortogonalità e relazioni di ricorrenza.
+Sostituendo gli sviluppi in serie e risolvendo l'integrale si ottiene
+\begin{multline}
+\sum_{l=0}^\infty \frac{2l+1}{4\pi}\mu P_l(\mu) \frac{\partial}{\partial 
+z}\psi_l(z)+ \sum_{l=0}^\infty \frac{2l+1}{4\pi} \Sigma^T P_l(\mu)\psi_l(z)\\
+=\sum_{l=0}^\infty \frac{2l+1}{4\pi}\Sigma_l^S P_l(\mu)\psi_l(z) 
++\sum_{l=0}^\infty \frac{2l+1}{4\pi} P_l(\mu)Q^{fiss}_l(z) \,,
+\end{multline}
+in cui è 
+stato omesso il pedice $g$ per semplicità di lettura.
+Attraverso la relazione di ricorrenza
+\begin{equation}
+(2l+1)\mu P(\mu)=(l+1)P_{l+1}(\mu)+l P_{l-1}(\mu) \,,
+\end{equation}
+e semplificando i polinomi $P_l$, si ottiene un sistema di equazioni accoppiate 
+tra loro come segue
+\begin{equation}
+\sum_{l=0}^\infty l 
+\frac{d}{dz}\psi_{l-1}(z)+(l+1)\frac{d}{dz}\psi_{l+1}(z)+(2l+1)[\Sigma^T 
+-\Sigma_l^S]\psi_l(z)=\sum_{l=0}^\infty Q_l^{fiss}(z) \,.
+\end{equation}
+Il sistema è risolto troncando l'espansione in serie ad $l=L$, che prende il 
+nome di approssimazione $P_L$.
+Un'ulteriore approssimazione, molto comune, è di troncare l'espansione ad $L=1$, 
+ottenendo l'approssimazione $P_1$, in cui si considera lo scattering linearmente 
+anisotropo (per $L=0$ lo scattering sarebbe isotropo).
+Questo consente attraverso alcune sostituzioni di ricavare l'equazione della 
+diffusione con correzione del trasporto.
+Infatti considerando la sorgente di fissione isotropa, e sostituendo il flusso 
+$\psi_0(z)=\psi(z)$ e la corrente di flusso $\psi_1(z)=J(z)$, si ricava
+\begin{equation}
+\label{sistema_di_diffusione}
+\begin{sistema}
+(\Sigma^T-\Sigma^S)\psi(z)+\displaystyle\frac{d}{dz}J(z)=Q^{fiss}(z)\\
+\displaystyle\frac{d}{dz}\psi(z)+3(\Sigma^T-\bar{\mu_0}\Sigma^S)J(z)=0
+\end{sistema} \,,
+\end{equation}
+dove $\Sigma_0^S$ e $\Sigma_1^S$ sono stati sostituiti rispettivamente da 
+$\Sigma^S$ e $\bar{\mu_0}\Sigma^S$.
+Sistemando le equazioni, si ottiene dalla seconda la legge di Fick nella forma
+\begin{equation}
+\label{corrente legendre}
+J(z)= -\frac{1}{3(\Sigma^T-\bar{\mu_0}\Sigma^S)} \frac{d}{dz}\psi(z)  
+-D\frac{d}{dz}\psi(z) \,,
+\end{equation}
+dove $D$ è definito come il coefficiente di diffusione e corrisponde, nel caso 
+la sezione d'urto d'assorbimento $\Sigma^A$ sia molto più piccola della sezione 
+d'urto di scattering $\Sigma^S$ alla sezione d'urto del trasporto, definita come 
+$\Sigma^{tr}=\Sigma^S(1-\bar{\mu_0})$.
+Quindi sostituendo \eqref{corrente legendre} in \eqref{sistema_di_diffusione} e 
+ricordando che $\Sigma^A=\Sigma^T-\Sigma^S$, si ottiene 
+\begin{equation}
+D\frac{d^2}{dz^2}\psi(z)-\Sigma^A \psi(z) + Q^{fiss}(z)=0 \,,
+\end{equation}
+si ottiene l'equazione di diffusione per il caso monodimensionale. Questa 
+equazione può essere risolta facilmente anche se per arrivarci son state fatte 
+diverse approssimazioni rilevanti.
+
+\subsubsection{Ordinate discrete}
+Il metodo delle ordinate discrete è introdotta per approssimare l'integrale 
+lungo il dominio angolare della sorgente $Q(s,\vec{\Omega})$ ed è equivalente ad 
+applicare regole di quadratura per calcolare l'integrale sopra il flusso 
+angolare usando una somma pesata di flussi ad uno specifico angolo dove i pesi 
+$\omega_m$ sono introdotti per ogni punto di quadratura $\vec{\Omega_m}$ con $m 
+\in \{1,\dots,M\}$.
+In questo modo si ottiene il flusso scalare $\phi_g(s)$, considerata 
+l'approssimazione multigruppo, il quale dipende solamente dalla caratteristica
+\begin{equation}
+\label{flusso_multigrup_ord_discrete}
+\phi_g(s)=\int_{4\pi}d\vec{\Omega}'\psi_g(s,\vec{\Omega}') \approx \sum_{m=1}^M 
+\omega_m \psi_g(s,\vec{\Omega_m}) \,.
+\end{equation}
+Allo stesso modo, si ottiene l'approssimazione per la sorgente $Q_{m,g}(s) 
+\approx Q_g(s,\vec{\Omega_m})$ sostituendo il flusso angolare integrato, come 
+segue
+\begin{multline}
+\label{sorgente_multigruppo_ord_discrete}
+Q_{m,g}(s,\vec{\Omega_m})=\sum_{g'=1}^G \sum_{m'=1}^M \omega_m  \Sigma_{g' 
+\rightarrow g}^S (s,\vec{\Omega_{m'}}\rightarrow 
+\vec{\Omega_m})\psi_{g'}(s,\vec{\Omega_{m'}})\\
++\frac{\chi_g(s)}{4\pi k_{eff}}\sum_{g'=1}^G \sum_{m'=1}^M \omega_{m'}\nu 
+\Sigma_{g'}^F (s) \int_{4\pi}d\vec{\Omega}'\, \psi_{g'}(s,\vec{\Omega_{m'}}) \,.
+\end{multline}
+Sostituendo questa approssimazione alla sorgente si ottiene la soluzione 
+caratteristica per il flusso angolare $\psi_{m,g}(s)\approx 
+\psi_g(s,\vec{\Omega_m}$ per ogni punto di quadratura $\vec{\Omega_m}$,
+\begin{equation}
+\psi_{m,g}(s)=\psi_{m,g}(\vec{r_0})e^{-\int_0^s ds' \, 
+\Sigma_g^T(s')}+\int_0^{s_m} ds'' \, Q_{m,g}(s'')e^{-\int_{s''}^s ds' \, 
+\Sigma_g^T(s')} \,.
+\end{equation}
+Tuttavia è possibile decomporre le equazione \eqref{flusso_multigrup_ord_discrete} e \eqref{sorgente_multigruppo_ord_discrete} secondo l'angolo azimutale 
+e polare attraverso regole di quadratura.
+
+Un'ulteriore approssimazione consiste nell'assumere che la sorgente di 
+scattering, oltre a quella di fissione, sia isotropa. Tale semplificazione 
+permette di esprimere la sorgente totale unicamente in termini di flusso 
+scalare
+\begin{equation}
+\label{sorgente_isotropa_od}
+Q_g(s)=\frac{1}{4\pi}\biggl(\sum_{g'=1}^G \Sigma_{g'\rightarrow 
+g}^S(s)\phi_{g'}(s)+\frac{\chi_g(s)}{k_{eff}}\sum_{g'=1}^G\nu 
+\Sigma_{g'}^F(s)\phi_{g'}(s)\biggr) \,.
+\end{equation}
+
+Un'altra approssimazione è assumere che la sorgente $Q_g$ sia costante 
+attraverso le regioni FSRs, denominate regioni di sorgente piana (Flat Source 
+Region); in questo modo si ipotizza che la sorgente non vari lungo la 
+caratteristica $k$ entrando in $s'$ e uscendo in $s''$ della regione $FRS_i$
+\begin{equation}
+Q_{i,g}=Q_g(s')=Q_g(s'')=Q_g(s), \quad con \quad s \in [s',s''] \,.
+\end{equation} 
+Una descrizione più accurata della sorgente in regioni spaziali è di assumere 
+una variazione lineare della sorgente $Q_g(s)$; la sorgente così varia lungo 
+ogni linea caratteristica
+\begin{equation}
+Q_g(s)=q_{t,g,0}+q_{t,g,1}\biggl(s-\frac{l_t}{2}\biggr) \,,
+\end{equation}
+dove $l_t$ è la lunghezza del segmento considerato, mentre $q_{t,g,0}$ e 
+$q_{t,g,1}$ sono coefficienti dipendenti dalla traiettoria che descrivono la 
+sorgente.
+
+In aggiunta alla considerazione di sorgente piana all'interno di ogni cella 
+spaziale, si assume anche che le proprietà dei materiali siano costanti in ogni 
+FRSs. Si possono definire le sezioni d'urto mediate sull'area del $FSR_i$ con $i 
+\in \{1,\dots,I\}$ con area $A_i$, come segue
+\begin{equation}
+\Sigma_{i,g}^T= \frac{\int_{\vec{r}\in A_i} d\vec{r}\, 
+\Sigma_g^T(\vec{r})\phi_g(\vec{r})}{\int_{\vec{r}\in A_i}d\vec{r}\, 
+\phi_g(\vec{r})} \,,
+\end{equation}
+\begin{equation}
+\Sigma_{i,g}^F= \frac{\int_{\vec{r}\in A_i} d\vec{r}\, 
+\Sigma_g^F(\vec{r})\phi_g(\vec{r})}{\int_{\vec{r}\in A_i}d\vec{r}\, 
+\phi_g(\vec{r})} \,,
+\end{equation}
+\begin{equation}
+\Sigma_{i,g'\rightarrow g}^S= \frac{\int_{\vec{r}\in A_i} d\vec{r}\, 
+\Sigma_{g'\rightarrow g}^S(\vec{r})\phi_{g'}(\vec{r})}{\int_{\vec{r}\in A_i} 
+d\vec{r}\, \phi_{g'}(\vec{r})} \,,
+\end{equation}
+\begin{equation}
+\chi_{i,g}= \frac{\int_{\vec{r}\in A_i} d\vec{r}\, 
+\chi_g(\vec{r})}{\int_{\vec{r}\in A_i}d\vec{r}} \,.
+\end{equation}
+Con le approssimazioni fatte, il termine di sorgente piana $Q_{i,g}$ per la 
+$FRS_i$ corrispondente con area $A_i$ è definito dal flusso scalare mediato 
+sull'area $\phi_{i,g}$. Quindi dalla \eqref{sorgente_isotropa_od} si ottiene
+\begin{equation}
+Q_{i,g}(s)=\frac{1}{4\pi}\biggl(\sum_{g'=1}^G \Sigma_{i,g'\rightarrow 
+g}^S(s)\phi_{i,g'}(s)+\frac{\chi_g(s)}{k_{eff}}\sum_{g'=1}^G\nu 
+\Sigma_{i,g'}^F(s)\phi_{i,g'}(s)\biggr) \,,
+\end{equation}
+dove $\phi_{i,g}$ è definito come
+\begin{equation}
+\label{flusso_scalare_FSR}
+\phi_{i,g}=\frac{\int_{\vec{r}\in A_i} d\vec{r}\, 
+\phi_g(\vec{r})}{\int_{\vec{r}\in A_i} d\vec{r}} \,.
+\end{equation}
+A questo punto le sezioni d'urto nucleari multigruppo per ciascun FSR sono 
+richieste come input per il procedimento computazionale MOC e gli integrali 
+mediati sull'area sono calcolati attraverso un pre processamento effettuato 
+solitamente con metodi MonteCarlo.
+
+\subsection{Soluzione mediante il calcolo del fattore di integrazione}
+Ogni caratteristica può essere discretizzata in segmenti su FRSs individuali. 
+Questa approssimazione permette all'equazione di poter essere localizzata sul 
+segmento caratteristico $k$ lungo la FRS i-esima dal punto in cui entra $s'$ al 
+punto in cui esce $s''$. Tale procedimento permette la valutazione analitica 
+dell'integrale  attraverso la definizione di un fattore integrativo in termini 
+di lunghezza ottica
+\begin{equation}
+\tau_{k,i,g}=\Sigma_{i,g}^T(s''-s') \,,
+\end{equation}
+ed esprimere il flusso uscente lungo la caratteristica come
+\begin{equation}
+\psi_{k,g}(s'')=\psi_{k,g}(s')e^{-\tau_{k,i,g}}+\frac{Q_{i,g}}{\Sigma_{i,g}^T}
+(1-e^{-\tau_{k,i,g}}) \,.
+\end{equation}
+Con qualche passaggio è possibile ricavare la variazione del flusso angolare lungo la 
+caratteristica 
+\begin{equation}
+\Delta\psi_{k,g}=\psi_{k,g}(s')-\psi_{k,g}(s'')=\biggl(\psi_{k,g}(s')-\frac{Q_{i
+,g}}{\Sigma_{i,g}^T}\biggr)(1-e^{-\tau_{k,i,g}}) \,.
+\end{equation}
+La quantità chiave che rimane da determinare è l'integrale sopra l'area FSRs del 
+flusso scalare $\phi_{i,g}(s)$ in \eqref{flusso_scalare_FSR}. Prima di tutto si 
+definisce $l_{k,i}=s''-s'$ in modo che il flusso angolare medio nella FSR 
+i-esima lungo la caratteristica $k$ sia espresso secondo il seguente integrale
+\begin{equation}
+\bar{\psi}_{k,i,g}=\frac{1}{l_{k,i}}\int_{s'}^{s''}ds\, \psi_{k,i,g}(s) \,.
+\end{equation}
+Per la valutazione dell'integrale, il flusso angolare medio lungo la 
+caratteristica è espresso secondo la seguente espressione algebrica
+\begin{equation}
+\bar{\psi}_{k,i,g}=\frac{1}{l_{k,i}}\biggl[\frac{\psi_{k,g}(s')}{\Sigma_{i,g}^T}
+(1-e^{-\tau_{k,i,g}})+\frac{l_{k,i}\,Q_{i,g}}{\Sigma_{i,g}^T}\biggl(1-\frac{
+(1-e^{-\tau_{k,i,g}})}{\tau_{k,i,g}}\biggr)\biggr] \,.
+\label{flusso_angolare_medio}
+\end{equation}
+Nel caso in cui sia le sezioni d'urto sia la sorgente siano costanti nella FSR 
+i-esima, il valore del flusso angolare medio $\bar{\psi}_{k,i,g}$ data dalla 
+\eqref{flusso_angolare_medio} risulta esatto.
+
+\subsection{Il metodo di probabilità di collisione \label{probcoll}}
+Il metodo di probabilità di collisione (CP) si ricava da una discretizzazione 
+spaziale dell'equazione integrale in forma multigruppo, assumendo la sorgente di 
+neutroni isotropa.
+
+Per un problema contenente $I$ regioni, questo approccio produce una matrice $I 
+\times I$ per ogni gruppo di energia. 
+Questo metodo è preferito per trattare mesh generali non strutturate e problemi 
+con poche regioni.
+Le probabilità di collisione possono essere definite sopra un dominio infinito 
+(come un reticolo di celle identiche o di assembly) o sopra un dominio finito (o 
+aperto) $D$ contornato dalla superficie $\partial D$.
+Il formalismo nel primo caso è semplice ma porta ad alcune difficoltà relative alla 
+valutazione pratica del CPs. Nel secondo caso invece è richiesta l'aggiunta 
+delle condizioni al contorno per chiudere il dominio.
+Prima di tutto si integra sopra l'angolo solido l'equazione \eqref{soluz_caratteristica} in forma multigruppo per ottenere direttamente il flusso 
+$\phi_g(\vec{r})$
+\begin{equation}
+\phi_g(\vec{r})=\int_{4\pi} d^2\Omega \, 
+\phi_g(\vec{r},\vec{\Omega})=\frac{1}{4\pi}\int_{4\pi} d^2\Omega \, 
+\int_0^\infty ds \, e^{-\tau_g(s)} Q_g(\vec{r}-s\vec{\Omega}) \,,
+\end{equation}
+dove $\tau_g$ è la lunghezza ottica in forma multigruppo definita in Eq. 
+\eqref{cammino_ottico}.
+Si introduce un cambio di variabile $\vec{r}'=\vec{r}-s\vec{\Omega}$ con 
+$d^3r'=s^2\,d^2\Omega ds$ e si ottiene 
+\begin{equation}
+\phi_g(\vec{r})=\frac{1}{4\pi}\int_\infty d^3r' \, 
+\frac{e^{-\tau_g(s)}}{s^2}Q_g(\vec{r}') \,,
+\end{equation}
+con $s=|\vec{r}-\vec{r}'|$.
+
+Questa forma dell'equazione del trasporto è generalmente usata per rappresentare 
+un reticolo infinito di celle identiche, che si ripetono e vengono modellate
+mediante  condizioni al contorno periodiche. Successivamente si ottimizza la 
+partizione delle celle unitarie o assembly all'interno delle regioni $V_i$.
+Si rappresenta con il simbolo $V_i^\infty$ un infinito insieme di di regioni 
+$V_i$ appartenenti a tutte le celle o all'assembly del reticolo. Inoltre si 
+suppone che la sorgente secondaria di neutroni sia uniforme e uguale a $Q_{i,g}$ 
+in ogni regione $V_i$. 
+Dopo la moltiplicazione di $\Sigma_g(\vec{r})$ e integrato sopra ogni regione 
+$V_i$, si ottiene
+\begin{equation}
+\int_{V_j}d^3r \, \Sigma_g(\vec{r})\phi_g(\vec{r})=\frac{1}{4\pi}\int_{V_j}d^3r 
+\, \Sigma_g(\vec{r})\sum	_i Q_{i,g}\int_{V_i^\infty} d^3r' 
+\frac{e^{-\tau_g(s)}}{s^2} \,.
+\end{equation}
+Tale equazione è semplificabile come
+\begin{equation}
+\label{flussocps}
+V_j\Sigma_{j,g}\phi_{j,g}=\sum_i Q_{i,g}V_iP_{ij,g} \,,
+\end{equation}
+dove il pedice $j$ corrisponde all'indice dell'isotopo fissionabile, mentre
+\begin{equation}
+\phi_{j,g}=\frac{1}{V_j}\int_{V_j} d^3r\,\phi_g(\vec{r}) \,,
+\end{equation}
+\begin{equation}
+\Sigma_{j,g}=\frac{1}{V_j\phi_{j,g}}\int_{V_J}d^r\,\Sigma_g(\vec{r})\phi_g(\vec{
+r}),
+\end{equation}
+\begin{equation}
+P_{ij,g}=\frac{1}{4\pi 
+V_i}\int_{V_i^\infty}d^3r'\int_{V_j}d^3r\,\Sigma_g(\vec{r})\frac{e^{-\tau_g(s)}}
+{s^2} \,.
+\end{equation}
+
+La collisione di probabilità $P_{ij,g}$ è la probabilità che un neutrone nato 
+uniformemente e isotropicamente in una delle regioni $V_i$ del reticolo subisca 
+la sua prima collisione nella regione $V_j$ della cella o assembly.
+
+Se la sezione d'urto totale $\Sigma_g(\vec{r})$ è costate e uguale a 
+$\Sigma{j,g}$ nella regione $V_j$, si può definire la probabilità di collisione 
+ridotta come segue
+\begin{equation}
+p_{ij,g}=\frac{P_{ij,g}}{\Sigma{j,g}}=\frac{1}{4\pi 
+V_i}\int_{V_i^\infty}d^3r'\int_{V_j}d^3r\,\frac{e^{-\tau_g(s)}}{s^2} \,.
+\end{equation}
+Le CPs ridotte generalmente rimangono finite nel limite di $\Sigma_{j,g}$ che
+tende a zero. Questo permette un corretto comportamento della teoria di 
+probabilità di collisione nel caso in cui regioni del reticolo siano considerate 
+vuote.
+
+Si possono scrivere inoltre le proprietà di reciprocità e di conservazione delle 
+CPs, rispettivamente
+\begin{equation}
+p_{ij,g}V_j=p_{ji,g}V_j \,,
+\end{equation}
+\begin{equation}
+\sum_j p_{ij,g}\Sigma_{j,g}=1; \quad \forall i \,.
+\end{equation}
+Usando la proprietà di reciprocità, l'equazione \eqref{flussocps} si semplifica 
+ulteriormente
+\begin{equation}
+\label{flussocpssemplificato}
+\phi_{i,g}=\sum_j Q_{j,g}p_{ij,g} \,.
+\end{equation}
+Il metodo di probabilità di collisione procede generalmente per tre passaggi.
+Il primo è l'applicazione di un processo di tracking sopra la geometria del 
+reticolo in modo da calibrare un numero sufficientemente grande di traiettorie 
+dei neutroni. Successivamente è richiesto un processo di integrazione numerica, 
+usando le informazioni di tracking e la conoscenza delle sezione d'urto 
+macroscopiche totali per ogni regione. Questa integrazione deve essere fatta per 
+ogni gruppo di energia, ma il processo è completamente parallelizzabile, in 
+quanto non ci sono interazioni tra i gruppi. Una volta conosciuti i CPs, il 
+flusso integrato può essere calcolato dalle Equazioni \eqref{flussocps} e 
+\eqref{flussocpssemplificato}.
+Infine le tecniche di probabilità di collisione possono anche essere applicate ad 
+un caso con dominio $D$ contornato dalla superficie $\partial D$. 
+

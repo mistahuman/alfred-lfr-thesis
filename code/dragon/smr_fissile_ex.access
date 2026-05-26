@@ -1,0 +1,58 @@
+#!/bin/sh
+if [ $# = 0 ]
+then
+echo "usage: alf_fix.access directory" 1>&2
+exit 1
+fi
+MACH=`uname -s`
+Sysx="`echo $MACH | cut -b -6`"
+if [ $Sysx = "CYGWIN" ]; then
+MACH=`uname -o`
+elif [ $Sysx = "Darwin" ]; then
+MACH=`uname -sm`
+elif [ $Sysx = "SunOS" ]; then
+MACH=`uname -sm`
+fi
+if [ "$MACH" = "Linux" -o "$MACH" = "OSF1" -o "$MACH" = "Cygwin" -o "$MACH" = "SunOS i86pc" -o \
+"$MACH" = "Darwin i386" -o "$MACH" = "Darwin x86_64" ]
+then 
+echo 'use little endian libraries'
+pos=$1/../../libraries/l_endian
+else
+echo 'use big endian libraries'
+pos=$1/../../libraries/b_endian
+fi
+# if [ -f "$pos"/draglibendfb7r1SHEM281.gz ]
+# then
+# echo 'gunzipping draglibendfb7r1SHEM281'
+# chmod 755 "$pos"
+# gunzip "$pos"/draglibendfb7r1SHEM281.gz
+# fi
+# if [ -f "$pos"/draglibendfb7r1SHEM281 ]
+# then
+# ln -s "$pos"/draglibendfb7r1SHEM281 DLIBe7r1_281 
+# fi
+
+# if [ -f "$pos"/draglibJeff3p2SHEM295.gz ]
+# then
+# echo 'gunzipping draglibJeff3p2SHEM295'
+# chmod 755 "$pos"
+# gunzip "$pos"/draglibJeff3p2SHEM295.gz
+# fi
+# if [ -f "$pos"/draglibJeff3p2SHEM295 ]
+# then
+# ln -s "$pos"/draglibJeff3p2SHEM295 DLIBJ3p2_295 
+# fi
+if [ -f "$pos"/draglibJeff3p1p2SHEM315.gz ]
+then
+echo 'gunzipping draglibJeff3p1p2SHEM315'
+chmod 755 "$pos"
+gunzip "$pos"/draglibJeff3p1p2SHEM315.gz
+fi
+if [ -f "$pos"/draglibJeff3p1p2SHEM315 ]
+then
+ln -s "$pos"/draglibJeff3p1p2SHEM315 DLIBJ312_315 
+fi
+ls
+cp "$1"/data/smr_proc/*.c2m .
+echo "alf_fissile access script terminated"

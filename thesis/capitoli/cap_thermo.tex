@@ -1,0 +1,404 @@
+\chapter{Termoidraulica del reattore \label{cap3}}
+
+
+\section{Equazioni di conservazione}
+L'equazione di conservazione della massa, della quantità di moto e 
+dell'energia 
+possono essere ricavate a partire dalla formulazione dell'equazione integrale 
+di 
+conservazione per una grandezza intensiva.
+La descrizione classica del moto di un fluido si basa sull'ipotesi di mezzo 
+continuo, in cui è possibile considerare il moto di elementi infinitesimali di 
+fluido.
+La velocità istantanea dell'elemento infinitesimale di fluido che occupa la 
+posizione $(x,y,x)$ al tempo $t$ è definita dal campo di velocità 
+$\vec{\upsilon}(x,y,x,t)$.
+Inoltre se si assume l'elemento come uno sistema termodinamico chiuso, è 
+possibile associare uno stato termodinamico definito dalle variabili di stato 
+di 
+temperatura $T$, pressione $p$, e di densità $\rho$.
+
+
+Si consideri una grandezza estensiva $\Psi$ compresa in una regione di spazio 
+tridimensionale $\Omega$, delimitata da una superficie chiusa $\partial \Omega$.
+In termodinamica una grandezza estensiva è tale in quanto dipende dalla 
+quantità 
+di materia.
+Quindi si può definire $\psi$, una grandezza intensiva, che corrisponde alla 
+grandezza estensiva $\Psi$ per unità di massa.
+Inoltre si definisce la densità di flusso $\vec{J}$ che descrive l'interazione 
+di $\psi$ con il sistema, la densità del fluido $\rho$, e il termine sorgente 
+$\mathcal{S}$ per unità di tempo e di massa.
+Si può formulare nella forma più generale l'equazione integrale di 
+conservazione 
+della grandezza intensiva $\psi$ sul volume $\Omega$, che esprime l'evoluzione 
+temporale di tale grandezza,
+\begin{equation}
+\label{eq_integrale_di_conservazione}
+\frac{d}{dt}\int_{\Omega}\rho\psi \, dV = - \int_{\partial \Omega} \vec{J} 
+\cdot 
+\hat{n}\, dS + \int_{\Omega} \rho \mathcal{S} \, dV .
+\end{equation}
+Dall'equazione \eqref{eq_integrale_di_conservazione} si desume che la variazione 
+della grandezza intensiva su tutto il volume è uguale al bilancio tra il flusso 
+che attraversa la superficie $\partial \Omega$ e il contributo della sorgente.
+Nel caso le funzione sia sufficientemente regolari è possibile applicare il 
+teorema del trasporto di Reynolds, ottenendo
+\begin{equation}
+\label{eq_integrale_reynolds}
+\frac{d}{dt}\int_{\Omega}\rho\psi \, dV = - \int_{\partial \Omega} 
+(\rho\psi\vec{\upsilon}) \cdot \hat{n}\, dS + \int_{\Omega} \frac{\partial 
+\rho\psi }{\partial t} \, dV ,
+\end{equation}
+dove $\vec{\upsilon}$ rappresenta il vettore velocità istantanea dell'elemento 
+infinitesimale che attraversa la superficie $\partial \Omega$.
+Il teorema di Gauss-Green permette di trasformare gli integrali di superficie 
+in 
+integrali di volume, dove si ottiene rispettivamente
+\begin{equation}
+\int_{\partial \Omega} \vec{J} \cdot \hat{n}\, dS = \int_{\Omega} \nabla \cdot 
+\vec{J} \, dV \,,
+\end{equation}
+
+\begin{equation}
+\label{greengauss}
+\int_{\partial \Omega} (\rho\psi\vec{\upsilon}) \cdot \hat{n}\, dS = 
+\int_{\Omega} \nabla \cdot (\rho\psi\vec{\upsilon})  \, dV \,.
+\end{equation}
+
+Se si introducono le equazioni \eqref{eq_integrale_reynolds}-\eqref{greengauss} 
+nella equazione \eqref{eq_integrale_di_conservazione}, si ottiene
+\begin{equation}
+\label{eq_termo}
+ \int_{\Omega} \frac{\partial \rho\psi }{\partial t} \, dV + \int_{\Omega} 
+\nabla \cdot (\rho\psi\vec{\upsilon})  \, dV = -\int_{\Omega} \nabla \cdot 
+\vec{J} \, dV + \int_{\Omega}\rho \mathcal{S} \,dV \,.
+\end{equation}
+L'equazione \eqref{eq_termo} deve essere verificata su tutti i volumi $\Omega$, 
+quindi è possibile rimuovere l'integrale, ottenendo l'equazione differenziale
+\begin{equation}
+\label{eq_converse_diff}
+ \frac{\partial \rho\psi }{\partial t}  +  \nabla \cdot 
+(\rho\psi\vec{\upsilon}) 
+  = -\nabla \cdot \vec{J}+ \rho \mathcal{S} \,.
+\end{equation}
+L'equazione di conservazione in forma differenziale può essere scritta per le 
+diverse grandezze ottenendo così le equazione di conservazione della massa, 
+della quantità di moto e dell'energia.
+
+\subsection{Equazione di conservazione della massa}
+Il principio di conservazione della massa stabilisce che la massa non può 
+essere 
+creata o distrutta. L'equazione di conservazione della massa si ottiene 
+sostituendo all'equazione \eqref{eq_converse_diff} i termini
+\begin{equation}
+\psi=1 \qquad \vec{J}=0 \qquad \mathcal{S}=0 \,.
+\end{equation}
+Si ottiene così l'equazione di continuità alle derivati parziali,
+\begin{equation}
+\label{eq_continu}
+\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \vec{\upsilon}) = 0 \,.
+\end{equation}
+Inoltre se si assume l'ipotesi di fluido incomprimibile, ovvero considerando la 
+densità costante $\rho(x,y,z,t)=cost$, l'equazione \eqref{eq_continu} si 
+semplifica 
+\begin{equation}
+\label{..}
+\nabla \cdot \vec{\upsilon} = 0 \,,
+\end{equation}
+che esprime come attraverso una qualunque superficie la quantità di massa 
+entrante è pari a quella uscente, in quanto si è considerato il fluido 
+incomprimibile.
+
+\subsection{Equazione di conservazione della quantità di moto}
+L'equazione di bilancio della quantità di moto si ottiene uguagliando la 
+variazione delle quantità di moto del sistema alle forze applicate sul volume 
+d'integrazione $\Omega$.
+Le forze che agiscono sul sistema si dividono in in forze volumetriche e in 
+forze di superficie.
+Le forze volumetriche agiscono sul volume del fluido e sono dovute a campi 
+esterni, come quello gravitazionale, elettrico o magnetico.
+\'E stato assunto che il fluido considerato sia elettricamente neutro ed 
+immerso 
+in un campo gravitazionale così che l'unica forza volumetrica sia il forza di 
+gravità $\vec{g}$.
+Le forze di superficie agiscono sulla superficie dell'elemento infinitesimale 
+di 
+fluido e sono espresse dal tensore delle tensioni $\vec{\sigma}$, suddiviso in 
+tensore idrostatico e in tensore delle deformazioni.
+Sostituendo all'equazione \eqref{eq_integrale_di_conservazione} le seguenti 
+grandezze
+\begin{equation}
+\psi= \vec{\upsilon} \qquad \vec{J}=-\vec{\sigma}= p \vec{I} - \vec{\tau} 
+\qquad 
+\mathcal{S}=\vec{g} \,,
+\end{equation}
+dove il tensore delle tensioni $\vec{\sigma}$ è stato scomposto nel termine di 
+pressione $p\vec{I}$, dove $\vec{I}$ è il tensore identità, e nel tensore degli 
+sforzi viscosi $\vec{\tau}$. si ottiene l'equazione di Navier-Stokes.
+Infatti,
+\begin{equation}
+\label{eq_navier-stokes}
+\frac{\partial \rho \vec{\upsilon}}{\partial t} + \nabla \cdot (\rho 
+\vec{\upsilon}\vec{\upsilon})= -\nabla P + \nabla \cdot \vec{\tau} + \rho 
+\vec{g} \,.
+\end{equation}
+
+Per un fluido newtoniano, ovvero un fluido la cui viscosità rimane costante al 
+variare della velocità, il tensore degli sforzi viscosi è espresso dalla 
+relazione,
+\begin{equation}
+\vec{\tau}=\mu [(\nabla\vec{\upsilon})+(\nabla\vec{\upsilon})^T]  
+\biggl(\frac{2}{3}\mu-\lambda\biggr)(\nabla \cdot \vec{\upsilon})\vec{I} \,,
+\end{equation}
+dove $\mu$ è la viscosità dinamica e $\lambda$ la viscosità di massa.
+
+Assumendo l'ipotesi di fluido incomprimibile, ovvero che dove la densità del 
+fluido si può considerare costante, si può semplificare il secondo termine che 
+compare nel tensore degli sforzi. Questo può essere fatto in quanto vale l'equazione di continuità 
+\eqref{eq_continu}.
+Inoltre se si considera la viscosità costante, vale la seguente relazione,
+\begin{equation}
+\nabla \cdot \vec{\tau} = \mu \nabla^2 \vec{\upsilon}
+\end{equation}
+Attraverso queste ipotesi appena fatte e semplificando il termine di avvezione 
+$\nabla \cdot (\rho 
+\vec{\upsilon}\vec{\upsilon})=\vec{\upsilon}\cdot\nabla\vec{\upsilon}$, è 
+possibile semplificare l'equazione \eqref{eq_navier-stokes}
+\begin{equation}
+\frac{\partial \vec{\upsilon}}{\partial t} + 
+\vec{\upsilon}\cdot\nabla\vec{\upsilon} = -\frac{1}{\rho} \nabla p + \mu 
+\nabla^2\vec{\upsilon}+\vec{g} \,.
+\end{equation}
+
+\subsection{Equazione di conservazione dell'energia}
+L'equazione di conservazione dell'energia rappresenta la traduzione matematica 
+del primo principio della termodinamica. 
+La grandezza intensiva è la somma dell'energia interna e dell'energia cinetica 
+dell'elemento infinitesimale di fluido. Infatti sostituendo all'equazione 
+\eqref{eq_integrale_di_conservazione} le seguenti grandezze
+\begin{equation}
+\psi= \varepsilon+\frac{|\vec{\upsilon}|^2}{2} \qquad 
+\vec{J}=\vec{q}-\vec{\sigma}\cdot \vec{\upsilon} \qquad 
+\mathcal{S}=\frac{\dot{Q}}{\rho}+\vec{g}\cdot\vec{\upsilon} \,,
+\end{equation}
+dove $\varepsilon$ rappresenta l'energia interna, $\frac{u^2}{2}$ l'energia 
+cinetica per unità di massa, $\vec{q}$ il flusso di calore che attraversa la 
+superficie $\partial \Omega$ e $\dot{Q}$ la sorgente volumetrica di calore.
+Si ottiene l'equazione di conservazione dell'energia sostituendo all'equazione 
+\eqref{eq_integrale_di_conservazione} e moltiplicando scalarmente l'equazione 
+con l'equazione di conservazione della quantità di moto e sottraendo membro a 
+membro si ottiene
+\begin{equation}
+\label{eq_conse_energia}
+ \frac{\partial}{\partial t}(\rho \varepsilon) + \nabla \cdot (\rho \varepsilon 
+\vec{\upsilon}) = -\nabla \cdot \vec{q} - p \nabla \cdot \vec{\upsilon} + 
+\vec{\tau} : \nabla \vec{\upsilon}+ \rho \vec{g}\cdot \vec{\upsilon} + \dot{Q} 
+\, .
+\end{equation}
+Aggiungendo l'ipotesi di fluido incomprimibile, quindi considerando valida 
+l'equazione di continuità \eqref{eq_continu}, e utilizzando la definizione di 
+derivata sostanziale, si ottiene una forma più compatta dell'equazione 
+\eqref{eq_conse_energia} nella forma
+\begin{equation}
+ \rho \frac{d\varepsilon}{dt}= - \nabla \cdot \vec{q} + 
+\vec{\tau}:\nabla\vec{\upsilon}+ \rho \vec{g}\cdot \vec{\upsilon} + \dot{Q}\,.
+\end{equation}
+Si introduce la legge di Fourier, che correla il flusso di calore al campo di 
+temperatura
+\begin{equation}
+ \vec{q} = - \kappa(T)\nabla T \,,
+\end{equation}
+dove $\kappa$ rappresenta la conducibilità termica del fluido.
+Inoltre si pone 
+\begin{equation}
+ \vec{\tau} : \nabla \vec{\upsilon} = \mu\Phi \,,
+\end{equation}
+dove $\Phi$ è la funzione di dissipazione viscosa e $\mu$ il coefficiente di 
+viscosità.
+Nell'ipotesi di fluido incomprimibile, l'energia interna $\varepsilon$ è in 
+funzione della sola temperatura
+\begin{equation}
+ d\varepsilon=c_v(T)dT
+\end{equation}
+dove $c_v(T)$ rappresenta il calore specifico a volume costante del fluido 
+considerato.
+A seguito delle approssimazioni precedenti si ottiene
+\begin{equation}\label{eq dell'energia}
+ \rho c_v\frac{dT}{dt}=\nabla \cdot (\kappa \nabla T) + \mu \Phi + \rho 
+\vec{g}\cdot \vec{\upsilon} + \dot{Q} \,.
+\end{equation}
+
+\section{Modello del reattore}
+
+\subsection{Modello del core e zone ingresso}
+In un reattore nucleare sono presenti una zona di ingresso 
+e una di uscita dette comunemente plena, ovvero zone in cui si raccoglie 
+il refrigerante: il plenum superiore e il plenum inferiore localizzati 
+rispettivamente sopra e sotto il nocciolo. Il refrigerante attraversa dal basso 
+verso l'altro, le assembly di combustibile, in cui esso asportata 
+il calore 
+generato dalle reazioni di fissione.
+Infatti in queste regioni, il refrigerante fluisce in un dominio 
+tridimensionale 
+aperto e lo stato del refrigerante, definito dal campo di velocità 
+$\vec{\upsilon}$, pressione $p$ e temperatura $T$, può essere determinato dalle 
+equazioni seguenti di conservazione tridimensionali per un fluido 
+incompressibile 
+per un modello 3D-CFD
+\begin{equation}
+ \nabla \cdot (\rho \vec{\upsilon}) = 0 \,,
+\end{equation}
+\begin{equation}
+ \frac{\partial \rho \vec{\upsilon}}{\partial t} + \nabla \cdot 
+(\rho\vec{\upsilon}\vec{\upsilon}) = - \nabla p + \nabla : \vec{\tau} \rho 
+\vec{g} \,,
+\end{equation}
+\begin{equation}
+\frac{\partial \rho h}{\partial t} + \nabla \cdot (\rho \vec{\upsilon} h) = 
+\Phi 
++ \nabla \cdot (\frac{\kappa_f}{c_p} \nabla h) + \dot{Q} \,,
+\end{equation}
+dove $c_p$ è il calore specifico a pressione costante, $\kappa_f$ la 
+conduttività termica effettiva e $h$ l'entalpia.
+Quest'ultima è in funzione della temperatura ed è definita dall'equazione,
+\begin{equation}
+ h(T)=c_p T \,,
+\end{equation}
+considerando il $c_p$ costante all'interno della regione considerata.
+In particolare i termini che più caratterizzano le proprietà del refrigerante, 
+come il piombo, in queste regioni sono la viscosità del fluido $\mu_f$, 
+la conducibilità termica $\kappa_f$, la capacità termica specifica e la densità 
+$\rho$, le quali possono essere considerate in funzione della sola
+temperatura $T$.
+
+In molte componenti del reattore la simulazione del flusso interno del 
+refrigerante è molto complessa e pertanto è necessario introdurre 
+approssimazioni, come l'omogeneizzazione del dominio.
+Inoltre la regione del nocciolo è così complessa e dettagliata, a causa della 
+presenta di diverse componenti sia solide che liquide, che un approssimazione 
+ad 
+un modello poroso diventa necessario in quanto una simulazione della 
+distribuzione di velocità, pressione e temperatura non è possibile. 
+\cite{cerroni}
+
+La distribuzione delle perdite di pressione, definita dalle griglie presenti 
+nel 
+reattore e dalle assembly, può essere definita dal modulo di $|\beta|$ dal 
+termine di caduta di pressione discreta
+\begin{equation}
+\label{eq_cad}
+ \frac{1}{2} \beta(\vec{x}) \cdot \vec{\upsilon}|\vec{\upsilon}|\,.
+\end{equation}
+Se si assume il flusso essere in prima approssimazione verticale allora 
+l'equazione \eqref{eq_cad} diventa
+\begin{equation}
+ \frac{1}{2} |\beta| \, |\vec{\upsilon}|^2 \,,
+\end{equation}
+Questo permette l'approssimazione solita al caso monodimensionale.
+
+Tuttavia è possibile implementare equazioni e modelli di turbolenza per una più approfondita rappresentazione fisica inerente alla termoidraulica del reattore.
+Per esempio nello studio in referenza \cite{leadmontecu} è presentata una 
+simulazione numerica del flusso turbolento di un fluido LBE (lega eutettica 
+piombo-bismuto) all'interno di un assembly di un reattore di IV$^{a}$ 
+generazione, in cui è stato risolto il sistema di equazioni di 
+Reynolds-Average-Navier-Stokes seguente
+\begin{equation}
+ \nabla \cdot \vec{\upsilon}=0 \,,
+\end{equation}
+\begin{equation}
+ \rho \frac{\partial \vec{\upsilon}}{\partial t} + \rho (\vec{\upsilon} \cdot \nabla)\vec{\upsilon}= -\nabla p + \nabla \cdot \bigl[\mu (\nabla \vec{\upsilon} + \nabla \vec{\upsilon}^T)- \rho \bar{\vec{\upsilon}'\vec{\upsilon}} \bigr] + \rho \vec{g} \,,
+\end{equation}
+\begin{equation}
+ \rho c_p \Bigl(\frac{\partial T}{\partial t} + (\vec{\upsilon} \cdot \nabla) T \Bigr) = \nabla \cdot \bigl[\lambda \nabla T - \rho c_p \bar{\vec{\upsilon}'T'}\bigr]+ Q \,.
+\end{equation}
+Il sistema di equazioni è chiuso, in questo caso, da un altro sistema di equazioni a quattro parametri logaritmici di turbolenza allo scopo di ottenere il tensore degli sforzi di Reynolds $\rho \bar{\vec{\upsilon}'\vec{\upsilon}}$ e il flusso di calore turbolento $\rho c_p \bar{\vec{\upsilon}'T'}$.
+
+Infatti metalli liquidi sono classificati con un numero di Prandtl relativamente 
+piccolo, in quanto sono caratterizzati da bassa viscosità $\nu$ e alti valori di 
+diffusività termica $\alpha$, definito dall'equazione
+\begin{equation}
+ Pr = \frac{\nu}{\alpha} \simeq 0.01-0.025 \,,
+\end{equation}
+e pertanto è necessario introdurre modelli sulla turbolenza adattati a numeri di Prandtl così piccoli.
+
+
+% \Figure[scale=0.8]{./figure/itex/tempeq.pdf}{ ssssss .}{tempeq}
+% \Figure[scale=0.8]{./figure/itex/canale.pdf}{ sss .}{canale}
+
+\subsection{Temperatura del combustibile}
+
+\Figure[scale=0.8]{./figure/itex/dist_temp_comb.pdf}{Distribuzione del profilo 
+di 
+temperatura in un elemento di combustibile.}{profil_temp}
+
+Dai valori mediati di temperatura ottenuti è possibile calcolare il profilo di 
+temperatura all'interno di un barra di combustibile, con dimensioni $2a$ per 
+l'elemento di combustibile e $b$ per la guaina di rivestimento.
+Considerando una geometria piana e il problema stazionario, il campo di 
+temperatura nell'elemento di combustibile è descrivibile attraverso 
+un'equazione 
+di Poisson monodimensionale alle derivate ordinarie
+\begin{equation}
+k_f \frac{d^2 T}{dx^2} + \dot{Q} = 0  \,,
+\end{equation}
+dove $\dot{Q}$ è la sorgente di calore volumetrica e $k_f$ è la conducibilità 
+termica del combustibile.
+Essendo un'equazione differenziale del secondo ordine alle derivate ordinarie e 
+non omogenea è richiesta per la sua risoluzione le condizioni al contorno; la 
+prima esprime che la temperatura è massima al centro della barra e le 
+condizione 
+di simmetria rispetto all'asse verticale.
+Si ottiene la distribuzione nell'elemento di combustibile,
+\begin{equation}
+T(x)=T_f - \frac{\dot{q}}{2k_f}x^2 \,,
+\end{equation}
+dove $\dot{q}(x)=\dot{Q}x$ è il flusso di calore per unità di lunghezza.
+Nella zona tra la guaina di rivestimento e il combustibile, detto comunemente 
+{\it gap}
+è presente un gas inerte, 
+generalmente argon o elio.
+Lo scambio termico è rappresentato attraverso un coefficiente di convezione 
+equivalente, calcolato come $h_g=k_g/l_g$, dove $l_g$ è la dimensione del gap. 
+Si ottiene così lo scambio termico tra la superficie dell'elemento di 
+combustibile e la guaina di rivestimento come
+\begin{equation}
+ \dot{q}= h_g (T_a - T_2) \,,
+\end{equation}
+dove $T_a$ è la temperatura sulla superficie del combustibile e $T_2$ la 
+temperatura sulla superficie interna della guaina.
+Attraverso la legge di Fourier è possibile il flusso di calore che attraversa 
+la 
+superficie della guaina a contatto con il refrigerante e si ottiene
+\begin{equation}
+T_2 - T_c = \frac{b}{k_c} \dot{q}\,,
+\end{equation}
+dove $T_c$ è la temperatura della guaina sulla superficie a contatto con il 
+refrigerante e $k_c$ la conducibilità termica della guaina.
+
+Aggiungendo infine il flusso di calore al refrigerante attraverso un 
+coefficiente di scambio equivalente
+\begin{equation}
+ \dot{q}= h_r (T_c - T_r) \,,
+\end{equation}
+si ottiene il profilo di temperatura della barra di combustibile
+\begin{equation}
+ T_f - T_r = \Delta T_f + \Delta T_g + \Delta T_c + \Delta T_r \,.
+\end{equation}
+Sostituendo i termini ottenuti in precedenza e raccogliendo il flusso di 
+calore, 
+si ottiene la temperatura del combustibile
+\begin{equation}
+ T_f = T_r + \dot{q} \bigl[ \frac{a}{2 k_f} + \frac{1}{h_g} + \frac{b}{k_c} + 
+\frac{1}{h_r} \bigr] \,.
+\end{equation}
+
+
+
+
+ 
+
+
+
+
+

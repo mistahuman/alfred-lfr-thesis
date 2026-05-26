@@ -1,0 +1,296 @@
+***********************************************************************
+* Input file :  alf_fissile.x2m, alf_fertile.x2m and alf_solide.x2m   *
+* Purpose    :  Full-core calculation for ALFRED                      *
+*               0 -TBE: all rods extracted                            *
+*               1 -TBI: all rods inserted                             *
+*               2 -THALF : all rods half inserted                     *
+***********************************************************************
+
+PROCEDURE    GeoCo SetParam SetFuelMap alf_N_Pb ;
+
+MODULE       USPLIT: TRIVAT: 
+             UTL: NCR: MACINI: TRIVAA: FLUD: FLPOW: GREP: DELETE: 
+             END:
+             ;
+
+LINKED_LIST  Geom Fmap Matex Cpo1 Cpo2 Cpo3 Cpo4 Track 
+             Flux Power
+             MacroF System Macro1 Macro2
+             ; 
+
+INTEGER iter := 1 ;
+REAL keffn mbp mcp ;
+
+*----
+*  Recover the Multicompo
+*----
+
+SEQ_ASCII ACOMPO1 :: FILE './ACOMPO1' ;
+SEQ_ASCII ACOMPO2 :: FILE './ACOMPO2' ;
+SEQ_ASCII ACOMPO3 :: FILE './ACOMPO3' ;
+SEQ_ASCII ACOMPO4 :: FILE './ACOMPO4' ;
+
+Cpo1 := ACOMPO1 ;
+Cpo2 := ACOMPO2 ;
+Cpo3 := ACOMPO3 ;
+Cpo4 := ACOMPO4 ;
+
+***subdirectories compo*****
+STRING  Dir1 := "FISSILE" ;
+STRING  Dir2 := "FERTILE" ;
+STRING  Dir3 := "FISSILE_EX" ;
+STRING  Dir4 := "SOLIDE" ;
+
+*------
+*parameter for rods 0=TBE,1=TBI,2=THALF
+*------
+INTEGER rod := 0 ; 
+**************************
+* Local Parameters
+**************************
+***********************
+*temperature in celsius
+***********************
+
+REAL 
+T_comb_0 T_clad_0 T_Pb_0
+:= 750.0 480.0 440.0
+;
+
+REAL N_Pb_0 N_Pb ;
+
+alf_N_Pb :: <<T_Pb_0>>
+  >>N_Pb_0<<
+  ;
+  
+* Conversion des temperatures en Kelvin
+
+REAL T_comb_K T_clad_K T_Pb_K ;
+EVALUATE T_comb_K := T_comb_0 273.16 + ;
+EVALUATE T_clad_K := T_clad_0 273.16 + ;
+EVALUATE T_Pb_K := T_Pb_0 273.16 + ;
+
+***********************************************************
+* all parameters are defined in Fmap like a real cristiano
+* -burnup in SetParam
+*----------------------------------------------------------
+*
+*                  FULL-CORE  CALCULATION
+*                  ======================
+******************* IniCompo *****************************
+*****
+* Geometry construction:
+*****
+
+Geom := GeoCo ;
+
+*****
+* Reactor material index:
+*****
+
+Geom Matex := USPLIT: Geom :: EDIT 2 NGRP 33 MAXR 40000
+              NREFL 13  RMIX 4 5 6 7 8 9 10 11 12 13 14 15 16
+              NFUEL 3  FMIX 1 2 3 ;
+            
+            
+*remark: 2 groups of energy, better to increase number
+
+*****
+*Tracking, Raviart-Thomas-Schneider method
+*****
+
+Track := TRIVAT: Geom :: EDIT 1
+          MAXR 50000 DUAL 1 3 1
+          SPN 3 SCAT 4 
+    ;
+
+******
+* Fuel Map construction
+******
+
+Fmap Matex := SetFuelMap Matex :: ;
+
+Fmap := SetParam Fmap :: 
+            <<T_comb_K>> <<T_Pb_K>> <<N_Pb_0>> ;
+        
+******************* PowComponent ****************************
+*--
+* Reference parameter values
+* for NCR interpolation (? i dont know.)
+*--
+
+*REAL  temp_comb_0 temp_mode_0  dens_mode_0 :=
+*      1.0732E+03 9.2316E+02 3.5751E-01 ;
+
+
+*********************************************
+
+REAL burnup := 0.0 ; !
+REAL powi := 300.0 ;
+!1500.0 ;     
+
+*------
+* Cross-section database interpolation
+*
+* remark: all SET with (*) because alrealdy defined in Fmap
+* ---> i think it's useless re-SET
+*
+*------
+MacroF := NCR: Cpo1 Cpo2 Cpo3 Fmap ::
+           EDIT 2
+           MACRO LINEAR
+           TABLE Cpo1 <<Dir1>> 'BURN'
+             MIX 1 FROM 1
+             INST-BURN
+                  * SET LINEAR 'BURN' MAP
+                  * SET LINEAR 'BURN' <<burnup>>
+                  * SET CUBIC 'TF'  <<temp_comb_0>>
+                  * SET CUBIC 'TCA' <<temp_mode_0>>
+                  * SET CUBIC 'DCA' <<dens_mode_0>>
+            ENDMIX 
+            TABLE Cpo2 <<Dir1>> 'BURN'
+               MIX 2 FROM 1
+                 INST-BURN
+                   * SET LINEAR 'BURN' MAP
+                   * SET LINEAR 'BURN' <<burnup>>
+                   * SET CUBIC 'TF' MAP !<<temp_comb_0>>
+                   * SET CUBIC 'TCA' <<temp_mode_0>>
+                   * SET CUBIC 'DCA' <<dens_mode_0>>
+             ENDMIX 
+            TABLE Cpo3 <<Dir3>> 'BURN'
+                MIX 3 FROM 1
+                INST-BURN
+                   * SET LINEAR 'BURN' MAP
+                   * SET LINEAR 'BURN' <<burnup>>
+                   * SET CUBIC 'TF' <<temp_comb_0>>
+                   * SET CUBIC 'TCA' <<temp_mode_0>>
+                   * SET CUBIC 'DCA' <<dens_mode_0>>
+             ENDMIX 
+; 
+ 
+
+*---
+* Reflector macrolib COMPO
+*---
+IF rod 0 = THEN
+ECHO "--------------------tbe rods" ;
+Macro1 := NCR: Cpo4 ::
+    EDIT 1
+    MACRO 
+    NMIX 16 COMPO Cpo4 <<Dir4>>
+    MIX  4 FROM 1 SET 'LEGO' COSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  5 FROM 1 SET 'LEGO' COSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  6 FROM 1 SET 'LEGO' COSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  7 FROM 1 SET 'LEGO' ARSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  8 FROM 1 SET 'LEGO' ARSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  9 FROM 1 SET 'LEGO' REPN SET DCA <<N_Pb_0>> ENDMIX
+    MIX 10 FROM 1 SET 'LEGO' REFS SET DCA <<N_Pb_0>> ENDMIX
+    MIX 11 FROM 1 SET 'LEGO' PRNL SET DCA <<N_Pb_0>> ENDMIX
+    MIX 12 FROM 1 SET 'LEGO' PRNS SET DCA <<N_Pb_0>> ENDMIX
+    MIX 13 FROM 1 SET 'LEGO' PLPb SET DCA <<N_Pb_0>> ENDMIX
+    MIX 14 FROM 1 SET 'LEGO' BCHN SET DCA <<N_Pb_0>> ENDMIX
+    MIX 15 FROM 1 SET 'LEGO' VSXP SET DCA <<N_Pb_0>> ENDMIX
+    MIX 16 FROM 1 SET 'LEGO' CALE SET DCA <<N_Pb_0>> ENDMIX
+; 
+ELSEIF rod 1 = THEN
+ECHO "--------------------tbi rods" ;
+Macro1 := NCR: Cpo4 ::
+    EDIT 1
+    MACRO 
+    NMIX 16 COMPO Cpo4 <<Dir4>>
+    MIX  4 FROM 1 SET 'LEGO' COSU SET DCA <<N_Pb_0>> ENDMIX
+    MIX  5 FROM 1 SET 'LEGO' COIN SET DCA <<N_Pb_0>> ENDMIX
+    MIX  6 FROM 1 SET 'LEGO' COSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  7 FROM 1 SET 'LEGO' ARRE SET DCA <<N_Pb_0>> ENDMIX
+    MIX  8 FROM 1 SET 'LEGO' ARSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  9 FROM 1 SET 'LEGO' REPN SET DCA <<N_Pb_0>> ENDMIX
+    MIX 10 FROM 1 SET 'LEGO' REFS SET DCA <<N_Pb_0>> ENDMIX
+    MIX 11 FROM 1 SET 'LEGO' PRNL SET DCA <<N_Pb_0>> ENDMIX
+    MIX 12 FROM 1 SET 'LEGO' PRNS SET DCA <<N_Pb_0>> ENDMIX
+    MIX 13 FROM 1 SET 'LEGO' PLPb SET DCA <<N_Pb_0>> ENDMIX
+    MIX 14 FROM 1 SET 'LEGO' BCHN SET DCA <<N_Pb_0>> ENDMIX
+    MIX 15 FROM 1 SET 'LEGO' VSXP SET DCA <<N_Pb_0>> ENDMIX
+    MIX 16 FROM 1 SET 'LEGO' CALE SET DCA <<N_Pb_0>> ENDMIX
+; 
+ELSEIF rod 2 = THEN
+ECHO "--------------------thalf rods" ;
+ECHO "--------error on code---------" ;
+Macro1 := NCR: Cpo4 ::
+    EDIT 1
+    NMIX 16 COMPO Cpo4 <<Dir4>>
+    MIX  4 FROM 1 SET 'LEGO' COIN SET DCA <<N_Pb_0>> ENDMIX
+    MIX  5 FROM 1 SET 'LEGO' COSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  6 FROM 1 SET 'LEGO' COSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  7 FROM 1 SET 'LEGO' ARSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  8 FROM 1 SET 'LEGO' ARSV SET DCA <<N_Pb_0>> ENDMIX
+    MIX  9 FROM 1 SET 'LEGO' REPN SET DCA <<N_Pb_0>> ENDMIX
+    MIX 10 FROM 1 SET 'LEGO' REFS SET DCA <<N_Pb_0>> ENDMIX
+    MIX 11 FROM 1 SET 'LEGO' PRNL SET DCA <<N_Pb_0>> ENDMIX
+    MIX 12 FROM 1 SET 'LEGO' PRNS SET DCA <<N_Pb_0>> ENDMIX
+    MIX 13 FROM 1 SET 'LEGO' PLPb SET DCA <<N_Pb_0>> ENDMIX
+    MIX 14 FROM 1 SET 'LEGO' BCHN SET DCA <<N_Pb_0>> ENDMIX
+    MIX 15 FROM 1 SET 'LEGO' VSXP SET DCA <<N_Pb_0>> ENDMIX
+    MIX 16 FROM 1 SET 'LEGO' CALE SET DCA <<N_Pb_0>> ENDMIX
+; 
+ENDIF ;
+
+Macro2 Matex := MACINI: Matex Macro1 MacroF 
+*:: EDIT 1 FUEL 
+;
+
+*--
+* Steady-state diffusion calculation
+*--
+System := TRIVAA: Macro2 Track ;
+
+IF iter 1 = THEN
+  Flux := FLUD: System Track ::
+    EDIT 10 ADI 4 ACCE 5 3 ;
+ELSE
+  Flux := FLUD: Flux System Track ::
+    EDIT 10 ;
+ENDIF ;
+
+System MacroF Macro1 Macro2 := DELETE: System MacroF Macro1 Macro2 ;
+
+*--
+* Thermo-hydraulics calculation
+*--
+Power Fmap := FLPOW: Fmap Flux Track Matex
+                :: EDIT 13 PTOT <<powi>>
+                *PRINT MAP 
+                PRINT DISTR FLUX 
+                ;
+                
+***remark (PRINT DISTR FLUX) print flux over whole reactor              
+                
+**************print directories****************************                
+Fmap := UTL: Fmap ::
+    EDIT 5
+    DIR ;
+Power := UTL: Power ::
+    EDIT 5
+    DIR
+    !IMPR FLUX *
+    ;
+Flux := UTL: Flux ::
+    EDIT 5
+    DIR ;
+    
+***********
+***** print result ****************************************
+************
+
+ECHO "-------------- RESULTs --------------" ;
+
+GREP: Flux   ::
+  GETVAL 'K-EFFECTIVE ' 1  >>keffn<<   ;
+ECHO "K-effective = " keffn  ;
+GREP: Power :: GETVAL 'PMAX-BUND' 1 >>mbp<< ;
+GREP: Power :: GETVAL 'PMAX-CHAN' 1 >>mcp<< ;
+ECHO "PMAX-BUND=" mbp "PMAX-CHAN=" mcp ;
+
+
+
+END: ;
+QUIT "LIST" .

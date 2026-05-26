@@ -1,0 +1,116 @@
+\chapter*{Introduzione}
+\addcontentsline{toc}{chapter}{Introduzione}
+
+Recentemente le simulazioni numeriche sono diventate un requisito fondamentale 
+per la progettazione di diverse componenti ingegneristiche. 
+Infatti in fase di progettazione di sistemi complessi, in particolar modo in 
+ambito nucleare, è richiesto lo sviluppo di codici di calcolo differenti in 
+grado di garantire una simulazione numerica del progetto, che sia attendibile e 
+inerente ai processi fisici reali.
+Per questa ragione molti problemi multifisici e multiscala sono studiati 
+attraverso l'accoppiamento di codici differenti appartenenti a discipline diverse che 
+risolvono i singoli problemi fisici.
+
+In questo progetto di tesi è stato implementato un modello di reattore nucleare 
+LFR (Lead Fast Reactor) all'interno di una piattaforma numerica, la quale 
+integra differenti strumenti computazionali allo scopo di investigare il 
+comportamento multifisico ottenuto dall'accoppiamento di codici di neutronica e 
+di termoidraulica.
+Il modello di reattore nucleare formalizzato è basato sul progetto ALFRED 
+(Advanced Lead Fast REactor Demonstrator), il quale ha il ruolo di dimostrare la 
+fattibilità della tecnologia dei reattori veloci raffreddati al piombo proposti 
+dal GIF (Generation IV International Forum) come sistemi energetici nucleari 
+appartenenti alla IV$^{a}$ generazione.
+I reattori veloci raffreddati al piombo dispongono di caratteristiche innovative di 
+sostenibilità e di affidabilità offerte dalle proprietà del piombo come 
+refrigerante; quest'ultimo è in grado di mantenere uno spettro neutronico veloce 
+che massimizza la fertilizzazione del combustibile, prospettando la possibilità di 
+ottenere un ciclo chiuso di combustibile.
+
+La possibilità di studiare sistemi nucleari attraverso simulazioni numeriche 
+presenta molteplici vantaggi durante la progettazione. Inoltre  l'integrazione
+di codici di neutronica e di termoidraulica all'interno di una 
+piattaforma numerica permette di scambiare dati tra essi e di assicurare 
+un approccio multifisico completo.
+In particolare, all'interno di questa tesi è presentato l'accoppiamento del 
+codice \textit{Donjon (Full-core simulation)}, che si occupa della simulazione 
+neutronica dell'intero reattore e del codice \textit{FEMuS}, che risolve la
+termoidraulica, all'interno della piattaforma numerica.
+La piattaforma numerica, basata su \textit{Salom\'e}, permette la gestione e lo 
+scambio delle strutture dati offerte da librerie e moduli. In particolare, 
+la distribuzione di potenza termica ottenuta dalla risoluzione del flusso 
+neutronico all'interno del codice di reattore viene passata al codice di 
+termoidraulica al fine di risolvere il campo di temperatura sul dominio del 
+reattore.
+La distribuzione di temperatura è trasferita, a sua volta, al codice di 
+neutronica al fine di interpolare sul database reattoristico e di ottenere le 
+sezioni d'urto omogeneizzate e condensate a 33 gruppi energetici in funzione 
+della temperatura del combustibile, della temperatura del refrigerante e dei tempi di 
+bruciamento isotopico del combustibile fissile.
+Il database reattoristico è stato realizzato attraverso il supporto del codice 
+di cella \textit{Dragon (Lattice code)}, il quale risolve il problema del 
+trasporto dei neutroni ottenendo le sezioni d'urto efficaci relative alle 
+principali componenti del reattore come le barre di combustibile, le barre di 
+controllo, elementi di protezione neutronica. I dati delle librerie nucleari 
+associati alle sezioni d'urto microscopiche di ogni elemento sono stati estratti 
+dalle \textit{Jeff3.1.2shem315}.
+
+Attraverso la versatilità della piattaforma numerica è stato possibile realizzare 
+un ciclo iterativo tra i codici di neutronica e di termoidraulica consentendo il calcolo del
+% l'analisi multifisica del modello di ALFRED e la stampa della distribuzione del 
+flusso neutronico, della potenza termica e della temperatura.
+L'analisi neutronica del reattore è stata investigata attraverso la valutazione 
+del fattore moltiplicativo effettivo $k_{eff}$ e del coefficiente di reattività 
+$\Delta \rho$ in funzione delle variazioni di temperatura, che incidono sulle 
+proprietà nucleari dei materiali e del bruciamento isotopico, considerando il
+tempo di inizio ciclo (BOC) di 2 anni e il tempo di fine ciclo di 3 anni.
+Il campo di temperatura è stato ottenuto attraverso la risoluzione 
+dell'equazione di conservazione dell'energia ipotizzando la velocità del 
+refrigerante costante e il coefficiente di conducibilità termica mediato sul 
+piombo.
+
+% Sono stati ottenuti valori del fattore moltiplicativo effettivo compatibili con 
+% altri studi inerenti al progetto ALFRED; persino la temperatura di uscita del 
+% refrigerante ottenuta calcolando la potenza termica neutronica è risultata accettabile 
+% con i dati progettuali previsti.
+% I risultati ottenuti soddisfano i parametri previsti per il progetto ALFRED; tuttavia sarebbe necessaria la raffinazione dei dati utilizzati durante la 
+% modellazione del reattore in riferimento ai cambiamenti apportati dagli enti di 
+% ricerca che operano nella costruzione del progetto dimostrativo ALFRED. 
+% Inoltre è auspicabile l'introduzione di modelli più accurati e complessi nell'analisi termoidraulica del reattore, 
+% come modelli per descrivere la turbolenza relativa al piombo liquido.
+
+% In conclusione la possibilità di integrare l'accoppiamento 
+% neutronico-termoidraulica in un unica piattaforma numerica può essere un ottimo 
+% strumento per la progettazione e la valutazione della fattibilità della 
+% tecnologia LFR, aprendo a prospettive future per indagare il comportamento 
+% multifisico di sistemi energetici complessi. 
+
+
+
+
+Nel Capitolo \ref{cap1} sono trattate le tematiche relative ai reattori veloci 
+di IV$^{a}$ generazione in particolare basati sulla tecnologia di raffreddamento al 
+piombo LFR.
+I reattori veloci hanno caratteristiche uniche di affidabilità e di 
+sostenibilità, in grado di ottenere un ciclo chiuso di combustibile con 
+attenzione ai problemi ambientali. Inoltre è approfondito il progetto europeo 
+ALFRED, il cui modello è stato utilizzato per valutare l'accoppiamento 
+multifisico della piattaforma numerica.
+Nel Capitolo \ref{cap2} sono affrontate le principali equazioni della neutronica 
+e la loro discretizzazione al fine di essere risolte numericamente attraverso 
+tecniche e metodi implementati nei codici di calcolo neutronico, sia di cella 
+che di intero reattore.
+Nel Capitolo \ref{cap3} sono derivate le equazioni della termodinamica di 
+conservazione della massa, della quantità di moto e dell'energia dall'equazione 
+di conservazione per una grandezza estensiva. Sono accennate le principali 
+approssimazioni di termoidraulica per il reattore nucleare.
+Nel Capitolo \ref{cap4} sono presentati i codici di neutronica e la loro 
+implementazione nella piattaforma numerica.
+Viene descritto il procedimento per la realizzazione del database reattoristico, 
+ottenuto dal codice di cella, e la successiva interpolazione sulle sezioni 
+d'urto efficaci per la risoluzione del problema neutronico associato al modello 
+di reattore ALFRED. 
+Infine, nel Capitolo \ref{cap5} sono presentati e valutati i risultati ottenuti 
+dall'accoppiamento neutronico-termoidraulico in relazione al reattore considerato. 
+
+

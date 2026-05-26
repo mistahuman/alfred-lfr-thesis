@@ -1,0 +1,56 @@
+*-----------------------------------------------------
+* PROCEDURE CLE 2000 CONCENTRATIONS ISOTOPES         *
+* Auteur: Marco Sumini, Augusto Di Chicco            *
+*-----------------------------------------------------
+* Donnees en entree :
+*     p_X           : proportion de l isotope X en % massique
+*                    (ppercentuale dell'isotopo X in massa)
+*     a_X           : coefficient de dilatation lineaire de la 
+*                     substance X (en C^-1)
+*                    (coefficiente di dilatazione lineare della
+*                    sostanza X)
+*     T_X           : température moyenne du milieu X (en C)
+*                    (temperatura media del mezzo X in °C)
+
+* Resultat          :
+*     N_X           : nombre de noyaux par cm^3 de l isotope X
+*                    (numero di nuclei per cm^3 dell'isotopo X)
+*
+*     X_f           : isotope contenu dans un assemblage fertile
+*                    (isotopo contenuto dentro un assembly fertile)
+
+MODULE END: ;
+
+*-----------------------------------------------------
+* RECUPERATION DES DONNEES D ENTREE                  *
+*-----------------------------------------------------
+
+REAL a_pb N_Pb ;
+
+:: >>a_pb<< >>N_Pb<< ;
+
+*-----------------------------------------------------
+* AUTRES PARAMETRES                                  *
+*-----------------------------------------------------
+
+* NOMBRE D AVOGADRO (numero di avogadro)
+
+ECHO "start calculation" ;
+
+REAL A := 6.022094E-1 ; ! Normalisation des concentrations par 10E-24
+                        ! Normalizzazione della concentrazione per 10E-24
+
+REAL rho_Pb := N_Pb A / 22.98976928 * ;
+
+REAL rho0_Pb := 11.34 ;
+REAL coeff_12 := rho_Pb rho0_Pb / ;
+REAL coeff_11 := coeff_12 coeff_12 / coeff_12 / ;
+REAL T_Pb := coeff_11 1.0 - a_pb / 20.0 + ;
+
+
+:: <<T_Pb>> 
+
+;
+ 
+END: ;
+QUIT .

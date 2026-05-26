@@ -1,0 +1,368 @@
+\section{Piattaforma Numerica}
+
+% 
+\begin{frame}
+\frametitle{Piattaforma Numerica}
+
+\begin{center}
+ \vspace{0.3cm}
+ %     \begin{center}
+%      
+%    \large La piattaforma numerica  semplificato e versatile}
+%    che permette l'integrazione e l'accoppiamento dei codici computazionali di \textbf{\textcolor{bleudefrance}{neutronica}} e
+%    di \textbf{\textcolor{mygreen}{termoidraulica}}.
+%    
+%     \end{center}
+ La piattaforma numerica consiste in un \textbf{ambiente computazionale}, basato sul progetto \textit{Salom\'e}, e permette la  
+%  coordinare i codici computazionali
+ \textbf{gestione} e \textbf{condivisione} delle strutture dati 
+ tra i moduli di \textbf{\textcolor{bleudefrance}{neutronica}} e di \textbf{\textcolor{mygreen}{termoidraulica}} \\
+ \end{center}
+%  \vspace{0.5cm}
+%  \begin{center}
+  \begin{columns}\hspace{0.5cm}
+ \begin{column}{0.42\textwidth}
+ \begin{block}{Obiettivo}
+%  \begin{center}
+   \begin{itemize}
+    \item Consentire l'\textbf{accoppiamento} tra la 
+     neutronica
+     e la termoidraulica
+    \item Ottenere la soluzione di un \textbf{problema multifisico} in un ambiente semplificato e versatile
+   \end{itemize}
+  \end{block}
+%   \begin{block}{Scopo dell'accoppiamento neutronico-termoidraulico}
+%   \begin{itemize}
+%   \item Scambiare la potenza termica ottenuta dal modulo di neutronica con il
+%   modulo di termoidraulica
+%   \item A sua volta, il modulo di termoidraulica restituisce la distribuzione del campo di temperatura
+%   al modulo di neutronico al fine di correggere il flusso neutronico a seguito delle variazioni di tempertura
+%   \end{itemize}
+%   \end{block}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{minipage}{\textwidth}
+\begin{tikzpicture}[overlay]
+ \node[xshift=25mm,yshift=32mm, text width = 4cm](sigma) {\textbf{\textcolor{mygreen}{$T_f,T_c$}}};
+ \node[xshift=45mm,yshift=-2mm, text width = 4cm](sigma) {\textbf{\textcolor{bleudefrance}{$\phi$, $P_{th}$}}};
+ \node[xshift=63mm,yshift=30mm, text width = 4cm](TF) {\textbf{\textcolor{red}{$\Sigma_f,\Sigma_a,\Sigma_s$}}};
+\end{tikzpicture}
+\scalebox{.7}{\smartdiagramset{set color list={red, bleudefrance, mygreen}, }\smartdiagram[circular diagram:clockwise]{Database Nucleare (Dragon), Simulazione Neutronica (Donjon), Analisi Termo Idraulica (FEMuS)}}
+\end{minipage}
+\end{column}
+\end{columns}
+\vspace{0.2cm}
+\begin{center}
+ Entrambi i codici ottengono la soluzione numerica attraverso \\ il \textbf{metodo degli elementi finiti}
+\end{center}
+
+
+\end{frame}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% Equazione della diffusione neutronica
+% \begin{multline*}
+%  -\nabla \cdot(D_g(\vec{r})\nabla \phi_g(\vec{r}))+\Sigma_g(\vec{r})\phi_g(\vec{r})=\\
+%  =\sum_{h=1}^G \Sigma_{h \rightarrow g}(\vec{r}) 
+% \phi_h(\vec{r})+\frac{\chi_g(\vec{r})}{k_{eff}} \sum_{h=1}^G \nu 
+% \Sigma_{f,h}(\vec{r})\phi_h(\vec{r})   \,.
+% \end{multline*}
+% Equazione del calore
+% \begin{equation*}
+%  \rho c_v\frac{dT}{dt}=\nabla \cdot (\kappa \nabla T) + \mu \Phi + \rho 
+% \vec{g}\cdot \vec{\upsilon} + \dot{Q} \,.
+% \end{equation*}
+% \end{frame}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\subsection{Codice di Neutronica}
+
+\begin{frame}
+ \frametitle{Modulo di Neutronica}
+ 
+ \begin{center} \vspace{0.2cm} 
+ \begin{block}{}
+   \begin{itemize}
+     \item \textbf{\textcolor{red}{Dragon}}: Codice di cella risolve le \textbf{equazioni del trasporto multigruppo} 
+     allo scopo
+     di ottenere le \textit{sezioni d'urto macroscopiche $\Sigma_i$}  e di generare il \textbf{database nucleare}
+   \end{itemize}
+   \end{block}
+   \begin{block}{}
+   \begin{itemize}
+    \item \textbf{\textcolor{bleudefrance}{Donjon}}: Codice di reattore che simula il comportamento dei neutroni sull'intero
+          reattore, ottenendo la distribuzione di \textbf{flusso neutronico} $\phi_g$ e di \textbf{potenza termica}. 
+%           attraverso la risoluzione
+% 	  dell'equazione di diffusione o di equazioni $SP_N$.
+      \end{itemize}	  
+  \end{block}
+
+   \underline{Equazione multigruppo della diffusione neutronica}
+\begin{multline*}
+ -\nabla \cdot(D_g(\vec{r})\nabla \phi_g(\vec{r}))+\Sigma_g(\vec{r})\phi_g(\vec{r})=\\
+ =\sum_{h=1}^G \Sigma_{h \rightarrow g}(\vec{r}) 
+\phi_h(\vec{r})+\frac{\chi_g(\vec{r})}{k_{eff}} \sum_{h=1}^G \nu 
+\Sigma_{f,h}(\vec{r})\phi_h(\vec{r})   \,.
+\end{multline*}
+  \end{center}
+
+  \end{frame}
+ 
+ \subsection{Codice di Termoidraulica}
+ 
+ \begin{frame}
+  \frametitle{Modulo di Termoidraulica}
+   \begin{center}
+%    \vspace{0.5cm}
+   \begin{block}{}
+   \begin{itemize}
+    \item \textbf{\textcolor{mygreen}{FEMuS}}: Codice CFD che risolve le equazioni di termofluidodinamica
+    con possibilità di aggiungere modelli di turbolenza.   
+    \end{itemize}
+      \end{block}
+      
+    \underline{Equazione del calore per fluidi incomprimibili}
+    \begin{equation*}
+ \rho c \frac{dT}{dt}=\nabla \cdot (\kappa \nabla T) + \mu \Phi + \rho 
+\vec{g}\cdot \vec{\upsilon} + \dot{Q}_{neutronica} 
+\end{equation*}
+
+
+
+ \underline{Proprietà termodinamiche del piombo}
+ \begin{table}[!htb]
+\centering
+ \begin{tabular}{lccc}
+\hline
+Parametro & Simbolo & Unità & Valore \\
+\hline
+Densità & $\rho$ & kg/m$^3$ & 11340 \\
+Conducibilità termica & $\kappa$ & W/(m$\cdot$K) & 35 \\
+Calore specifico & $c$ & J/(kg$\cdot$K) & 129 \\
+Viscosità dinamica & $\mu$ & Pa$\cdot$s & 0.001844 \\
+\hline
+\end{tabular}
+\end{table}
+
+  \begin{itemize}
+ \item Non è necessario risolvere Navier-Stokes (Canali chiusi)
+ \item Conducibilità termica mediata su tutti i materiali dell'assembly 
+\end{itemize}
+%   \item \begin{block}{FEMuS}
+%          Codice di termoidraulica che risolve le principali equazioni di termodinamica.
+%         \end{block}
+%   \end{itemize}
+%   In supporto alla neutronica, il
+
+ \end{center}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Logica dell'accoppiamento neutronico-termoidraulico}
+\vspace{0.1cm}
+\begin{columns}\hspace{0.5cm}
+ \begin{column}{0.35\textwidth}
+ 
+% 
+\begin{center} 
+  \begin{itemize}
+   \item Librerie dati nucleari \textbf{\textcolor{orange}{JEFF-3.1.2-SHEM315}}
+   \item Codice di cella\\ \textbf{\textcolor{red}{Dragon}}
+   \item Codice di reattore\\ \textbf{\textcolor{bleudefrance}{Donjon}}
+   \item Codice di termoidraulica \textbf{\textcolor{mygreen}{FEMuS}}
+  \end{itemize}
+  
+\end{center}
+%  \end{block}
+ \end{column}
+
+ \begin{column}{0.72\textwidth}
+  \begin{center}
+ \includegraphics[scale=0.55]{../../thesis/figure/flowchart/dataflow_platform}
+ \end{center}
+ \end{column}
+ \end{columns}
+
+\end{frame}
+
+% % % % %  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % %  \section{Modellazione del reattore}
+% % % % %  \begin{frame}
+% % % % %  \frametitle{Creazione del database nucleare}
+% % % % %  \vspace{0.5cm}
+% % % % %  
+% % % % %  \begin{center}
+% % % % %   Il \textbf{database nucleare} contiene le informazioni sulle sezioni d'urto macroscopiche $\Sigma_T$,
+% % % % %   omogeneizzate su ciascuna cella e condensate a 33 gruppi di energia, degli elementi che compongono il
+% % % % %   reattore.
+% % % % %  \end{center}
+% % % % %   \begin{columns}
+% % % % %   
+% % % % %     \begin{column}{0.6\textwidth}
+% % % % % %       \begin{center}
+% % % % % %     \includegraphics[scale=1]{../../thesis/figure/itex/unitcells_wq}
+% % % % % %     
+% % % % % %    \end{center}
+% % % % %      Parametri per le interpolazione
+% % % % %      \begin{itemize}
+% % % % %       \item Temperatura del combustibile $T_f$
+% % % % %       \item Temperatura del refrigerante $T_c$
+% % % % %       \item Tempo relativo al bruciamento $t_{burnup}$
+% % % % %      \end{itemize}
+% % % % % 
+% % % % % 
+% % % % %    
+% % % % %   \end{column}
+% % % % %   
+% % % % % 
+% % % % %   
+% % % % %   \begin{column}{0.4\textwidth}
+% % % % %    \begin{center}
+% % % % %     \includegraphics[scale=0.26]{../../thesis/figure/itex/fassembly}\\
+% % % % %     Assembly di combustibile
+% % % % %    \end{center}
+% % % % %    \end{column}
+% % % % %    
+% % % % %   
+% % % % %   
+% % % % %  \end{columns}
+% % % % %  \begin{block}{}
+% % % % %    \begin{center}
+% % % % %   La sua realizzazione permetterà al codice di reattore \textcolor{bleudefrance}{\textbf{Donjon}} di correggere le sezioni d'urto a seguito delle variazioni
+% % % % %   di temperatura.
+% % % % %  \end{center}
+% % % % % 
+% % % % %  \end{block}
+% % % % %  \end{frame}
+% % % % %  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% % % %  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % %  \begin{frame}
+% % % %  
+% % % %     \begin{columns}
+% % % %   
+% % % %     \begin{column}{0.6\textwidth}
+% % % %  \small{
+% % % %  \begin{tabular}{lcc}
+% % % % \hline
+% % % % Parametro & Unità & Valore \\
+% % % % \hline
+% % % % N$^\circ$ totale di esagoni & - & 169 \\
+% % % % N$^\circ$ barre di combustibile & - & 126 \\
+% % % % N$^\circ$ elementi di acciaio & - & 43 \\
+% % % % Lato di un esagono & mm & 8.00208 \\
+% % % % Apotema di un esagono & mm & 6.93 \\
+% % % % Distanza tra barre di combustibile & mm & 13.86 \\
+% % % % Raggio barra di combustibile & mm & 5.25 \\
+% % % % \hline
+% % % % \end{tabular}
+% % % %    }
+% % % %   \end{column}
+% % % %   
+% % % % 
+% % % %   
+% % % %   \begin{column}{0.4\textwidth}
+% % % %   
+% % % %    \begin{center}
+% % % %     \underline{Esagono di combustibile}
+% % % %     \includegraphics[scale=1.2]{../../thesis/figure/itex/unitcells_wq}\\
+% % % % 
+% % % %    \end{center}
+% % % %    \end{column}
+% % % %    
+% % % %   
+% % % %   
+% % % %  \end{columns}
+% % % %   
+% % % %   
+% % % %  \end{frame}
+% % % % 
+% % % %  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ \begin{frame}
+ \frametitle{Geometria complessiva del reattore}
+ \vspace{0.3cm}
+ \begin{columns}
+  
+  \begin{column}{0.48\textwidth}
+%   \begin{itemize}
+%    \item[-] \textcolor{yellow}{$\circ$} Combustibile MOX arricchito al \underline{20.5$\%$}
+%    \item[-] \textcolor{red}{$\circ$} Combustibile MOX arricchito al \underline{26.2$\%$}
+%    \item[-] \textcolor{green}{$\circ$} Barre di controllo
+%    \item[-] \textcolor{purple}{$\circ$} Barre di sicurezza
+%   \end{itemize}
+   \begin{center}
+   
+  \underline{Sezione radiale del nocciolo}
+    \includegraphics[scale=0.3]{../../thesis/figure/itex/hexagon}
+   \end{center}
+
+  \end{column}
+  
+    \begin{column}{0.48\textwidth}
+     \begin{center}
+     \underline{Sezione assiale del reattore}
+    \includegraphics[scale=0.28]{../../thesis/figure/itex/rectangle_wq}
+   \end{center}
+   
+
+  \end{column}
+  
+ \end{columns}
+ \vspace{0.3cm}
+ \begin{center}
+ \begin{itemize}
+  \item  Arricchimento combustibile MOX interno {\underline{20.5$\%$}} (in giallo), 
+    esterno {\underline{26.2$\%$} (in rosso)}
+  \item 12 barre di controllo (in verde) e 4 di sicurezza (in viola)
+ \end{itemize}
+ \end{center}
+
+ \end{frame}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % %  \begin{frame}
+% % % %  \frametitle{Modellazione complessiva del reattore}
+% % % %  \begin{columns}
+% % % %   
+% % % %   \begin{column}{0.48\linewidth}
+% % % %      \begin{center}
+% % % %   \underline{Sezione assiale del reattore}
+% % % %     \includegraphics[scale=0.35]{../../thesis/figure/itex/rectangle_wq}
+% % % %    \end{center}
+% % % %   \end{column}
+% % % %   
+% % % %     \begin{column}{0.48\linewidth}
+% % % %      \begin{center}
+% % % %      \underline{Reattore tridimensionale}
+% % % %        \includegraphics[scale=0.3]{../../thesis/figure/result_tred/new/tred-reactor}
+% % % %    \end{center}
+% % % %   \end{column}
+% % % %   
+% % % %  \end{columns}
+% % % %  
+
+
+
+% % % % %  \end{frame}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  \begin{frame}
+%  \frametitle{Codice di termoidraulica}
+%  \begin{columns}
+%   
+%   \begin{column}{0.48\textwidth}
+%      \begin{center}
+%     \includegraphics[scale=0.4]{../../thesis/figure/itex/tempeq}
+%    \end{center}
+%   \end{column}
+%   
+%     \begin{column}{0.48\textwidth}
+%      \begin{center}
+%     \includegraphics[scale=0.35]{../../thesis/figure/itex/canale}
+%    \end{center}
+%   \end{column}
+%   
+%  \end{columns}
+%  \end{frame}

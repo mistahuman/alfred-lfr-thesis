@@ -1,0 +1,388 @@
+\section{Risultati}
+%  \begin{frame}
+% \frametitle{Distribuzione di flusso neutronico}
+% \begin{figure}[!htb]
+% \centering
+% \subfigure[Sezione con barre inserite]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-clip-insert1.png}}
+% \hspace{1.2cm}
+% \subfigure[Nocciolo con barre inserite]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-trashold-insert1.png}}\\
+% \subfigure[Sezione con barre estratte]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-clip-exstract1.png}}
+% \hspace{1.2cm}
+% \subfigure[Nocciolo con barre estratte]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-trashold-exstract1.png}}
+% \end{figure}
+% \end{frame}
+%  \begin{frame}
+% \frametitle{Distribuzione di flusso neutronico}
+% \begin{figure}[!htb]
+% \centering
+% \subfigure[Sezione con barre inserite]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-clip-insert1.png}}
+% \hspace{1.2cm}
+% \subfigure[Nocciolo con barre inserite]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-trashold-insert1.png}}\\
+% \subfigure[Sezione con barre estratte]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-clip-exstract1.png}}
+% \hspace{1.2cm}
+% \subfigure[Nocciolo con barre estratte]
+% {\includegraphics[height=0.28\textheight]{../../thesis/figure/result_tred/morenew/pw-trashold-exstract1.png}}
+% \end{figure}
+% \end{frame}
+% 
+\begin{frame}
+\frametitle{Validazione Neutronica}
+\vspace{0.4cm}
+\begin{center}
+
+  Confronto tra i valori della costante moltiplicativa effettiva $k_{eff}$ 
+  tra il codice deterministico \textbf{\textcolor{blue}{Donjon}} e il codice probabilistico
+  \textbf{MCNPX} effettuato in un altro studio
+  
+  
+ \begin{center}
+ \begin{tabular}{l|cc|cc}
+\hline
+Tempo [Giorni] & $k_{eff}$ Donjon [-] & & $k_{eff}$ MCNPX [-] & \\
+$t_{burnup}$ & Barre Estratte & Inserite & Barre Estratte & Inserite \\
+\hline
+0   & 1.1177  & 1.0794  & 1.0804 & 1.0525  \\
+365 & 1.0887  & 1.0520  & 1.0510 & 1.0229   \\
+730 & 1.0624  & 1.0272  & 1.0247 & 0.9964   \\
+1095 & 1.0384  & 1.0001 & 0.9988  & 0.9703 \\
+\hline
+\end{tabular}
+  \end{center}
+  \begin{figure}
+   \includegraphics[scale=0.15]{../barre-di-controllo}
+  \end{figure}
+ inserite\quad \quad  \quad estratte
+\end{center}  
+\end{frame}
+% %    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % \begin{frame}
+% % \frametitle{Validazione Neutronica}
+% % Confronto tra i valori della costante moltiplicativa effettiva $k_{eff}$ 
+% %   tra il caso deterministico di \textcolor{blue}{Donjon} e il caso probabilistico
+% %   di MCNPX, effettuato in un altro studio.
+% %  \begin{columns}
+% %   \begin{column}{0.5\textwidth}
+% %    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % %   \begin{equation*}
+% % %    k_{eff}=\frac{popolazione neutronica del}{×}
+% % %   \end{equation*}
+% % 
+% % 
+% %   \end{column}
+% % 
+% %   \begin{column}{0.4\textwidth}
+% %   \begin{center}
+% %       \begin{table}
+% %  \begin{tabular}{lcc}
+% % \hline
+% % Tempo  & Donjon  &  MCNPX \\
+% % $[$giorni$]$ & $k_{eff}$ [-] & $k_{eff}$ [-]  \\
+% % \hline
+% % 0   & 1.07935 & 1.0525 \\
+% % 365 & 1.0520  & 1.0229  \\
+% % 730 & 1.0272  & 0.9964  \\
+% % 1095 & 1.0001 & 0.9703  \\
+% % \hline
+% % \end{tabular}
+% % \end{table}
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %   \end{center}
+% % 
+% %   \end{column}
+% %   
+% %  \end{columns}
+% % 
+% % \end{frame}
+% % % % % % % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % % % % % \begin{frame}
+% % % % % % % % % % \frametitle{Variazioni di $k_{eff}$ in funzione della temperatura $T_f$}
+% % % % % % % % % %   \begin{center}
+% % % % % % % % % %    \includegraphics[scale=0.7]{../../thesis/graph/keff_temp.eps}
+% % % % % % % % % %   \end{center}
+% % % % % % % % % % \end{frame}
+% % % % % % % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Variazioni di $k_{eff}$ in funzione dei tempi di bruciamento $t_{burnup}$}
+\vspace{0.5cm}
+  \begin{center}
+   \includegraphics[scale=0.7]{../../thesis/graph/keff_in_out_side0-eps-converted-to}
+  
+  \begin{itemize}
+ \item \centering Confronto tra barre inserite e estratte per temperatura 
+ del combustibile $T_f$= 550 $^\circ$C e $T_f$= 1000 $^\circ$C 
+\end{itemize}
+\end{center}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Distribuzione di flusso neutronico a $t_{burnup}$= 3 anni}
+    \vspace{0.5cm}
+ \begin{columns}
+  \begin{column}{0.48\textwidth}
+  \begin{center}
+  \underline{Barre estratte}
+  
+   \includegraphics[scale=0.2]{../../thesis/figure/result_tred/morenew/flux-trashold-exstract1}
+   
+  \end{center}
+
+  
+  \end{column}
+
+  \begin{column}{0.48\textwidth}
+  
+  \begin{center}
+  \underline{Barre inserite}
+  
+   \includegraphics[scale=0.2]{../../thesis/figure/result_tred/morenew/flux-trashold-insert1}
+   
+  \end{center}
+  
+  \end{column}
+  
+ \end{columns}
+% 
+% 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Distribuzione di potenza termica a $t_{burnup}$= 3 anni}
+  \vspace{0.5cm}
+ \begin{columns}
+  \begin{column}{0.48\textwidth}
+  
+  \begin{center}
+  \underline{Barre estratte}
+  
+   \includegraphics[scale=0.202]{../../thesis/figure/result_tred/morenew/pw-trashold-exstract1}
+  \end{center}
+
+  
+  \end{column}
+
+  \begin{column}{0.48\textwidth}
+  
+  \begin{center}
+  \underline{Barre inserite}
+  
+   \includegraphics[scale=0.2]{../../thesis/figure/result_tred/morenew/pw-trashold-insert1}
+  \end{center}
+  
+  \end{column}
+  
+ \end{columns}
+% 
+% 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % \begin{frame}
+% % % % \frametitle{Confronto barre inserite e barre estratte lungo l'asse $y$}
+% % % %   \vspace{0.5cm}
+% % % %   
+% % % %  \begin{columns}
+% % % %   \begin{column}{0.48\textwidth}
+% % % %   
+% % % %   \begin{center}
+% % % %   Distribuzione di flusso
+% % % %    \includegraphics[scale=0.43]{../../thesis/graph/fluxy-eps-converted-to}
+% % % %   \end{center}
+% % % % 
+% % % %   
+% % % %   \end{column}
+% % % % 
+% % % %   \begin{column}{0.48\textwidth}
+% % % %   
+% % % %   \begin{center}
+% % % %   Distribuzione di potenza termica
+% % % %    \includegraphics[scale=0.43]{../../thesis/graph/powery}
+% % % %   \end{center}
+% % % %   
+% % % %   \end{column}
+% % % %   
+% % % %  \end{columns}
+% % % %  \vspace{0.4cm}
+% % % % %         \hspace{0.5cm}
+% % % %  \begin{center}
+% % % %  
+% % % %  \begin{block}{Relazione tra flusso neutronico e potenza termica}
+% % % % %  \hspace{1.5cm}
+% % % %   \begin{equation*}
+% % % %    P_{th}=E_{fissione} \cdot V_{nocciolo} \cdot \int_E \Sigma_F(E) \Phi(E)\, dE
+% % % %   \end{equation*}
+% % % % 
+% % % %  \end{block}
+% % % %   \end{center}
+% % % % % 
+% % % % \end{frame}
+% % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Confronto barre inserite e barre estratte lungo un profilo radiale}
+  \vspace{0.5cm}
+  
+ \begin{columns}
+  \begin{column}{0.48\textwidth}
+  
+  \begin{center}
+  Distribuzione di flusso
+     \includegraphics[scale=0.43]{../../thesis/graph/fluxy-eps-converted-to}
+%    \includegraphics[height=0.38\textheight]{../flusso}
+  \end{center}
+
+  
+  \end{column}
+ \hspace{-1cm}
+  \begin{column}{0.48\textwidth}
+  
+  \begin{center}
+  Distribuzione di potenza termica
+   \includegraphics[scale=0.43]{../potenza}
+  \end{center}
+  
+  \end{column}
+  
+ \end{columns}
+ \vspace{0.4cm}
+%         \hspace{0.5cm}
+ \begin{center}
+ 
+ \begin{block}{Relazione tra flusso neutronico e potenza termica}
+%  \hspace{1.5cm}
+  \begin{equation*}
+   P_{th}=E_{fissione} \cdot V_{nocciolo} \cdot \int_E \Sigma_F(E) \Phi(E)\, dE
+  \end{equation*}
+
+ \end{block}
+  \end{center}
+% 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\begin{frame}
+\frametitle{Evoluzione del campo di temperatura}
+\vspace{0.3cm} 
+ \begin{columns}
+  \begin{column}{0.3\textwidth}
+  
+  \begin{center}
+  \underline{$t$= 100 secondi}
+  \vspace{0.1cm}
+  
+   \includegraphics[scale=0.2]{../../thesis/figure/result_tred/new/tred2-temp}
+   
+  \end{center}
+
+  
+  \end{column}
+
+  \begin{column}{0.3\textwidth}
+  
+  \begin{center}
+   \underline{$t$= 250 secondi}
+   \vspace{0.1cm}
+   
+   \includegraphics[scale=0.2]{../../thesis/figure/result_tred/new/tred3-temp}
+  
+  \end{center}
+  
+  \end{column}
+  
+   \begin{column}{0.3\textwidth}
+  
+  \begin{center}
+   \underline{$t$= 400 secondi}
+   \vspace{0.1cm}
+   
+   \includegraphics[scale=0.2]{../../thesis/figure/result_tred/new/tred1-temp}
+  
+  \end{center}
+  
+  \end{column}
+ 
+ \end{columns}
+ \vspace{0.3cm}
+ 
+ \begin{center}
+    Velocità del piombo liquido considerata costante \\
+    \textbf{$\boldsymbol{\upsilon}$ = 1.28 m/s}
+ \end{center}
+
+
+% 
+% 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % % % % % % % % % % % \begin{frame}
+% % % % % % % % % % % % % % % % \frametitle{Distribuzione di temperatura lungo l'asse $z$}
+% % % % % % % % % % % % % % % %   
+% % % % % % % % % % % % % % % %  \begin{columns}
+% % % % % % % % % % % % % % % %   \begin{column}{0.4\textwidth}
+% % % % % % % % % % % % % % % %   
+% % % % % % % % % % % % % % % %   \begin{center}
+% % % % % % % % % % % % % % % %    \includegraphics[scale=0.2]{../../thesis/figure/result_tred/morenew/tempassurda}
+% % % % % % % % % % % % % % % %   \end{center}
+% % % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % %   
+% % % % % % % % % % % % % % % %   \end{column}
+% % % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % %   \begin{column}{0.4\textwidth}
+% % % % % % % % % % % % % % % %   
+% % % % % % % % % % % % % % % %   \begin{center}
+% % % % % % % % % % % % % % % %   Profilo di temperatura
+% % % % % % % % % % % % % % % %    \includegraphics[scale=0.4]{../../thesis/graph/tempz}
+% % % % % % % % % % % % % % % %   \end{center}
+% % % % % % % % % % % % % % % %   
+% % % % % % % % % % % % % % % %   \end{column}
+% % % % % % % % % % % % % % % %   
+% % % % % % % % % % % % % % % %  \end{columns}
+% % % % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % \end{frame}
+% % % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % \section{Conclusioni}
+% % % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % \begin{frame}
+% % % % % % \frametitle{Conclusioni}
+% % % % % % \begin{block}{Aspetti positivi}
+% % % % % % \begin{itemize}
+% % % % % % \item L'approccio multifisico consente di effettuare una simulazione complessiva della fisica del reattore
+% % % % % % \item L'evoluzione isotopica dovuta al bruciamento è in linea con altri studi
+% % % % % % \item L'accoppiamento neutronico-termoidraulico che è stato implementato apre a prospettive future per l'indagine del compormento multifisico
+% % % % % % di sistemi nucleari
+% % % % % % %\item La soluzione è ottenuta dopo numerose iterazione attraverso il codice di neutronica e termoidraulica con correzioni di temperatura e densità
+% % % % % % %\item I risultati ottenuti aprono a prosfettivi di estendere un simile approccio ad altri modelli
+% % % % % % %\item L'intera procedura è in grado di garantire flessibilità all'utente
+% % % % % % \end{itemize}
+% % % % % % \end{block}
+% % % % % % \begin{block}{Aspetti negativi}
+% % % % % % \begin{itemize}
+% % % % % % \item $k_{eff}$ troppo elevato in riferimento ad altri studi del settore
+% % % % % % \item Possibilità di interpolare solo su due variabili e non su tre 
+% % % % % % \item Modello di termoidraulica troppo semplificativo per un'analisi approffondita
+% % % % % % \end{itemize}
+% % % % % % \end{block}
+% % % % % % 
+% % % % % % \end{frame}
+% % % % % % 
+% % % % % % % \section{Sviluppi Futuri}
+% % % % % % \begin{frame}
+% % % % % % \frametitle{Sviluppi Futuri}
+% % % % % % \begin{itemize}
+% % % % % % \item Aggiornamento dei dati utilizzati nella modellazione con i progetti più recenti inerenti al progetto ALFRED
+% % % % % % \item Approfondimento sui sistemi di sicurezza del reattore nel codice di neutronica
+% % % % % % \item Raffinazione del modello termoidraulico attraverso l'introduzione di modelli più sosfisticati e l'implementazione di codici per la turbolenza dei metalli liquidi
+% % % % % % \item Estendere un simile approccio multifisico ad altri reattori
+% % % % % % \end{itemize}
+% % % % % % \end{frame}
+% % % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

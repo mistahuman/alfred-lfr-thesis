@@ -1,0 +1,102 @@
+***********************************************************************
+*                                                                     *
+* Input file :  alf_fissile.x2m, alf_fertile.x2m and alf_solide.x2m   *
+* Purpose    :  Full-core calculation for ALFRED                      *
+*               TBE: all rods extracted
+* Author(s)  :  Marco Lanconelli (2018-2019)                          *
+*                                                                     *
+***********************************************************************
+PARAMETER  Fmap Matex Cpo1 Cpo2 Cpo3 Cpo4 Track ::
+  ::: LINKED_LIST Fmap Matex Cpo1 Cpo2 Cpo3 Cpo4 Track ; ;
+
+PROCEDURE    GeoCo SetParam SetFuelMap alf_N_Pb ;
+
+MODULE       USPLIT: TRIVAT: END: ;
+
+LINKED_LIST  GEOM ; 
+
+*----
+*  Recover the Multicompo
+*----
+
+SEQ_ASCII ACOMPO1 :: FILE './compo33/ACOMPO1' ;
+SEQ_ASCII ACOMPO2 :: FILE './compo33/ACOMPO2' ;
+SEQ_ASCII ACOMPO3 :: FILE './compo33/ACOMPO3' ;
+SEQ_ASCII ACOMPO4 :: FILE './compo33/ACOMPO4' ;
+
+Cpo1 := ACOMPO1 ;
+Cpo2 := ACOMPO2 ;
+Cpo3 := ACOMPO3 ;
+Cpo4 := ACOMPO4 ;
+
+**************************
+* Local Parameters
+**************************
+***********************
+*temperature in celsius
+***********************
+
+REAL 
+T_comb_0 T_clad_0 T_Pb_0
+:= 550.0 480.0 440.0
+;
+
+REAL N_Pb_0 N_Pb ;
+
+alf_N_Pb :: <<T_Pb_0>>
+  >>N_Pb_0<<
+  ;
+  
+* Conversion des temperatures en Kelvin
+
+REAL T_comb_K T_clad_K T_Pb_K ;
+EVALUATE T_comb_K := T_comb_0 273.16 + ;
+EVALUATE T_clad_K := T_clad_0 273.16 + ;
+EVALUATE T_Pb_K := T_Pb_0 273.16 + ;
+
+REAL burnup := 0.0 ;
+REAL powi := 300.0 ; 
+
+*----------------------------------------------------------
+*
+*                  FULL-CORE  CALCULATION
+*                  ======================
+*****
+* Geometry construction:
+*****
+
+GEOM := GeoCo ;
+
+*****
+* Reactor material index:
+*****
+
+GEOM Matex := USPLIT: GEOM :: EDIT 0 NGRP 33 MAXR 40000
+              NREFL 13  RMIX 4 5 6 7 8 9 10 11 12 13 14 15 16
+              NFUEL 3  FMIX 1 2 3 ;
+
+*****
+*Tracking, Raviart-Thomas-Schneider method
+*****
+
+Track := TRIVAT: GEOM :: EDIT 1
+          MAXR 50000 DUAL 1 3 1
+          SPN 3 SCAT 4 
+    ;
+
+******
+* Fuel Map construction
+******
+
+Fmap Matex := SetFuelMap Matex :: ;
+
+
+
+Fmap := SetParam Fmap :: 
+            <<T_comb_K>> <<T_Pb_K>> <<N_Pb_0>> ;
+        
+******************************************
+
+END: ;
+QUIT "LIST" .
+

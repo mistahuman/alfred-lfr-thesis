@@ -1,0 +1,161 @@
+*-----------------------------------------------------------------------
+* PROCEDURE CLE 2000 CONCENTRATIONS ISOTOPES TEMP LEAD               *
+*-----------------------------------------------------------------------
+
+* Procedure appelee par :
+* <<N_Fe54_APb>> <<N_Fe56_APb>>
+* <<N_Fe57_APb>> <<N_Fe58_APb>> <<N_Cr50_APb>> 
+* <<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>> 
+* <<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> 
+* <<N_Ni62_APb>> <<N_Ni64_APb>> <<N_Mn55_APb>> 
+* <<N_Mo92_APb>> <<N_Mo94_APb>> <<N_Mo95_APb>> <<N_Mo96_APb>>
+* <<N_Mo97_APb>> <<N_Mo98_APb>> <<N_Mo100_APb>>
+* <<N_Si_APb>> <<N_Ti_APb>>
+* <<N_Mn55_F17>> <<N_C12_F17>> <<N_S_F17>> <<N_Si_F17>> 
+* := alfred_cc_Pb ::
+* >>p_Fe_AIM1<< >>p_Cr_AIM1<< >>p_Ni_AIM1<< >>p_Mn_AIM1<<
+* >>p_Mo_AIM1<< >>p_Si_AIM1<< >>p_Ti_AIM1<<
+* >>p_Fe_F17<< >>p_Cr_F17<< >>p_Mn_F17<< >>p_C12_F17<< >>p_S_F17<<
+* >>p_Si_F17<< >>a_AIM1_Pb<< >>a_F17<< >>T_Pb<< ;
+
+MODULE END: ;
+
+*-----------------------------------------------------------------------
+* RECUPERATION DES DONNEES D ENTREE                                    *
+*-----------------------------------------------------------------------
+
+REAL
+p_Fe_AIM1 p_Cr_AIM1 p_Ni_AIM1 p_Mn_AIM1 p_Mo_AIM1 p_Si_AIM1 p_Ti_AIM1
+p_Fe_F17 p_Cr_F17 p_Mn_F17 p_C_F17 p_S_F17 p_Si_F17 a_AIM1_Pb a_F17
+T_Pb ;
+
+:: 
+
+>>p_Fe_AIM1<< >>p_Cr_AIM1<< >>p_Ni_AIM1<< >>p_Mn_AIM1<<
+>>p_Mo_AIM1<< >>p_Si_AIM1<< >>p_Ti_AIM1<<
+>>p_Fe_F17<< >>p_Cr_F17<< >>p_Mn_F17<< >>p_C_F17<< >>p_S_F17<<
+>>p_Si_F17<< >>a_AIM1_Pb<< >>a_F17<< >>T_Pb<<
+;
+
+*-----------------------------------------------------------------------
+* AUTRES PARAMETRES                                                    *
+*-----------------------------------------------------------------------
+
+* NOMBRE D AVOGADRO
+
+ECHO "start calculation" ;
+REAL A := 6.022094E-1 ; ! Normalisation des concentrations par 10E-24
+
+REAL 
+p_Fe54 p_Fe56 p_Fe57 p_Fe58 
+p_Cr50 p_Cr52 p_Cr53 p_Cr54 
+p_Ni58 p_Ni60 p_Ni61 p_Ni62 p_Ni64
+p_Mo92 p_Mo94 p_Mo95 p_Mo96 p_Mo97 p_Mo98 p_Mo100
+:=
+0.058 0.9172 0.022 0.0028 
+0.0434 0.8381 0.0949 0.0236 
+0.6827 0.261 0.0113 0.0359 0.0091
+0.148 0.091 0.159 0.167 0.095 0.244 0.096 ;
+
+* MASSES NUCLEAIRES DES ISOTOPES (u)
+
+* Donnees tirées du site atom.kaeri.re.kr
+
+REAL M_Fe := p_Fe54 53.9396148 * p_Fe56 55.9349421 * 
+p_Fe57 56.9353987 * p_Fe58 57.9332805 * + + + ;
+REAL M_Cr := p_Cr50 49.9460496 * p_Cr52 51.9405119 * 
+p_Cr53 52.9406538 * p_Cr54 53.9388849 * + + + ;
+REAL M_Ni := p_Ni58 57.9353479 * p_Ni60 59.9307906 * 
+p_Ni61 60.9310604 * p_Ni62 61.9283488 * p_Ni64 
+63.9279696 * + + + + ;
+REAL M_Mn := 54.938045 ;
+REAL M_Mo := p_Mo92 91.906824 * p_Mo94 93.905090 * p_Mo95 94.905888 *
+p_Mo96 95.904668 * p_Mo97 96.905969 * p_Mo98 97.905355 *
+p_Mo100 99.907252 * + + + + + + ;
+REAL M_Si := 28.0855 ;
+REAL M_Ti := 47.867 ;
+REAL M_C := 12.0107 ;
+REAL M_S := 31.9720707 ;
+
+* DENSITES NOMINALES A 20 C (g/cm^3)
+
+REAL rho0_AIM1 := 7.95 ;
+REAL rho0_F17 := 7.7 ;
+
+* DENSITES A LA TEMPERATURE T (g/cm^3)
+
+* A la temperature du plombe
+REAL coeff_5 := T_Pb 20.0 - a_AIM1_Pb * 1.0 + ;
+REAL coeff_6 := coeff_5 coeff_5 * coeff_5 * ;
+REAL rho_AIM1_Pb := rho0_AIM1 coeff_6 * ;
+
+REAL coeff_9 := T_Pb 20.0 - a_F17 * 1.0 + ;
+REAL coeff_10 := coeff_9 coeff_9 * coeff_9 * ;
+REAL rho_F17 := rho0_F17 coeff_10 * ;
+
+
+* GAINE (ACIER AIM1) A LA TEMPERATURE DU PLOMBE
+
+REAL N_Fe_APb := p_Fe_AIM1 rho_AIM1_Pb A * M_Fe / * ;
+REAL N_Fe54_APb := p_Fe54 N_Fe_APb * ;
+REAL N_Fe56_APb := p_Fe56 N_Fe_APb * ;
+REAL N_Fe57_APb := p_Fe57 N_Fe_APb * ;
+REAL N_Fe58_APb := p_Fe58 N_Fe_APb * ;
+REAL N_Cr_APb := p_Cr_AIM1 rho_AIM1_Pb A * M_Cr / * ;
+REAL N_Cr50_APb := p_Cr50 N_Cr_APb * ;
+REAL N_Cr52_APb := p_Cr52 N_Cr_APb * ;
+REAL N_Cr53_APb := p_Cr53 N_Cr_APb * ;
+REAL N_Cr54_APb := p_Cr54 N_Cr_APb * ;
+REAL N_Ni_APb := p_Ni_AIM1 rho_AIM1_Pb A * M_Ni / * ;
+REAL N_Ni58_APb := p_Ni58 N_Ni_APb * ;
+REAL N_Ni60_APb := p_Ni60 N_Ni_APb * ;
+REAL N_Ni61_APb := p_Ni61 N_Ni_APb * ;
+REAL N_Ni62_APb := p_Ni62 N_Ni_APb * ;
+REAL N_Ni64_APb := p_Ni64 N_Ni_APb * ;
+REAL N_Mn55_APb := p_Mn_AIM1 rho_AIM1_Pb A * M_Mn / * ;
+REAL N_Mo_APb := p_Mo_AIM1 rho_AIM1_Pb A * M_Mo / * ;
+REAL N_Mo92_APb := p_Mo92 N_Mo_APb * ;
+REAL N_Mo94_APb := p_Mo94 N_Mo_APb * ;
+REAL N_Mo95_APb := p_Mo95 N_Mo_APb * ;
+REAL N_Mo96_APb := p_Mo96 N_Mo_APb * ;
+REAL N_Mo97_APb := p_Mo97 N_Mo_APb * ;
+REAL N_Mo98_APb := p_Mo98 N_Mo_APb * ;
+REAL N_Mo100_APb := p_Mo100 N_Mo_APb * ;
+REAL N_Si_APb := p_Si_AIM1 rho_AIM1_Pb A * M_Si / * ;
+REAL N_Ti_APb := p_Ti_AIM1 rho_AIM1_Pb A * M_Ti / * ;
+
+* ACIER F17
+
+REAL N_Fe_F17 := p_Fe_F17 rho_F17 A * M_Fe / * ;
+REAL N_Fe54_F17 := p_Fe54 N_Fe_F17 * ;
+REAL N_Fe56_F17 := p_Fe56 N_Fe_F17 * ;
+REAL N_Fe57_F17 := p_Fe57 N_Fe_F17 * ;
+REAL N_Fe58_F17 := p_Fe58 N_Fe_F17 * ;
+REAL N_Cr_F17 := p_Cr_F17 rho_F17 A * M_Cr / * ;
+REAL N_Cr50_F17 := p_Cr50 N_Cr_F17 * ;
+REAL N_Cr52_F17 := p_Cr52 N_Cr_F17 * ;
+REAL N_Cr53_F17 := p_Cr53 N_Cr_F17 * ;
+REAL N_Cr54_F17 := p_Cr54 N_Cr_F17 * ;
+REAL N_Mn55_F17 := p_Mn_F17 rho_F17 A * M_Mn / * ;
+REAL N_C12_F17 := p_C_F17 rho_F17 A * M_C / * ;
+REAL N_S_F17 := p_S_F17 rho_F17 A * M_S / * ;
+REAL N_Si_F17 := p_Si_F17 rho_F17 A * M_Si / * ;
+
+*-----------------------------------------------------------------------
+* AFFICHAGE DES RESULTATS                                              *
+*-----------------------------------------------------------------------
+
+:: <<N_Fe54_APb>> <<N_Fe56_APb>>
+<<N_Fe57_APb>> <<N_Fe58_APb>> <<N_Cr50_APb>> 
+<<N_Cr52_APb>> <<N_Cr53_APb>> <<N_Cr54_APb>> 
+<<N_Ni58_APb>> <<N_Ni60_APb>> <<N_Ni61_APb>> 
+<<N_Ni62_APb>> <<N_Ni64_APb>> <<N_Mn55_APb>> 
+<<N_Mo92_APb>> <<N_Mo94_APb>> <<N_Mo95_APb>> <<N_Mo96_APb>>
+<<N_Mo97_APb>> <<N_Mo98_APb>> <<N_Mo100_APb>>
+<<N_Si_APb>> <<N_Ti_APb>> <<N_Fe54_F17>> 
+<<N_Fe56_F17>> <<N_Fe57_F17>> <<N_Fe58_F17>> <<N_Cr50_F17>> 
+<<N_Cr52_F17>> <<N_Cr53_F17>> <<N_Cr54_F17>> <<N_Mn55_F17>>
+<<N_C12_F17>> <<N_S_F17>> <<N_Si_F17>> 
+;
+
+END: ;

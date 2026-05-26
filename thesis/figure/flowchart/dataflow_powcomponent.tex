@@ -1,0 +1,91 @@
+\documentclass[crop,border=7pt]{standalone}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}       
+\usepackage{scalefnt}
+\usepackage[dvipsnames]{xcolor}
+%% TIKZ
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usetikzlibrary{decorations.pathmorphing,decorations.text,decorations.pathreplacing}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes,shapes.multipart,arrows,fit,calc,positioning,intersections,through}
+\usetikzlibrary{backgrounds,fadings}
+
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+%  \tikzsetnextfilename{flow_chart}
+ \tikzstyle{rect} = [draw=black, thick, rectangle, fill=yellow!30, text width=16em, text centered, minimum height=2em]
+ \tikzstyle{elli} = [draw=black, thick, ellipse, fill= white!20, minimum height=2em, text width=10em]
+\tikzstyle{circ} = [draw=black, thick, circle, fill=red!30, text width=3em, text centered]
+\tikzstyle{diam} = [draw=black, thick, diamond, fill=green!30, text width=4.5em, text badly centered, inner sep=0pt]
+\tikzstyle{trap} = [draw=black, thick, trapezium, trapezium left angle=70, trapezium right angle=110, fill=white!20, text width=6em, text centered, minimum height=2em]
+\tikzstyle{arrow} = [thick, ->]
+\begin{tikzpicture}[>=latex, node distance=2.5cm]
+%     every node/.style = {thin, shape=rectangle, 
+%    rounded corners,
+%     draw, 
+%     align=center},
+%    ]   
+
+% \node (geom) [rect, rounded corners] {Caricamento della geometria complessiva del reattore};
+
+\node (compo) [rect, rounded corners] {\textbf{MULTICOMPO}:\\ Database reattoristico che contiene le sezioni d'urto efficaci del combustibile e altri componenti};
+\node (ncr) [diam, below of=compo] {modulo \\ NCR};
+\node (fmap) [circ, left of=ncr, xshift=-2.5cm] {Fmap};
+
+% \node (ncrd) [rect, rounded corners, below of=ncr] {Interpolazione del database sui parametri di temperatura del combustibile, densità del refrigerante e burn-up};
+
+\node(macrof) [circ, below of=ncr, xshift=-1.5cm] {MacroF};
+\node(macro1) [circ, below of=ncr, xshift=1.5cm] {Macro1};
+
+\node(macini) [diam, below of=macrof, xshift=1.5cm] {modulo \\ MACINI};
+% \node(macinid) [rect, rounded corners, below of=macini] { byebye };
+
+\node(matex) [circ, left of=macini, xshift=-2.5cm] {Matex};
+\node(macro2) [circ, below of=macini] {Macro2};
+
+\node(trivaa) [diam, below of=macro2] {modulo \\ TRIVAA};
+\node(system) [circ, below of=trivaa] {System};
+
+\node(track) [circ, left of=trivaa, xshift=-2.5cm] {Track};
+
+\node(flud) [diam, below of=system] {modulo \\ FLUD};
+\node(flux) [circ, right of=flud] {Flux};
+\node(flpow) [diam, right of=flux] {modulo \\ FLPOW};
+\node(power) [circ, right of=flpow] {Power};
+
+\node(rods) [rect, rounded corners, right of=macro1, xshift=2cm] {Parametro per l'inserzione delle barre di controllo: \\ -\textbf{Estratte: rod=0 }\\ -\textbf{Inserite: rod=1}};
+
+\node(para) [rect, rounded corners, right of=ncr, xshift=3.5cm] {Soluzione del campo di temperatura dal codice di termodinamica \\ \textbf{-Temperature del combustibile} \\ \textbf{-Densit\'a del refrigerante}};
+
+
+
+\draw [arrow] (compo) -- (ncr);
+\draw [arrow] (fmap) -- (ncr);
+% \draw [arrow] (ncr) -- (ncrd);
+\draw [arrow] (ncr) -- (macrof);
+\draw [arrow] (ncr) -- (macro1);
+\draw [arrow] (macro1) -- (macini);
+\draw [arrow] (macrof) -- (macini);
+\draw [arrow] (matex) -- (macini);
+% \draw [arrow] (macini) -- (macinid);
+\draw [arrow] (macini) -- (macro2);
+\draw [arrow] (macro2) -- (trivaa);
+\draw [arrow] (track) -- (trivaa);
+\draw [arrow] (trivaa) -- (system);
+\draw [arrow] (system) -- (flud);
+\draw [arrow] (flud) -- (flux);
+\draw [arrow] (flux) -- (flpow);
+\draw [arrow] (flpow) -- (power);
+
+
+\draw [arrow] (para) -- (ncr);
+\draw [arrow] (rods) -- (macro1);
+
+\end{tikzpicture}
+\end{document}
+% pdflatex --shell-escape figure.tex

@@ -1,0 +1,136 @@
+\section{Piattaforma numerica}
+
+\begin{frame}
+\frametitle{Schema blocchi concettuale del procedimento}
+\begin{center}
+ \includegraphics[scale=0.5]{../../figure/flowchart/dataflow_platform}
+ \end{center}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Modellazione dell'assembly di combustibile}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\begin{figure}[!htb]
+\centering
+\subfigure[Assembly di combustibile. \label{fassembly}]
+{\includegraphics[width=0.48\textwidth]{../../figure/itex/fassembly}}
+\centering
+\subfigure[Elemento di combustibile. \label{unitcells}]
+{\includegraphics[width=0.48\textwidth]{../../figure/itex/unitcells_wq}}
+\caption{Modello di assembly di combustibile al fine di creare il database 
+per il combustibile. }
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{frame}
+
+\begin{frame}
+\frametitle{Modellazione dell'assembly di combustibile}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!htb]
+\centering
+ \begin{tabular}{lcc}
+\toprule
+Parametro & Unità & Valore \\
+\midrule
+Numero totale di esagoni & - & 169 \\
+Numero di barre di combustibile & - & 126 \\
+Numero di elementi di acciaio & - & 43 \\
+Lato di un esagono & mm & 8.00208 \\
+Apotema di un esagono & mm & 6.93 \\
+Distanza tra barre di combustibile & mm & 13.86 \\
+Raggio totale della barra di combustibile & mm & 5.25 \\
+\bottomrule
+\end{tabular}
+\caption{Parametri di modellazione in riferimento all'assembly di combustibile 
+in Figura \ref{fassembly}. \label{tabcrosection}}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Modellazione dell'assembly di combustibile}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\begin{table}[!htb]
+\small
+\centering
+ \begin{tabular}{lcccccccc}
+ \toprule
+ Parametro & Unità & Valori &  &  &   & & \\
+ \midrule
+Temperatura del combustibile & [$^\circ$C] & 400.0 & 550.0 & 700.0 & 850.0 & 1000.0 
+\\
+\midrule
+Temperatura del refrigerante & [$^\circ$C] & 380.0 & 440.0 & 600.0 & 750.0 &  \\
+\midrule
+Valori di bruciamento salvati & [Giorni] & 0.0 & 365.0 & 730.0 & 1095.0 & \\ 
+\bottomrule
+\end{tabular}
+\caption{Dati di ingresso per la creazione del database combustibile.\label{daticompo}}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ \begin{frame}
+ \frametitle{Modello implementato del reattore} 
+ \begin{minipage}{0.48\linewidth}
+ \begin{center}
+ \includegraphics[scale=0.3]{../../figure/itex/hexagon}
+ \end{center}
+ \end{minipage}\hfill
+ \begin{minipage}{0.48\linewidth}
+ \begin{center}
+ Sketch of the reactor core
+ \begin{figure}
+ \includegraphics[scale=0.3]{../../figure/itex/rectangle_wq}
+ \end{figure}
+ \end{center}
+ \end{minipage}
+   Reactor core fuel map 
+ \end{frame}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ \begin{frame}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!htb]
+\centering
+\subfigure[Conducibilità termica mediata \label{tempeq}]
+{\includegraphics[height=0.3\textheight]{./figure/itex/tempeq}}
+\hspace{5mm}
+\subfigure[Canale chiuso \label{canale}]
+{\includegraphics[height=0.3\textheight]{./figure/itex/canale}}
+\caption{Principali approssimazione considerate per la risoluzione termoidraulica di ciascun elemento del reattore.}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!htb]
+\centering
+ \begin{tabular}{lccc}
+\toprule
+Parametro & Simbolo & Unità & Valore \\
+\midrule
+Densità & $\rho$ & kg/m$^3$ & 11340 \\
+Conduttività termica & $\lambda$ & W/(m$\cdot$K) & 35 \\
+Calore specifico & $c_p$ & J/(kg$\cdot$K) & 129 \\
+Viscosità dinamica & $\mu$ & Pa$\cdot$s & 0.001844 \\
+\bottomrule
+\end{tabular}
+\caption{Principali parametri termodinamici che caratterizzano il piombo 
+liquido.}
+\label{leadparam}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ 
+ 
+ 
+ 
+ \end{frame}
+ 
+ 
+ 
+ 
+ \begin{frame}
+ 
+ 
+ \end{frame}

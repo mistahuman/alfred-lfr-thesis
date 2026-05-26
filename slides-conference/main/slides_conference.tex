@@ -1,0 +1,427 @@
+\documentclass[10pt]{beamer}
+
+%%% Dichiarazione dei pacchetti standard.
+\usepackage[italian]{babel}
+\usepackage[T1]{fontenc} 
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts,amsmath,amssymb}
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\usepackage[none]{hyphenat}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{smartdiagram}
+
+%%% Personalizzazione del layout---articolata su cinque livelli.
+%\usetheme{Madrid}        % layout complessivo.
+%\usetheme{boxes}
+%\usetheme{Pittsburgh}
+%\usetheme{Median}
+%\usetheme{Rochester}
+%\usetheme{Pittsburgh}
+%\usetheme{Madrid}        % layout complessivo.
+%\definecolor{mygreen}{rgb}{.125,.5,.25}
+%\definecolor{bleudefrance}{rgb}{0.19, 0.55, 0.91}
+%\definecolor{ceruleanblue}{rgb}{0.16, 0.32, 0.75}
+%\definecolor{bondiblue}{rgb}{0.0, 0.58, 0.71}
+\usetheme{Casalbo}
+%\usecolortheme[named=ceruleanblue]{structure}
+%\useinnertheme{circles} % layout interno. (circles rectangles rounded inmargin)
+%\useoutertheme{smoothbars}  % layout esterno. (infolines miniframes smoothbars sidebar
+%\usecolortheme{crane} % schema di colori.
+%\usefonttheme{structurebold}  %schema dei font.
+%\setbeamercovered{dynamic}
+%\usecolortheme[named=blue]{structure}
+%\usecolortheme{seahorse}
+%\useinnertheme{circles} % layout interno. (circles rectangles rounded inmargin)
+%\useoutertheme{sidebar}  % layout esterno. (infolines miniframes smoothbars sidebar
+%\usecolortheme{crane} % schema di colori.
+%\usefonttheme{structurebold}  % schema dei font.
+%\usefonttheme{professionalfonts}
+%\setbeamercovered{dynamic}
+% Inutile dire che se volete tutti i default, potete risparmiarvi gli ultimi
+% quattro comandi. 
+
+%%% Titolo e autore.
+\title{A MULTIPHYSICS APPROACH TO LFR ANALYSIS}
+%\subtitle{?}
+\author[M.Sumini, S.Manservisi, M.Lanconelli]{Marco Sumini, Sandro Manservisi, Marco Lanconelli}
+\institute{University of Bologna, DIN, Lab. of Montecuccolino, Italy}
+\date{\tt Technical Meeting on the Benefits and Challenges of Fast Reactors of the SMR Type, 26 September 2019}
+
+\theoremstyle{definition}
+\newtheorem{definizione}{Definizione}
+
+
+\newcommand*\tick{\item[\Checkmark]}
+\newcommand*\fail{\item[\XSolidBrush]}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+%\begin{frame}
+ %\frametitle{Index of contents}
+ % \tableofcontents
+%\end{frame}
+
+\section{introduction of approach}
+
+\begin{frame}
+\frametitle{Introduction of multiphysics approach}
+Development of computational platform that integrates different computational tools, into the common wrapping framework given by the \textcolor{red}{\textbf{SALOME platform}}:
+\begin{itemize}
+\item Lattice code, \textcolor{blue}{\textbf{DRAGON}}
+\item Full core simulation code, \textcolor{bleudefrance}{\textbf{DONJON}}
+\item 3D-porous thermal-hydraulic CFD code, \textcolor{mygreen}{\textbf{FEMus}}
+\end{itemize}
+\begin{minipage}[c]{0.48\linewidth}
+\begin{center}
+\scalebox{.5}{\smartdiagram[bubble diagram]{
+Salome Platform,Lattice code,Core simulation code,CFD code
+}
+}
+\end{center}
+\end{minipage}
+\begin{minipage}[c]{0.48\linewidth}
+\begin{center}
+\scalebox{.6}{\smartdiagram[circular diagram:clockwise]{Full core simulation, Analysis Thermal Hydraulics, Nuclear Database}}
+\end{center}
+\end{minipage}\hfill
+
+
+\end{frame}
+
+
+
+
+\section{target of approach}
+\begin{frame}[t]
+\frametitle{Targets of multiphysics approach}
+\begin{itemize}
+\item Investigate the coupling between neutronic code and thermal-hydraulic code
+\item Implementation of multiphysics approach into preliminary model of a Fast Small Modular Reactor (SMR) 
+\item Choosing a lead cooled reactor conceptual design, ALFRED, characterized by small core dimension along the axis
+\end{itemize}
+\begin{block}{Future perspectives}
+A coupled neutronics and thermal hydraulics analysis to better supporting the fast core dynamics (in both fields) at design level
+\end{block}
+\end{frame}
+
+\section{description of neutronic code}
+\begin{frame}[t]
+\frametitle{Neutronic Code}
+The neutronic code is an \textcolor{blue}{open-source reactor physics code \texttt{"Dragon-Donjon Ver5.0.5"}} developed at Ecole Polytechnique de Montreal (Canada), designed around methods to solving transport equation of neutron.
+\begin{block}{Lattice code, DRAGON}
+Simulate the neutronic behavior of the fuel assembly in the reactor core and create the proper nuclear database, called MULTICOMPO
+\end{block}
+\begin{block}{Full core simulation, DONJON}
+Interpolate information contained in MULTICOMPO, simulate the comprehensive neutronic behavior of core and compute power and flux distribution
+\end{block}
+\end{frame}
+
+\section{cross section}
+\begin{frame}[t]
+\frametitle{Nuclear Database - MULTICOMPO}
+\begin{block}{MULTICOMPO}
+\begin{itemize}
+
+\item \textcolor{red}{\textbf{data structure}} which contain nuclear properties of assembly's materials.
+
+\item possibility to recovery data concerned parameters as \textcolor{mygreen}{\textbf{nuclide's temperature and density or depletion calculation}}. 
+
+\item necessity to create an optimal nuclear database for a correctly use of full core simulation code.
+
+\end{itemize}
+\end{block}
+\begin{block}
+
+\begin{enumerate}
+\item Isotopic cross-section library \texttt{JEFF 3.1.2} with 315 energy groups
+\item Lattice calculation
+\begin{itemize}
+\item Burn-up calculation
+\item Temperature and density modification
+\item Homogenization and collapse to 33 energy groups
+\end{itemize}
+\item Saving macroscopic cross sections in MULTICOMPO
+\end{enumerate}
+
+\end{block}
+
+\end{frame}
+
+
+\section{description of computational fluid dynamics code}
+\begin{frame}[t]
+\frametitle{Computational fluid dynamics code}
+% The 3D-CFD thermal hydraulics is based on the open-source code:
+ \begin{block}{FEMus}
+is a an open-source version, developed at the University of Bologna, of the LIBMESH library with parallel MPI-PETSC and multigrid solvers
+
+ \end{block}
+ \begin{exampleblock}{The CFD solvers}
+have the function to \textcolor{blue}{solve energy and temperature equations} starting from a given \textcolor{blue}{neutronic power density distribution}
+ \end{exampleblock}
+
+% 
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Temperature Field}
+\begin{minipage}{0.35\linewidth}
+\includegraphics[scale=0.15]{../img/tempeq.png}
+% Reactor
+\end{minipage}
+\begin{minipage}{0.28\linewidth}
+{\small
+ Assumption for solution of energy equation is \textcolor{blue}{porous medium}
+ \begin{equation}
+ \vec{v}\cdot\nabla T + \nabla K_{eff} \nabla T = Q_{source} \nonumber 
+ \end{equation}
+%  where $K_{eff}$ is thermal conductivity effective of the material
+}
+\end{minipage}
+\begin{minipage}{0.32\linewidth}
+\includegraphics[scale=0.2]{../img/canale.png}\\
+{\tiny Reactor channel (closed core)}
+\end{minipage}
+\end{frame}
+
+
+\begin{frame}
+
+\frametitle{Computational platform}
+\framesubtitle{Open source codes}
+\begin{center}
+
+\includegraphics[scale=0.40]{../img/platform.png}
+
+\end{center}
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Computational platform}
+\framesubtitle{Proprietary codes}
+\begin{center}
+
+\includegraphics[scale=0.40]{../img/platform1.png}
+
+\end{center}
+\end{frame}
+
+\section{description of numerical platform}
+\begin{frame}
+\frametitle{Computational wrapping platform}
+\begin{alertblock}{The main purpose} 
+is to couple the solution of a multi-physics and multi-scale three-dimensional problem inside a simplified and more comprehensive framework.
+\end{alertblock}
+\begin{block}{The Salomé project}
+facilitates the coupling of scientific mesh-based codes thanks to its architecture and suite of tools that provide several data interfaces and exchange across the different codes
+\end{block}
+The integration of a code on the Salomè platform is obtained by generating an interface with functions available in the MEDMem library that \textcolor{red}{allows a data transfer from the platform to the code and then from the code to the interface}
+\end{frame}
+
+\begin{frame}
+\frametitle{Main modules used in wrapping}
+\begin{block}{MED module}
+provide a library for \textcolor{blue}{\textbf{storing}} and \textcolor{blue}{\textbf{recovering}} computer data in a suitable format
+\end{block}
+\begin{block}{GEOM and MESH modules}
+have the main function to \textcolor{blue}{\textbf{draw}} and \textcolor{blue}{\textbf{create meshes}} in MED format, respectively.
+\end{block}
+\begin{block}{YACS module}
+is a tool to \textcolor{blue}{\textbf{supervise execution}} of complex interconnected scientific applications as object structure available during execution of DONJON code.
+\end{block}
+\end{frame}
+
+\section{flowchart}
+\begin{frame}
+\frametitle{Summary flowchart}
+\begin{figure}
+\includegraphics[scale=0.30]{../img/flowchart_2.png}
+\end{figure}
+\end{frame}
+
+\section{data modeling}
+
+% \begin{frame}
+% \includegraphics[scale=0.2]{../img/crosection.pdf}
+
+
+% \end{frame}
+
+
+
+
+
+
+\begin{frame}
+\frametitle{The ALFRED (SMR) concept model}
+\framesubtitle{Data and Modeling}
+
+\begin{minipage}{0.48\linewidth}
+\scalebox{.6}{
+\begin{tabular}{lcc}
+\hline
+Parameters & Unit & Value \\
+\hline
+Thermal Power & $MW$  & 300 \\
+Total height vessel & $mm$ & 3500 \\
+Inner vessel inner/outer radius & $mm$ & 1475/1525 \\ 
+Lattice pitch (hexagonal) & $mm$ & 13.86\\
+Wrapper thickness & $mm$ & 4.0\\
+Distance between to wrappers & $mm$ & 5.0\\
+Pins per FA & - & 126\\
+Total FA & - & 134\\
+Inner/Outer FA & - &  56/78 \\
+Inner/Outer enrichment & $\%$ & 20.5/26.2 \\
+Control/Safety Rods & - & 12/4 \\
+In-pile section & - & 1 \\
+Average Core Flow & $m/s$ & 1.28 \\
+Coolant Inlet/Outlet Temperature & $^oC$ & 400/520 \\
+\hline
+\end{tabular}
+}
+\begin{center}
+\includegraphics[scale=0.18]{../img/hexagon.pdf}
+\end{center}
+\end{minipage}\hfill
+\begin{minipage}{0.48\linewidth}
+\begin{center}
+Sketch of the reactor core
+\begin{figure}
+\includegraphics[scale=0.18]{../img/rectangle.pdf}
+\end{figure}
+\end{center}
+\end{minipage}
+  Reactor core fuel map 
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Fuel pin and assembly}
+\framesubtitle{Data and Modeling}
+
+
+\scalebox{.7}{
+\begin{tabular}{lcc}
+\hline
+Parameters & Unit & Value \\
+\hline
+Pellet hollow diameter & $mm$ & 2.0\\
+Pellet radius & $mm$ & 4.5\\ 
+Gap thickness & $mm$ & 0.15\\
+Clad thickness & $mm$ & 0.6\\
+Pin diameter & $mm$ & 10.5\\
+Bottom plug length & $mm$ & 50\\
+Gas plenum height & $mm$ & 550\\
+Bottom plug length & $mm$ & 10\\
+Active height & $mm$ & 600\\
+Upper insulator height & $mm$ & 10\\
+Spring length & $mm$ & 120\\
+Upper plug length & $mm$ & 50\\
+\hline
+\end{tabular}
+% Dimensional Parameters of Fuel Pin
+}
+\begin{minipage}{0.3\linewidth}
+\begin{center}
+\includegraphics[scale=0.09]{../img/fullassembly.pdf}
+\end{center}
+$ \qquad $Fuel Assembly
+\end{minipage}
+\begin{minipage}[c]{0.2\linewidth}
+\begin{center}
+\includegraphics[scale=0.15]{../img/pin.pdf}
+\end{center}
+$ \qquad $Fuel pin
+\end{minipage}
+
+
+\end{frame}
+
+
+
+
+
+\section{result}
+\begin{frame}[c]
+\frametitle{Finite elements for neutronic and CFD codes}
+\begin{minipage}[c]{0.48\linewidth}
+\centering Mesh CFD
+\begin{figure}
+\includegraphics[scale=0.3]{../img/1-ok.png}
+\end{figure}
+\end{minipage}
+\begin{minipage}[c]{0.48\linewidth}
+\centering Mesh Neutronic
+\begin{figure}
+\includegraphics[scale=0.3]{../img/2-ok.png}
+\end{figure}
+\end{minipage}
+\end{frame}
+\begin{frame}
+\frametitle{Preliminary result of multiphysics approach}
+\begin{minipage}[c]{0.32\linewidth}
+Flux distribution
+\begin{figure}
+\includegraphics[scale=0.14]{../img/a1.png}
+
+\includegraphics[scale=0.14]{../img/b1.png}
+
+\includegraphics[scale=0.14]{../img/c1.png}
+\end{figure}
+\end{minipage}
+\begin{minipage}[c]{0.32\linewidth}
+Power distribution
+\begin{figure}
+\includegraphics[scale=0.14]{../img/a2.png}
+
+\includegraphics[scale=0.14]{../img/b2.png}
+
+\includegraphics[scale=0.14]{../img/c2.png}
+\end{figure}
+\end{minipage}
+\begin{minipage}[c]{0.32\linewidth}
+Temperature field
+\begin{figure}
+\includegraphics[scale=0.14]{../img/a3.png}
+
+\includegraphics[scale=0.14]{../img/b3.png}
+
+\includegraphics[scale=0.14]{../img/c3.png}
+\end{figure}
+\end{minipage}
+\end{frame}
+
+
+
+
+\begin{frame}[c]
+\frametitle{Preliminary result of multiphysics approach}
+\begin{minipage}[c]{0.48\linewidth}
+\centering Power distribution along axial
+\begin{figure}
+\includegraphics[scale=0.25]{../img/pw.png}
+\end{figure}
+\end{minipage}
+\begin{minipage}[c]{0.48\linewidth}
+\centering Wappring power distribution with temperature field on reactor section
+\begin{figure}
+\includegraphics[scale=0.25]{../img/clipthre.png}
+\end{figure}
+\end{minipage}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusions}
+\begin{itemize}
+\item 
+\end{itemize}
+\end{frame}
+\end{document}

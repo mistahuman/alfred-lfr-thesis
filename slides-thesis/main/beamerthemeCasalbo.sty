@@ -1,0 +1,73 @@
+% Copyright 2007 by Till Tantau
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+
+
+\mode<presentation>
+
+\definecolor{blizzardblue}{rgb}{0.67, 0.9, 0.93}
+\definecolor{mygreen}{rgb}{.125,.5,.25}
+\definecolor{bleudefrance}{rgb}{0.19, 0.55, 0.91}
+\definecolor{ceruleanblue}{rgb}{0.16, 0.32, 0.75}
+\definecolor{bondiblue}{rgb}{0.0, 0.58, 0.71}
+\definecolor{celestialblue}{rgb}{0.29, 0.59, 0.82}
+
+
+%%%%%%%%% set palette color 
+
+\setbeamercolor*{structure}{fg=ceruleanblue}
+
+\setbeamercolor*{palette primary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=structure.fg!75!black}
+\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg!50!black}
+\setbeamercolor*{palette quaternary}{fg=white,bg=black}
+
+\setbeamercolor*{sidebar}{use=structure,bg=structure.fg}
+  
+\setbeamercolor*{palette sidebar primary}{use=structure,fg=structure.fg!10}
+\setbeamercolor*{palette sidebar secondary}{fg=white}
+\setbeamercolor*{palette sidebar tertiary}{use=structure,fg=structure.fg!50}
+\setbeamercolor*{palette sidebar quaternary}{fg=white}
+
+\setbeamercolor*{titlelike}{parent=palette primary}
+
+\setbeamercolor*{separation line}{}
+\setbeamercolor*{fine separation line}{}
+
+
+%%%%%%%%% set block color
+
+\setbeamercolor{block title}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor{block title alerted}{use=alerted text,fg=white,bg=alerted text.fg!75!black}
+\setbeamercolor{block title example}{use=example text,fg=white,bg=example text.fg!75!black}
+
+\setbeamercolor{block body}{parent=normal text,use=block title,bg=block title.bg!10!bg}
+\setbeamercolor{block body alerted}{parent=normal text,use=block title alerted,bg=block title alerted.bg!10!bg}
+\setbeamercolor{block body example}{parent=normal text,use=block title example,bg=block title example.bg!10!bg}
+
+
+%%%%%%%%% set inner theme
+
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\setbeamertemplate{items}[circle]
+\setbeamertemplate{sections/subsections in toc}[circle]
+\setbeamertemplate{title page}[default][colsep=-4bp,rounded=true,shadow=true]
+\setbeamertemplate{part page}[default][colsep=-4bp,rounded=true,shadow=true]
+\setbeamertemplate{section page}[default][colsep=-4bp,rounded=true,shadow=true]
+\setbeamertemplate{subsection page}[default][colsep=-4bp,rounded=true,shadow=true]
+  
+
+%%%%%%%%% set font theme  
+
+
+\usefonttheme{structurebold}  % schema dei font.
+% \usefonttheme{professionalfonts}
+\setbeamercovered{dynamic}  
+
+\mode
+<all>

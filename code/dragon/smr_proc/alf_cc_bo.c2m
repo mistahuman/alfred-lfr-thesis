@@ -1,0 +1,145 @@
+*-----------------------------------------------------------------------
+* PROCEDURE CLE 2000 CONCENTRATIONS ISOTOPES BOUCHON                   *
+*-----------------------------------------------------------------------
+
+* Procedure appelee par :
+* 
+* N_Pb_bo N_Fe54_Ebo N_Fe56_Ebo N_Fe57_Ebo N_Fe58_Ebo
+* N_Cr50_Ebo N_Cr52_Ebo N_Cr53_Ebo N_Cr54_Ebo N_Ni58_Ebo
+* N_Ni60_Ebo N_Ni61_Ebo N_Ni62_Ebo N_Ni64_Ebo N_Mn55_Ebo
+* N_Mo92_Ebo N_Mo94_Ebo N_Mo95_Ebo N_Mo96_Ebo N_Mo97_Ebo
+* N_Mo98_Ebo N_Mo100_Ebo N_C_Ebo N_Si_Ebo N_Ti_Ebo
+* N_Fe54_APbbo N_Fe56_APbbo N_Fe57_APbbo N_Fe58_APbbo N_Cr50_APbbo
+* N_Cr52_APbbo N_Cr53_APbbo N_Cr54_APbbo N_Ni58_APbbo N_Ni60_APbbo
+* N_Ni61_APbbo N_Ni62_APbbo N_Ni64_APbbo N_Mn55_APbbo N_Mo92_APbbo
+* N_Mo94_APbbo N_Mo95_APbbo N_Mo96_APbbo N_Mo97_APbbo N_Mo98_APbbo
+* N_Mo100APbbo N_Si_APbbo N_Ti_APbbo
+* := alfred_cc_bo ::
+* >>p_Pb_bo<< >>p_Ebo<< >>p_Abo<<
+* >>N_Fe54_E<< >>N_Fe56_E<< >>N_Fe57_E<< >>N_Fe58_E<<
+* >>N_Cr50_E<< >>N_Cr52_E<< >>N_Cr53_E<< >>N_Cr54_E<<
+* >>N_Ni58_E<< >>N_Ni60_E<< >>N_Ni61_E<< >>N_Ni62_E<<
+* >>N_Ni64_E<< >>N_Mn55_E<< >>N_Mo92_E<< >>N_Mo94_E<<
+* >>N_Mo95_E<< >>N_Mo96_E<< >>N_Mo97_E<< >>N_Mo98_E<<
+* >>N_Mo100_E<< >>N_C_E<< >>N_Si_E<< >>N_Ti_E<< >>N_Pb<<
+* >>N_Fe54_APb<< >>N_Fe56_APb<< >>N_Fe57_APb<< >>N_Fe58_APb<<
+* >>N_Cr50_APb<< >>N_Cr52_APb<< >>N_Cr53_APb<< >>N_Cr54_APb<<
+* >>N_Ni58_APb<< >>N_Ni60_APb<< >>N_Ni61_APb<< >>N_Ni62_APb<<
+* >>N_Ni64_APb<< >>N_Mn55_APb<< >>N_Mo92_APb<< >>N_Mo94_APb<<
+* >>N_Mo95_APb<< >>N_Mo96_APb<< >>N_Mo97_APb<< >>N_Mo98_APb<<
+* >>N_Mo100_APb<< >>N_Si_APb<< >>N_Ti_APb<< ;
+
+MODULE END: ;
+
+*-----------------------------------------------------------------------
+* RECUPERATION DES DONNEES D ENTREE                                    *
+*-----------------------------------------------------------------------
+
+REAL 
+p_Pb_bo p_Ebo p_Abo N_Fe54_E N_Fe56_E N_Fe57_E
+N_Fe58_E N_Cr50_E N_Cr52_E N_Cr53_E N_Cr54_E N_Ni58_E N_Ni60_E N_Ni61_E
+N_Ni62_E N_Ni64_E N_Mn55_E N_Mo92_E N_Mo94_E N_Mo95_E N_Mo96_E N_Mo97_E
+N_Mo98_E N_Mo100_E N_C_E N_Si_E N_Ti_E N_Pb
+N_Fe54_APb N_Fe56_APb N_Fe57_APb N_Fe58_APb N_Cr50_APb N_Cr52_APb
+N_Cr53_APb N_Cr54_APb N_Ni58_APb N_Ni60_APb N_Ni61_APb N_Ni62_APb
+N_Ni64_APb N_Mn55_APb N_Mo92_APb N_Mo94_APb N_Mo95_APb N_Mo96_APb
+N_Mo97_APb N_Mo98_APb N_Mo100_APb N_Si_APb N_Ti_APb
+;
+
+:: >>p_Pb_bo<< >>p_Ebo<< >>p_Abo<<
+>>N_Fe54_E<< >>N_Fe56_E<< >>N_Fe57_E<< >>N_Fe58_E<< >>N_Cr50_E<<
+>>N_Cr52_E<< >>N_Cr53_E<< >>N_Cr54_E<< >>N_Ni58_E<< >>N_Ni60_E<<
+>>N_Ni61_E<< >>N_Ni62_E<< >>N_Ni64_E<< >>N_Mn55_E<< >>N_Mo92_E<<
+>>N_Mo94_E<< >>N_Mo95_E<< >>N_Mo96_E<< >>N_Mo97_E<< >>N_Mo98_E<<
+>>N_Mo100_E<< >>N_C_E<< >>N_Si_E<< >>N_Ti_E<< >>N_Pb<<
+>>N_Fe54_APb<< >>N_Fe56_APb<< >>N_Fe57_APb<< >>N_Fe58_APb<<
+>>N_Cr50_APb<< >>N_Cr52_APb<< >>N_Cr53_APb<< >>N_Cr54_APb<<
+>>N_Ni58_APb<< >>N_Ni60_APb<< >>N_Ni61_APb<< >>N_Ni62_APb<<
+>>N_Ni64_APb<< >>N_Mn55_APb<< >>N_Mo92_APb<< >>N_Mo94_APb<<
+>>N_Mo95_APb<< >>N_Mo96_APb<< >>N_Mo97_APb<< >>N_Mo98_APb<<
+>>N_Mo100_APb<< >>N_Si_APb<< >>N_Ti_APb<<
+;
+
+*-----------------------------------------------------------------------
+* CALCUL DES CONCENTRATIONS                                            *
+*-----------------------------------------------------------------------
+
+REAL N_Pb_bo N_Fe54_Ebo N_Fe56_Ebo N_Fe57_Ebo N_Fe58_Ebo
+N_Cr50_Ebo N_Cr52_Ebo N_Cr53_Ebo N_Cr54_Ebo N_Ni58_Ebo N_Ni60_Ebo
+N_Ni61_Ebo N_Ni62_Ebo N_Ni64_Ebo N_Mn55_Ebo N_Mo92_Ebo N_Mo94_Ebo
+N_Mo95_Ebo N_Mo96_Ebo N_Mo97_Ebo N_Mo98_Ebo N_Mo100_Ebo
+N_C_Ebo N_Si_Ebo N_Ti_Ebo
+N_Fe54_APbbo N_Fe56_APbbo N_Fe57_APbbo N_Fe58_APbbo N_Cr50_APbbo
+N_Cr52_APbbo N_Cr53_APbbo N_Cr54_APbbo N_Ni58_APbbo N_Ni60_APbbo
+N_Ni61_APbbo N_Ni62_APbbo N_Ni64_APbbo N_Mn55_APbbo N_Mo92_APbbo
+N_Mo94_APbbo N_Mo95_APbbo N_Mo96_APbbo N_Mo97_APbbo N_Mo98_APbbo
+N_Mo100APbbo N_Si_APbbo N_Ti_APbbo ;
+
+EVALUATE N_Pb_bo := N_Pb p_Pb_bo * ;
+EVALUATE N_Fe54_Ebo := N_Fe54_E p_Ebo * ;
+EVALUATE N_Fe56_Ebo := N_Fe56_E p_Ebo * ;
+EVALUATE N_Fe57_Ebo := N_Fe57_E p_Ebo * ;
+EVALUATE N_Fe58_Ebo := N_Fe58_E p_Ebo * ;
+EVALUATE N_Cr50_Ebo := N_Cr50_E p_Ebo * ;
+EVALUATE N_Cr52_Ebo := N_Cr52_E p_Ebo * ;
+EVALUATE N_Cr53_Ebo := N_Cr53_E p_Ebo * ;
+EVALUATE N_Cr54_Ebo := N_Cr54_E p_Ebo * ;
+EVALUATE N_Ni58_Ebo := N_Ni58_E p_Ebo * ;
+EVALUATE N_Ni60_Ebo := N_Ni60_E p_Ebo * ;
+EVALUATE N_Ni61_Ebo := N_Ni61_E p_Ebo * ;
+EVALUATE N_Ni62_Ebo := N_Ni62_E p_Ebo * ;
+EVALUATE N_Ni64_Ebo := N_Ni64_E p_Ebo * ;
+EVALUATE N_Mn55_Ebo := N_Mn55_E p_Ebo * ;
+EVALUATE N_Mo92_Ebo := N_Mo92_E p_Ebo * ;
+EVALUATE N_Mo94_Ebo := N_Mo94_E p_Ebo * ;
+EVALUATE N_Mo95_Ebo := N_Mo95_E p_Ebo * ;
+EVALUATE N_Mo96_Ebo := N_Mo96_E p_Ebo * ;
+EVALUATE N_Mo97_Ebo := N_Mo97_E p_Ebo * ;
+EVALUATE N_Mo98_Ebo := N_Mo98_E p_Ebo * ;
+EVALUATE N_Mo100_Ebo := N_Mo100_E p_Ebo * ;
+EVALUATE N_C_Ebo := N_C_E p_Ebo * ;
+EVALUATE N_Si_Ebo := N_Si_E p_Ebo * ;
+EVALUATE N_Ti_Ebo := N_Ti_E p_Ebo * ;
+EVALUATE N_Fe54_APbbo := N_Fe54_APb p_Abo * ;
+EVALUATE N_Fe56_APbbo := N_Fe56_APb p_Abo * ;
+EVALUATE N_Fe57_APbbo := N_Fe57_APb p_Abo * ;
+EVALUATE N_Fe58_APbbo := N_Fe58_APb p_Abo * ;
+EVALUATE N_Cr50_APbbo := N_Cr50_APb p_Abo * ;
+EVALUATE N_Cr52_APbbo := N_Cr52_APb p_Abo * ;
+EVALUATE N_Cr53_APbbo := N_Cr53_APb p_Abo * ;
+EVALUATE N_Cr54_APbbo := N_Cr54_APb p_Abo * ;
+EVALUATE N_Ni58_APbbo := N_Ni58_APb p_Abo * ;
+EVALUATE N_Ni60_APbbo := N_Ni60_APb p_Abo * ;
+EVALUATE N_Ni61_APbbo := N_Ni61_APb p_Abo * ;
+EVALUATE N_Ni62_APbbo := N_Ni62_APb p_Abo * ;
+EVALUATE N_Ni64_APbbo := N_Ni64_APb p_Abo * ;
+EVALUATE N_Mn55_APbbo := N_Mn55_APb p_Abo * ;
+EVALUATE N_Mo92_APbbo := N_Mo92_APb p_Abo * ;
+EVALUATE N_Mo94_APbbo := N_Mo94_APb p_Abo * ;
+EVALUATE N_Mo95_APbbo := N_Mo95_APb p_Abo * ;
+EVALUATE N_Mo96_APbbo := N_Mo96_APb p_Abo * ;
+EVALUATE N_Mo97_APbbo := N_Mo97_APb p_Abo * ;
+EVALUATE N_Mo98_APbbo := N_Mo98_APb p_Abo * ;
+EVALUATE N_Mo100APbbo := N_Mo100_APb p_Abo * ;
+EVALUATE N_Si_APbbo := N_Si_APb p_Abo * ;
+EVALUATE N_Ti_APbbo := N_Ti_APb p_Abo * ;
+
+*-----------------------------------------------------------------------
+* AFFICHAGE DES RESULTATS                                              *
+*-----------------------------------------------------------------------
+
+:: <<N_Pb_bo>> <<N_Fe54_Ebo>> <<N_Fe56_Ebo>> <<N_Fe57_Ebo>>
+<<N_Fe58_Ebo>> <<N_Cr50_Ebo>> <<N_Cr52_Ebo>> <<N_Cr53_Ebo>>
+<<N_Cr54_Ebo>> <<N_Ni58_Ebo>> <<N_Ni60_Ebo>> <<N_Ni61_Ebo>>
+<<N_Ni62_Ebo>> <<N_Ni64_Ebo>> <<N_Mn55_Ebo>> <<N_Mo92_Ebo>>
+<<N_Mo94_Ebo>> <<N_Mo95_Ebo>> <<N_Mo96_Ebo>> <<N_Mo97_Ebo>>
+<<N_Mo98_Ebo>> <<N_Mo100_Ebo>> <<N_C_Ebo>> <<N_Si_Ebo>> <<N_Ti_Ebo>>
+<<N_Fe54_APbbo>> <<N_Fe56_APbbo>> <<N_Fe57_APbbo>> <<N_Fe58_APbbo>>
+<<N_Cr50_APbbo>> <<N_Cr52_APbbo>> <<N_Cr53_APbbo>> <<N_Cr54_APbbo>>
+<<N_Ni58_APbbo>> <<N_Ni60_APbbo>> <<N_Ni61_APbbo>> <<N_Ni62_APbbo>>
+<<N_Ni64_APbbo>> <<N_Mn55_APbbo>> <<N_Mo92_APbbo>> <<N_Mo94_APbbo>> 
+<<N_Mo95_APbbo>> <<N_Mo96_APbbo>> <<N_Mo97_APbbo>> <<N_Mo98_APbbo>>
+<<N_Mo100APbbo>> <<N_Si_APbbo>> <<N_Ti_APbbo>>
+;
+
+END: ;

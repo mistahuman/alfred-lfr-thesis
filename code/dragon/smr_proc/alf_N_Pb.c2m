@@ -1,0 +1,107 @@
+*-----------------------------------------------------
+* PROCEDURE CLE 2000 CONCENTRATIONS ISOTOPES         *
+* Auteur: Marco Sumini, Augusto Di Chicco            *
+*-----------------------------------------------------
+* Donnees en entree :
+*     p_X           : proportion de l isotope X en % massique
+*                    (ppercentuale dell'isotopo X in massa)
+*     a_X           : coefficient de dilatation lineaire de la 
+*                     substance X (en C^-1)
+*                    (coefficiente di dilatazione lineare della
+*                    sostanza X)
+*     T_X           : température moyenne du milieu X (en C)
+*                    (temperatura media del mezzo X in °C)
+
+* Resultat          :
+
+*     N_X           : nombre de noyaux par cm^3 de l isotope X
+*                    (numero di nuclei per cm^3 dell'isotopo X)
+*
+*     X_f           : isotope contenu dans un assemblage fertile
+*                    (isotopo contenuto dentro un assembly fertile)
+
+MODULE END: ABORT: ;
+
+*-----------------------------------------------------
+* RECUPERATION DES DONNEES D ENTREE                  *
+*-----------------------------------------------------
+
+REAL T_Pb ;
+::
+>>T_Pb<< ;
+
+*-----------------------------------------------------
+* CALCUL LEAD  da 100 a 2300                         *
+*-----------------------------------------------------
+REAL a b ya yb ;
+
+IF T_Pb 100.0 < THEN
+EVALUATE a b ya yb := 0.0 100.0 0.0 8.6560E-05 ;
+ELSEIF T_Pb 200.0 <= THEN
+EVALUATE a b ya yb := 100.0 200.0 8.6560E-05 8.9030E-05 ;
+ELSEIF T_Pb 300.0 <= THEN
+EVALUATE a b ya yb := 200.0 300.0 8.9030E-05 9.1380E-05 ;
+ELSEIF T_Pb 400.0 <= THEN
+EVALUATE a b ya yb := 300.0 400.0 9.1380E-05 9.3910E-05 ;
+ELSEIF T_Pb 500.0 <= THEN
+EVALUATE a b ya yb := 400.0 500.0 9.3910E-05 9.6690E-05 ;
+ELSEIF T_Pb 600.0 <= THEN
+EVALUATE a b ya yb := 500.0 600.0 9.6690E-05 9.9540E-05 ;
+ELSEIF T_Pb 700.0 <= THEN
+EVALUATE a b ya yb := 600.0 700.0 9.9540E-05 1.0270E-04 ;
+ELSEIF T_Pb 800.0 <= THEN
+EVALUATE a b ya yb := 700.0 800.0 1.0270E-04 1.0590E-04 ;
+ELSEIF T_Pb 900.0 <= THEN
+EVALUATE a b ya yb := 800.0 900.0 1.0590E-04 1.0920E-04 ;
+ELSEIF T_Pb 1000.0 <= THEN
+EVALUATE a b ya yb := 900.0 1000.0 1.0920E-04 1.1260E-04 ;
+ELSEIF T_Pb 1100.0 <= THEN
+EVALUATE a b ya yb := 1000.0 1100.0 1.1260E-04 1.1620E-04 ;
+ELSEIF T_Pb 1200.0 <= THEN
+EVALUATE a b ya yb := 1100.0 1200.0 1.1620E-04 1.1980E-04 ;
+ELSEIF T_Pb 1300.0 <= THEN
+EVALUATE a b ya yb := 1200.0 1300.0 1.1980E-04 1.2350E-04 ;
+ELSEIF T_Pb 2300.0 <= THEN
+EVALUATE a b ya yb := 1300.0 2300.0 1.2350E-04 1.2351E-04 ;
+ELSE
+ECHO "alf_interpol: out of interpolation domain(5)" ;
+ABORT: ;
+ENDIF ;
+
+REAL coeff1 := yb ya - b a - / ;
+REAL coeff2 := b ya * a yb * - b a - / ;
+REAL a_pb := coeff1 T_Pb * coeff2 + ;
+
+* NOMBRE D AVOGADRO (numero di avogadro)
+
+ECHO "start calculation" ;
+
+REAL A := 6.022094E-1 ; ! Normalisation des concentrations par 10E-24
+                        ! Normalizzazione della concentrazione per 10E-24
+
+* DENSITES NOMINALES A 20°C (g/cm^3) [?]
+* densità nominale a ....(i think)
+
+REAL rho0_Pb := 11.34 ;
+
+* DENSITES A LA TEMPERATURE T (g/cm^3)
+
+REAL coeff_11 := T_Pb 20.0 - a_pb * 1.0 + ;
+REAL coeff_12 := coeff_11 coeff_11 * coeff_11 * ;
+REAL rho_Pb := rho0_Pb coeff_12 * ; 
+
+*-----------------------------------------------------
+* CALCUL DES CONCENTRATIONS                          *
+*-----------------------------------------------------
+
+REAL N_Pb := rho_Pb A * 22.98976928 / ;
+
+*-----------------------------------------------------
+* AFFICHAGE DES RESULTATS                            *
+*-----------------------------------------------------
+
+:: <<N_Pb>> 
+;
+ 
+END: ;
+QUIT .

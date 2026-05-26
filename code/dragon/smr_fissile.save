@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+if [ $# = 0 ]
+  then
+  echo "usage: smr_fix.save directory" 1>&2
+  exit 1
+fi
+echo access alf_fissile.save
+MACH=`uname -s`
+Sysx="`echo $MACH | cut -b -6`"
+if [ $Sysx = "CYGWIN" ]; then
+  MACH=`uname -o`
+else
+  MACH=`uname -sm`
+fi
+ls -l
+
+# mv *.l2m $1/ALFcompo/
+mv ACOMPO1 $1/SMRcompo33/
+mv ABURNUP $1/SMRcompo33/
+
+echo "alf_fissile.save completed"

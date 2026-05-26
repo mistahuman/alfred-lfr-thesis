@@ -1,0 +1,472 @@
+*----
+*  Nom           : smr_fissile.x2m
+*  Auteur        : Marco Lanconelli
+*  Date          : June 2019
+*  Calcul assemblage fissile pour un ALFRED et production d une COMPO
+*----
+*
+************************************************************************
+* DECLARATION INITIALE                                                 *
+************************************************************************
+
+LINKED_LIST DONNEES MICROLIB MICROLIB2 GEO_FERT TRACK PIJ FLUX BURNUP
+            EDIOBJ COMPO ;
+
+SEQ_ASCII ACOMPO3 :: FILE './ACOMPO3' ;
+
+MODULE  LIB: GEO: SYBILT: EXCELT: FLU: COMPO: ASM: EVO: 
+        DELETE: END: UTL: USS: NXT:
+        SHI: TONE: GREP: EDI: ABORT: 
+        SAP: G2S: ;
+
+PROCEDURE alf_cc alf_interpol alf_N_Pb smr_lib_efix ;
+
+*STRING Library := "DLIBJ3p2_295" ;
+*STRING Library := "DLIBe7r1_281" ;
+*STRING Library := "DLIBJ312_281" ;
+STRING Library := "DLIBJ312_315" ;
+
+STRING Compo := "FISSILE_EX" ;
+
+************************************************************************
+* MASSIC POWER OF A FBR                              ??                *
+************************************************************************
+
+REAL Fuelpwr := 40.0 ; ! W/g ou kW/kg ou MW/t
+
+************************************************************************
+* DECLARATION and EVALUATION DES DONNEES                               *
+************************************************************************
+
+***********************
+*temperature in celsius
+***********************
+
+REAL 
+T_comb_0 T_clad_0 T_Pb_0
+:= 550.0 480.0 440.0
+;
+
+REAL T_Pb_K T_clad_K ;
+EVALUATE T_clad_K := T_clad_0 273.16 + ;
+EVALUATE T_Pb_K := T_Pb_0 273.16 + ;
+
+  
+************************************************************************
+INTEGER maxstep maxsap iTfMax := 7 4 4 ;
+
+DONNEES := UTL: ::
+CREA
+burn <<maxstep>> = 
+0.0 73.0 365.0 547.5 730.0 912.5 1095.0 
+!1.0 36.5 73.0 
+!0.0 1.0 36.5   73.0  109.5  146.0  182.5  219.0  255.5  292.0  328.5
+!365.0  401.5  438.0  474.5  511.0  547.5  584.0  620.5  657.0  693.5
+!730.0  766.5  803.0  839.5  876.0  912.5  949.0  985.5 1022.0 1058.5
+!1095.0 1131.5 1168.0 1204.5 1241.0 1277.5 1314.0 1350.5 1387.0 1423.5
+!1460.0 1496.5 1533.0 1569.5 1606.0 1642.5 1679.0 1715.5 1752.0
+CREA
+saphyb <<maxsap>> =  
+0.0 365.0 730.0 1095.0 
+!1.0 73.0
+!0.0  1.0  365.0  730.0  1095.0  1460.0  1752.0  
+CREA
+tf <<iTfMax>> =
+400.0 700.0 850.0 1000.0
+;
+************************************************************************
+*Geometria FA-alfred
+*****
+REAL Rcomb1 Rcomb2 Rcomb3 Rcomb4 Rcomb5 Rcomb6 Rcomb7
+   := 0.1 0.1875 0.275 0.3625 0.45 0.465 0.525 ;
+*0-r1: gas plenum
+*r1-r2: fuel mox
+*r2-r3: fuel mox
+*r3-r4: fuel mox
+*r4-r5: fuel mox
+*r5-r6: helium gap
+*r6-r7: cladding
+
+************************************************************************
+* DECLARATION DES GEOMETRIES Fa-alfred                                 *
+************************************************************************
+GEO_FERT := GEO: :: HEX 20 (*ASSEMBLAGE FISSILE*)
+EDIT 0
+HBC S30 SYME
+CELL  
+C2 
+C1 
+C1 C1 
+C1 C1 
+C1 C1 C1 
+C1 C1 C1 
+C1 C1 C1 C1
+C2 C2 C2 C2 
+::: C1 := GEO: HEXCEL 7 (*COMBUSTIBLE*)
+  SIDE 0.8002074731
+  RADIUS 0.0 <<Rcomb1>> <<Rcomb2>> <<Rcomb3>> <<Rcomb4>> <<Rcomb5>> 
+  <<Rcomb6>> <<Rcomb7>> 
+MIX 8 2 3 4 5 9 6 1 ;
+::: C2 := GEO: HEXCEL 0 (*BOITIER*)
+  SIDE 0.8002074731
+  MIX 7 ;
+;
+************************************************************
+* DECLARATION TRACKING                                                 *
+************************************************************************
+TRACK := SYBILT: GEO_FERT ::
+EDIT 0
+MAXR 500
+MAXZ 1000000
+QUA2 20 3
+DP01  
+;
+
+************************************************************************
+* BEGIN COMPO INITIALIZATION                                           *
+************************************************************************
+
+COMPO := COMPO: ::
+EDIT 1
+STEP UP <<Compo>>
+COMM 'Evolution burnup assembly' ENDC
+PARA 'TF' TEMP MICROLIB 2
+PARA 'TCA' TEMP MICROLIB 1
+PARA 'DCA' VALU REAL
+PARA 'BURN' IRRA
+INIT
+;
+
+************************************************************************
+* SET MICROLIB                                                         *
+************************************************************************
+
+MICROLIB := smr_lib_efix ::
+    <<Library>> <<T_comb_0>> <<T_clad_0>> <<T_Pb_0>> ;
+
+REAL N_Pb_0 N_Pb ;
+
+alf_N_Pb :: <<T_Pb_0>>
+  >>N_Pb_0<<
+  ;
+  
+
+************************************************************************
+* BOUCLE DE BURNUP DE REFERENCE AVEC DECROISSANCE                      *
+*  REFERENCE BURNUP LOOP WITH DEPLETION                                *
+************************************************************************
+*indici burnup
+
+INTEGER istep issap ;
+REAL Tbeg Tend Tnext ;
+
+EVALUATE istep issap := 1 1 ;
+EVALUATE Tbeg Tend Tnext := 0.0 0.0 0.0 ;
+
+GREP: DONNEES :: GETVAL 'saphyb' <<issap>> >>Tnext<< ;
+ECHO "Tnext=" Tnext ;
+
+ECHO "call CalcFlux(1)" ;
+
+* SELF SHIELDING
+    MICROLIB2 := USS: MICROLIB TRACK :: EDIT 1 PASS 3 PIJ TRAN ;
+
+* MATRICE PIJ
+    PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+    FLUX := FLU: PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+ 
+ PIJ := DELETE: PIJ ;
+
+************************************************************************
+* HOMOGENIZATION/CONDENSATION                                          *
+************************************************************************
+  EDIOBJ := EDI: FLUX MICROLIB2 TRACK ::
+  EDIT 0
+  MICR RES
+  MERG COMP
+  COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+  106 131 149 157 180 193 205 215 230 283 299 315
+  !COND 19 
+  !COND 30 59 99 193 315
+  SAVE
+  ;
+  
+************************************************************************
+* INITIAL MULTICOMPO FEEDING                                           *
+************************************************************************
+    BURNUP MICROLIB2 := EVO: MICROLIB2 FLUX TRACK ::
+    EDIT 1
+    SAVE <<Tbeg>> DAY POWR <<Fuelpwr>>
+    ;
+    
+    ECHO "create COMPO at" Tend "day" ;
+    COMPO := COMPO: COMPO EDIOBJ BURNUP MICROLIB ::
+    EDIT 1
+    STEP UP <<Compo>>
+    'DCA' <<N_Pb_0>>
+    SET <<Tbeg>> DAY ;
+
+    
+  EDIOBJ := DELETE: EDIOBJ ;
+
+************************************************************************
+*  DEPLETION [FUEL DEPLETION]                                          *
+************************************************************************
+
+EVALUATE issap := issap 1 + ;
+IF issap maxsap <= THEN
+  GREP: DONNEES :: GETVAL 'saphyb' <<issap>> >>Tnext<< ;
+ENDIF ;
+
+INTEGER whilestep := 1 ;
+
+ECHO "------START REFERENCE BURNUP LOOP---------" ;
+
+* Valori di burnup rispettivamente ai tempi Tbeg e Tend
+REAL BUbeg BUend ;
+
+WHILE istep maxstep < DO
+  ECHO " step while " whilestep ;
+  EVALUATE whilestep := whilestep 1 + ;
+  
+  EVALUATE Tbeg := Tend ;
+  ECHO "(cooled assembly) istep =" istep "<=" maxstep " Time=" Tbeg
+       " day" ;
+  EVALUATE istep := istep 1 + ;
+  
+  ********echo**********
+  
+  EVALUATE BUbeg := Tbeg Fuelpwr * ;
+  ECHO " tempo iniziale " Tbeg " al burnup " BUbeg ;
+  
+  GREP: DONNEES :: GETVAL 'burn' <<istep>> >>Tend<< ;
+  
+  EVALUATE BUend := Tend Fuelpwr * ;
+  ECHO " tempo finale " Tend " al burnup " BUend ;
+  
+
+  ECHO " tempo successivo " Tnext ;
+  *********************
+  * depleting module
+  *********************
+  
+  ECHO "depleting from " Tbeg " to " Tend " day" ;
+  BURNUP MICROLIB2 := EVO: BURNUP MICROLIB2 FLUX TRACK ::
+    EDIT 3 DEPL <<Tbeg>> <<Tend>> DAY POWR <<Fuelpwr>> ;
+
+************************************************************************
+* FLUX CALCULATION [USS ASM FLU]                                       *
+************************************************************************
+    
+    ECHO "call CalcFlux(2)" ;  
+* SELF SHIELDING
+    MICROLIB2 := USS: MICROLIB MICROLIB2 TRACK :: EDIT 1 PASS 3 PIJ TRAN ;
+
+* MATRICE PIJ
+    PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* CALCUL DE FLUX 
+    FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: EDIT 1 TYPE B B1 ECCO ;
+    PIJ := DELETE: PIJ ;
+
+************************************************************************
+* HOMOGENIZATION/CONDENSATION                                          *
+************************************************************************
+
+  EDIOBJ := EDI: FLUX MICROLIB2 TRACK ::
+  EDIT 0
+  MICR RES
+  MERG COMP
+  COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+  106 131 149 157 180 193 205 215 230 283 299 315
+  !COND 19 
+  !COND 30 59 99 193 315
+  SAVE
+  ;
+  
+************************************************************************
+* COMPO FEEDING                                                       *
+************************************************************************
+
+    BURNUP MICROLIB2 := EVO: BURNUP MICROLIB2 FLUX TRACK ::
+    EDIT 2
+    SAVE <<Tend>> DAY POWR <<Fuelpwr>>
+    ;
+    
+  IF Tend Tnext - ABS 1E-5 < THEN
+    ECHO "create COMPO at" Tend "day" ;
+    EVALUATE issap := issap 1 + ;
+    IF issap maxsap <= THEN
+      GREP: DONNEES :: GETVAL 'saphyb' <<issap>> >>Tnext<< ;
+    ENDIF ;
+    COMPO := COMPO: COMPO EDIOBJ BURNUP MICROLIB ::
+    EDIT 5
+    STEP UP <<Compo>>
+    'DCA' <<N_Pb_0>>
+    SET <<Tend>> DAY ;
+    
+  ENDIF ;
+  
+  EDIOBJ := DELETE: EDIOBJ ;
+
+  
+ENDWHILE ;
+MICROLIB2 := DELETE: MICROLIB2 ;
+MICROLIB := DELETE: MICROLIB ;
+ECHO "------FINISH REFERENCE BURNUP LOOP---------" ;
+
+
+*************************************************************************
+**  FUEL TEMPERATURE LOOP                                               *
+*************************************************************************
+REAL T_comb T_comb_K ;
+
+INTEGER iTfStep := 0 ;
+INTEGER iDcaStep ;
+
+EVALUATE whilestep := 1 ;
+
+ECHO "---- START FUEL TEMPERATURE LOOP  ----" ;
+EVALUATE iTfStep := 0 ;
+
+WHILE iTfStep iTfMax < DO
+
+  ECHO " step while " whilestep ;
+  EVALUATE whilestep := whilestep 1 + ;
+  
+  
+  EVALUATE iTfStep := iTfStep 1 + ;
+  ECHO "iTfStep numero " iTfStep "su " iTfMax ;
+  GREP: DONNEES :: GETVAL 'tf' <<iTfStep>> >>T_comb<< ;
+  EVALUATE T_comb_K := T_comb 273.16 + ;
+  
+  ECHO "-----Fuel Temperature (°K)-----  " T_comb_K  ;
+  ECHO "-----Cladding Temperature (°K)-----  " T_clad_K  ;
+  ECHO "-----Lead Temperature (°K)-----  " T_Pb_K  ;
+  
+  
+
+  EVALUATE iDcaStep := 0 ;
+  
+  *******************density lead loop********************************
+  
+  WHILE iDcaStep 2 < DO
+  
+  ********************************************************
+  IF iDcaStep 1 < THEN
+    EVALUATE N_Pb := N_Pb_0 ;
+  ELSE 
+    EVALUATE N_Pb := N_Pb_0 100.0 / ;
+  ENDIF ;
+  
+  ECHO " Density lead (loop) with " N_Pb ;    
+  
+  EVALUATE iDcaStep := iDcaStep 1 + ;
+  *******************************************************
+  
+  ***************burnup loop**********************************
+  EVALUATE issap := 0 ;
+  
+  WHILE issap maxsap < DO
+  
+  EVALUATE issap := issap 1 + ;
+  GREP: DONNEES :: GETVAL 'saphyb' <<issap>> >>Tbeg<< ;
+  ECHO "(fuel assembly) issap =" issap "<=" maxsap " Time=" Tbeg
+       " day" ;
+
+************************************************************************
+* SET UPDATE MICROLIB                                                  *
+************************************************************************
+
+MICROLIB := smr_lib_efix ::
+    <<Library>> <<T_comb>> <<T_clad_0>> <<T_Pb_0>> ;
+     
+
+* LIBRARY
+  MICROLIB := LIB: MICROLIB ::
+  EDIT 1
+  MIXS LIB: DRAGON FIL: <<Library>>
+  MIX 1 (*LEAD*) <<T_Pb_K>> NOEV
+    Pb = 'Pb208' <<N_Pb>>
+  ;
+  
+MICROLIB := LIB: MICROLIB BURNUP ::
+  EDIT 0
+  BURN <<Tbeg>> (*DAYS*)
+  MIX 2 (*COMBUSTIBLE MOX*) 
+  MIX 3 (*COMBUSTIBLE MOX*) 
+  MIX 4 (*COMBUSTIBLE MOX*) 
+  MIX 5 (*COMBUSTIBLE MOX*) 
+;
+
+************************************************************************
+
+* SELF SHIELDING
+  MICROLIB2 := USS: MICROLIB TRACK :: EDIT 1 PASS 3 PIJ TRAN ;
+      
+* PIJ MATRIX
+  PIJ := ASM: MICROLIB2 TRACK :: EDIT 1 PIJ ECCO ;
+
+* FLUX CALCULATION
+  FLUX := FLU: FLUX PIJ MICROLIB2 TRACK :: TYPE B B1 ECCO ;
+
+PIJ := DELETE: PIJ ;
+
+************************************************************************
+* HOMOGENIZATION/CONDENSATION                                          *
+************************************************************************
+  EDIOBJ := EDI: FLUX MICROLIB2 TRACK ::
+  EDIT 0
+  MICR RES
+  MERG COMP
+  COND  4 9 13 17 21 26 30 35 39 43 46 49 55 59 63 68 73 80 84 90 99
+  106 131 149 157 180 193 205 215 230 283 299 315
+  !COND 19 
+  !COND 30 59 99 193 315 
+  SAVE
+;
+
+************************************************************************
+* COMPO FEEDING                                                       *
+************************************************************************
+  BURNUP MICROLIB2 := EVO: BURNUP MICROLIB2 FLUX TRACK ::
+  EDIT 1
+  SAVE <<Tbeg>> DAY POWR <<Fuelpwr>>
+  ;
+  COMPO := COMPO: COMPO EDIOBJ BURNUP MICROLIB ::
+    EDIT 1
+    STEP UP <<Compo>>
+    'DCA' <<N_Pb>>
+    SET <<Tbeg>> DAY ;
+    
+    
+  EDIOBJ MICROLIB2 := DELETE: EDIOBJ MICROLIB2 ;
+MICROLIB := DELETE: MICROLIB ;
+  
+
+    ENDWHILE ;    
+    
+    ENDWHILE ;
+ENDWHILE ;
+ECHO "---- FINISH FUEL TEMPERATURE LOOP  ----" ;
+************************************************************************
+* CONVERSION COMPO EN FORMAT ASCII                                    *
+************************************************************************
+    
+ACOMPO3 := COMPO ;
+
+BURNUP := DELETE: BURNUP ;
+
+*----
+*  End of calculation - Memory release
+*----
+
+GEO_FERT TRACK := DELETE: GEO_FERT TRACK ;
+
+ECHO "Successful execution of alf_fissile_externe" ;
+END: ;
+
+
+QUIT "LIST" .

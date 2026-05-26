@@ -1,0 +1,236 @@
+*-----------------------------------------------------------------------
+* PROCEDURE CLE 2000 CONCENTRATIONS ISOTOPES COMMANDE                  *
+*-----------------------------------------------------------------------
+
+* Procedure appelee par :
+* 
+* N_Pb_co N_B10_co_1 N_B10_co_2 N_B11_co_1 N_B11_co_2 N_Fe54_Eco
+* N_Fe56_Eco N_Fe57_Eco N_Fe58_Eco 
+* N_Cr50_Eco N_Cr52_Eco N_Cr53_Eco N_Cr54_Eco N_Ni58_Eco 
+* N_Ni60_Eco N_Ni61_Eco N_Ni62_Eco N_Ni64_Eco N_Mn55_Eco
+* N_Mo92_Eco N_Mo94_Eco N_Mo95_Eco N_Mo96_Eco N_Mo97_Eco N_Mo98_Eco
+* N_Mo100_Eco N_C_Eco N_Si_Eco N_Ti_Eco
+* N_Fe54_APbco N_Fe56_APbco N_Fe57_APbco N_Fe58_APbco N_Cr50_APbco 
+* N_Cr52_APbco N_Cr53_APbco N_Cr54_APbco N_Ni58_APbco N_Ni60_APbco 
+* N_Ni61_APbco N_Ni62_APbco N_Ni64_APbco N_Mn55_APbco N_Mo92_APbco 
+* N_Mo94_APbco  N_Mo95_APbco N_Mo96_APbco N_Mo97_APbco N_Mo98_APbco
+* N_Mo100APbco N_Si_APbco N_Ti_APbco
+* N_Pb_svco N_Fe54_Esvco N_Fe56_Esvco N_Fe57_Esvco N_Fe58_Esvco 
+* N_Cr50_Esvco N_Cr52_Esvco N_Cr53_Esvco N_Cr54_Esvco N_Ni58_Esvco 
+* N_Ni60_Esvco N_Ni61_Esvco N_Ni62_Esvco N_Ni64_Esvco N_Mn55_Esvco 
+* N_Mo92
+* Esvco N_C_Esvco N_Si_Esvco N_Ti_Esvco
+* := alfred_cc_co ::
+* >>p_Pb_co<< >>p_Eco<< >>p_Aco<< >>p_B_co<< >>p_Pb_sv<< >>p_Esv<<
+* >>N_Fe54_E<< >>N_Fe56_E<< >>N_Fe57_E<< >>N_Fe58_E<<
+* >>N_Cr50_E<< >>N_Cr52_E<< >>N_Cr53_E<< >>N_Cr54_E<<
+* >>N_Ni58_E<< >>N_Ni60_E<< >>N_Ni61_E<< >>N_Ni62_E<<
+* >>N_Ni64_E<< >>N_Mn55_E<< >>N_Mo92_E<< >>N_Mo94_E<< >>N_Mo95_E<<
+* >>N_Mo96_E<< >>N_Mo97_E<< >>N_Mo98_E<< >>N_Mo100_E<< >>N_C_E<< 
+* >>N_Si_E<< >>N_Ti_E<< >>N_Pb<<
+* >>N_Fe54_APb<< >>N_Fe56_APb<<
+* >>N_Fe57_APb<< >>N_Fe58_APb<< >>N_Cr50_APb<<
+* >>N_Cr52_APb<< >>N_Cr53_APb<< >>N_Cr54_APb<<
+* >>N_Ni58_APb<< >>N_Ni60_APb<< >>N_Ni61_APb<<
+* >>N_Ni62_APb<< >>N_Ni64_APb<< >>N_Mn55_APb<<
+* >>N_Mo92_APb<< >>N_Mo94_APb<< >>N_Mo95_APb<< >>N_Mo96_APb<<
+* >>N_Mo97_APb<< >>N_Mo98_APb<< >>N_Mo100_APb<<
+* >>N_Si_APb<< >>N_Ti_APb<< >>T_Pb<< >>a_B<< ;
+
+MODULE END: ;
+
+*-----------------------------------------------------------------------
+* RECUPERATION DES DONNEES D ENTREE                                    *
+*-----------------------------------------------------------------------
+
+REAL 
+p_Pb_co p_Eco p_Aco p_B_co p_Pb_sv p_Esv N_Fe54_E N_Fe56_E N_Fe57_E
+N_Fe58_E N_Cr50_E N_Cr52_E N_Cr53_E N_Cr54_E N_Ni58_E N_Ni60_E N_Ni61_E
+N_Ni62_E N_Ni64_E N_Mn55_E N_Mo92_E N_Mo94_E N_Mo95_E N_Mo96_E N_Mo97_E
+N_Mo98_E N_Mo100_E N_C_E N_Si_E N_Ti_E N_Pb
+N_Fe54_APb N_Fe56_APb N_Fe57_APb N_Fe58_APb N_Cr50_APb N_Cr52_APb
+N_Cr53_APb N_Cr54_APb N_Ni58_APb N_Ni60_APb N_Ni61_APb N_Ni62_APb
+N_Ni64_APb N_Mn55_APb N_Mo92_APb N_Mo94_APb N_Mo95_APb N_Mo96_APb
+N_Mo97_APb N_Mo98_APb N_Mo100_APb N_Si_APb N_Ti_APb T_Pb a_B
+;
+
+:: >>p_Pb_co<< >>p_Eco<< >>p_Aco<< >>p_B_co<< >>p_Pb_sv<< >>p_Esv<<
+>>N_Fe54_E<< >>N_Fe56_E<< >>N_Fe57_E<< >>N_Fe58_E<< >>N_Cr50_E<<
+>>N_Cr52_E<< >>N_Cr53_E<< >>N_Cr54_E<< >>N_Ni58_E<< >>N_Ni60_E<<
+>>N_Ni61_E<< >>N_Ni62_E<< >>N_Ni64_E<< >>N_Mn55_E<< >>N_Mo92_E<<
+>>N_Mo94_E<< >>N_Mo95_E<< >>N_Mo96_E<< >>N_Mo97_E<< >>N_Mo98_E<<
+>>N_Mo100_E<< >>N_C_E<< >>N_Si_E<< >>N_Ti_E<< >>N_Pb<<
+>>N_Fe54_APb<< >>N_Fe56_APb<< >>N_Fe57_APb<< >>N_Fe58_APb<<
+>>N_Cr50_APb<< >>N_Cr52_APb<< >>N_Cr53_APb<< >>N_Cr54_APb<<
+>>N_Ni58_APb<< >>N_Ni60_APb<< >>N_Ni61_APb<< >>N_Ni62_APb<<
+>>N_Ni64_APb<< >>N_Mn55_APb<< >>N_Mo92_APb<< >>N_Mo94_APb<<
+>>N_Mo95_APb<< >>N_Mo96_APb<< >>N_Mo97_APb<< >>N_Mo98_APb<<
+>>N_Mo100_APb<< >>N_Si_APb<< >>N_Ti_APb<< >>T_Pb<< >>a_B<<
+;
+
+*-----------------------------------------------------------------------
+* TENEUR EN BORE                                                       *
+*-----------------------------------------------------------------------
+
+* NOMBRE D AVOGADRO
+
+ECHO "start calculation" ;
+REAL A := 6.022094E-1 ; ! Normalisation des concentrations par 10E-24
+
+* DENSITE NOMINALE A 20 C
+
+REAL rho0_B_1 rho0_B_2 ;
+
+EVALUATE rho0_B_1 := 2.470 ; ! partie sup (teneur : 48%)
+EVALUATE rho0_B_2 := 2.521 ; ! partie inf (teneur : 19.8%)
+
+* DENSITE A LA TEMPERATURE DU PLOMBE (g/cm^3)
+
+REAL coeff_1 := T_Pb 20.0 - a_B * 1.0 + ;
+(*Hypothese : disp de commande a la temp du plombe*)
+REAL coeff_2 := coeff_1 coeff_1 * coeff_1 * ;
+REAL rho_B_1 := rho0_B_1 coeff_2 * ;
+REAL rho_B_2 := rho0_B_2 coeff_2 * ;
+
+* CONCENTRATION (cm^-3)
+
+REAL M_B_1 := 0.48 10.0129370 * 0.52 11.0093053 * + ;
+REAL M_B_2 := 0.198 10.0129370 * 0.802 11.0093053 * + ;
+REAL N_B10_1 := 0.48 rho_B_1 * A * M_B_1 / ;
+REAL N_B10_2 := 0.198 rho_B_2 * A * M_B_2 / ;
+REAL N_B11_1 := 0.52 rho_B_1 * A * M_B_1 / ;
+REAL N_B11_2 := 0.802 rho_B_2 * A * M_B_2 / ;
+
+*-----------------------------------------------------------------------
+* CALCUL DES CONCENTRATIONS                                            *
+*-----------------------------------------------------------------------
+
+* MATERIAU ABSORBANT
+
+REAL N_Pb_co N_B10_co_1 N_B10_co_2 N_B11_co_1 N_B11_co_2 N_Fe54_Eco
+N_Fe56_Eco N_Fe57_Eco N_Fe58_Eco
+N_Cr50_Eco N_Cr52_Eco N_Cr53_Eco N_Cr54_Eco N_Ni58_Eco N_Ni60_Eco
+N_Ni61_Eco N_Ni62_Eco N_Ni64_Eco N_Mn55_Eco N_Mo92_Eco N_Mo94_Eco
+N_Mo95_Eco N_Mo96_Eco N_Mo97_Eco N_Mo98_Eco N_Mo100_Eco
+N_C_Eco N_Si_Eco N_Ti_Eco
+N_Fe54_APbco N_Fe56_APbco N_Fe57_APbco N_Fe58_APbco N_Cr50_APbco
+N_Cr52_APbco N_Cr53_APbco N_Cr54_APbco N_Ni58_APbco N_Ni60_APbco
+N_Ni61_APbco N_Ni62_APbco N_Ni64_APbco N_Mn55_APbco N_Mo92_APbco
+N_Mo94_APbco N_Mo95_APbco N_Mo96_APbco N_Mo97_APbco N_Mo98_APbco
+N_Mo100APbco N_Si_APbco N_Ti_APbco ;
+
+EVALUATE N_Pb_co := N_Pb p_Pb_co * ;
+EVALUATE N_B10_co_1 := N_B10_1 p_B_co * ; ! B10 partie sup
+EVALUATE N_B10_co_2 := N_B10_2 p_B_co * ; ! B10 partie inf
+EVALUATE N_B11_co_1 := N_B11_1 p_B_co * ; ! B11 partie sup
+EVALUATE N_B11_co_2 := N_B11_2 p_B_co * ; ! B11 partie inf
+EVALUATE N_Fe54_Eco := N_Fe54_E p_Eco * ;
+EVALUATE N_Fe56_Eco := N_Fe56_E p_Eco * ;
+EVALUATE N_Fe57_Eco := N_Fe57_E p_Eco * ;
+EVALUATE N_Fe58_Eco := N_Fe58_E p_Eco * ;
+EVALUATE N_Cr50_Eco := N_Cr50_E p_Eco * ;
+EVALUATE N_Cr52_Eco := N_Cr52_E p_Eco * ;
+EVALUATE N_Cr53_Eco := N_Cr53_E p_Eco * ;
+EVALUATE N_Cr54_Eco := N_Cr54_E p_Eco * ;
+EVALUATE N_Ni58_Eco := N_Ni58_E p_Eco * ;
+EVALUATE N_Ni60_Eco := N_Ni60_E p_Eco * ;
+EVALUATE N_Ni61_Eco := N_Ni61_E p_Eco * ;
+EVALUATE N_Ni62_Eco := N_Ni62_E p_Eco * ;
+EVALUATE N_Ni64_Eco := N_Ni64_E p_Eco * ;
+EVALUATE N_Mn55_Eco := N_Mn55_E p_Eco * ;
+EVALUATE N_Mo92_Eco := N_Mo92_E p_Eco * ;
+EVALUATE N_Mo94_Eco := N_Mo94_E p_Eco * ;
+EVALUATE N_Mo95_Eco := N_Mo95_E p_Eco * ;
+EVALUATE N_Mo96_Eco := N_Mo96_E p_Eco * ;
+EVALUATE N_Mo97_Eco := N_Mo97_E p_Eco * ;
+EVALUATE N_Mo98_Eco := N_Mo98_E p_Eco * ;
+EVALUATE N_Mo100_Eco := N_Mo100_E p_Eco * ;
+EVALUATE N_C_Eco := N_C_E p_Eco * ;
+EVALUATE N_Si_Eco := N_Si_E p_Eco * ;
+EVALUATE N_Ti_Eco := N_Ti_E p_Eco * ;
+EVALUATE N_Fe54_APbco := N_Fe54_APb p_Aco * ;
+EVALUATE N_Fe56_APbco := N_Fe56_APb p_Aco * ;
+EVALUATE N_Fe57_APbco := N_Fe57_APb p_Aco * ;
+EVALUATE N_Fe58_APbco := N_Fe58_APb p_Aco * ;
+EVALUATE N_Cr50_APbco := N_Cr50_APb p_Aco * ;
+EVALUATE N_Cr52_APbco := N_Cr52_APb p_Aco * ;
+EVALUATE N_Cr53_APbco := N_Cr53_APb p_Aco * ;
+EVALUATE N_Cr54_APbco := N_Cr54_APb p_Aco * ;
+EVALUATE N_Ni58_APbco := N_Ni58_APb p_Aco * ;
+EVALUATE N_Ni60_APbco := N_Ni60_APb p_Aco * ;
+EVALUATE N_Ni61_APbco := N_Ni61_APb p_Aco * ;
+EVALUATE N_Ni62_APbco := N_Ni62_APb p_Aco * ;
+EVALUATE N_Ni64_APbco := N_Ni64_APb p_Aco * ;
+EVALUATE N_Mn55_APbco := N_Mn55_APb p_Aco * ;
+EVALUATE N_Mo92_APbco := N_Mo92_APb p_Aco * ;
+EVALUATE N_Mo94_APbco := N_Mo94_APb p_Aco * ;
+EVALUATE N_Mo95_APbco := N_Mo95_APb p_Aco * ;
+EVALUATE N_Mo96_APbco := N_Mo96_APb p_Aco * ;
+EVALUATE N_Mo97_APbco := N_Mo97_APb p_Aco * ;
+EVALUATE N_Mo98_APbco := N_Mo98_APb p_Aco * ;
+EVALUATE N_Mo100APbco := N_Mo100_APb p_Aco * ;
+EVALUATE N_Si_APbco := N_Si_APb p_Aco * ;
+EVALUATE N_Ti_APbco := N_Ti_APb p_Aco * ;
+
+* SUIVEUR DE BARRE
+
+REAL N_Pb_svco N_Fe54_Esvco N_Fe56_Esvco N_Fe57_Esvco N_Fe58_Esvco 
+N_Cr50_Esvco N_Cr52_Esvco N_Cr53_Esvco N_Cr54_Esvco N_Ni58_Esvco 
+N_Ni60_Esvco N_Ni61_Esvco N_Ni62_Esvco N_Ni64_Esvco N_Mn55_Esvco  
+N_Mo92_Esvco N_Mo94_Esvco N_Mo95_Esvco N_Mo96_Esvco N_Mo97_Esvco
+N_Mo98_Esvco N_Mo100Esvco N_C_Esvco N_Si_Esvco N_Ti_Esvco ;
+
+EVALUATE N_Pb_svco := N_Pb p_Pb_sv * ;
+EVALUATE N_Fe54_Esvco := N_Fe54_E p_Esv * ;
+EVALUATE N_Fe56_Esvco := N_Fe56_E p_Esv * ;
+EVALUATE N_Fe57_Esvco := N_Fe57_E p_Esv * ;
+EVALUATE N_Fe58_Esvco := N_Fe58_E p_Esv * ;
+EVALUATE N_Cr50_Esvco := N_Cr50_E p_Esv * ;
+EVALUATE N_Cr52_Esvco := N_Cr52_E p_Esv * ;
+EVALUATE N_Cr53_Esvco := N_Cr53_E p_Esv * ;
+EVALUATE N_Cr54_Esvco := N_Cr54_E p_Esv * ;
+EVALUATE N_Ni58_Esvco := N_Ni58_E p_Esv * ;
+EVALUATE N_Ni60_Esvco := N_Ni60_E p_Esv * ;
+EVALUATE N_Ni61_Esvco := N_Ni61_E p_Esv * ;
+EVALUATE N_Ni62_Esvco := N_Ni62_E p_Esv * ;
+EVALUATE N_Ni64_Esvco := N_Ni64_E p_Esv * ;
+EVALUATE N_Mn55_Esvco := N_Mn55_E p_Esv * ;
+EVALUATE N_Mo92_Esvco := N_Mo92_E p_Esv * ;
+EVALUATE N_Mo94_Esvco := N_Mo94_E p_Esv * ;
+EVALUATE N_Mo95_Esvco := N_Mo95_E p_Esv * ;
+EVALUATE N_Mo96_Esvco := N_Mo96_E p_Esv * ;
+EVALUATE N_Mo97_Esvco := N_Mo97_E p_Esv * ;
+EVALUATE N_Mo98_Esvco := N_Mo98_E p_Esv * ;
+EVALUATE N_Mo100Esvco := N_Mo100_E p_Esv * ;
+EVALUATE N_C_Esvco := N_C_E p_Esv * ;
+EVALUATE N_Si_Esvco := N_Si_E p_Esv * ;
+EVALUATE N_Ti_Esvco := N_Ti_E p_Esv * ;
+
+*-----------------------------------------------------------------------
+* AFFICHAGE DES RESULTATS                                              *
+*-----------------------------------------------------------------------
+
+:: <<N_Pb_co>> <<N_B10_co_1>> <<N_B10_co_2>> <<N_B11_co_1>>
+<<N_B11_co_2>> <<N_Fe54_Eco>> <<N_Fe56_Eco>> <<N_Fe57_Eco>>
+<<N_Fe58_Eco>> <<N_Cr50_Eco>> <<N_Cr52_Eco>> <<N_Cr53_Eco>>
+<<N_Cr54_Eco>> <<N_Ni58_Eco>> <<N_Ni60_Eco>> <<N_Ni61_Eco>>
+<<N_Ni62_Eco>> <<N_Ni64_Eco>> <<N_Mn55_Eco>> <<N_Mo92_Eco>>
+<<N_Mo94_Eco>> <<N_Mo95_Eco>> <<N_Mo96_Eco>> <<N_Mo97_Eco>>
+<<N_Mo98_Eco>> <<N_Mo100_Eco>> <<N_C_Eco>>
+<<N_Si_Eco>> <<N_Ti_Eco>>
+<<N_Fe54_APbco>> <<N_Fe56_APbco>> <<N_Fe57_APbco>> <<N_Fe58_APbco>>
+<<N_Cr50_APbco>> <<N_Cr52_APbco>> <<N_Cr53_APbco>> <<N_Cr54_APbco>>
+<<N_Ni58_APbco>> <<N_Ni60_APbco>> <<N_Ni61_APbco>> <<N_Ni62_APbco>>
+<<N_Ni64_APbco>> <<N_Mn55_APbco>> <<N_Mo92_APbco>> <<N_Mo94_APbco>>
+<<N_Mo95_APbco>> <<N_Mo96_APbco>> <<N_Mo97_APbco>> <<N_Mo98_APbco>>
+<<N_Mo100APbco>> <<N_Si_APbco>> <<N_Ti_APbco>>
+<<N_Pb_svco>> <<N_Fe54_Esvco>> <<N_Fe56_Esvco>> <<N_Fe57_Esvco>>
+<<N_Fe58_Esvco>> <<N_Cr50_Esvco>> <<N_Cr52_Esvco>> <<N_Cr53_Esvco>>
+<<N_Cr54_Esvco>> <<N_Ni58_Esvco>> <<N_Ni60_Esvco>> <<N_Ni61_Esvco>>
+<<N_Ni62_Esvco>> <<N_Ni64_Esvco>> <<N_Mn55_Esvco>> <<N_Mo92_Esvco>>
+<<N_Mo94_Esvco>> <<N_Mo95_Esvco>> <<N_Mo96_Esvco>> <<N_Mo97_Esvco>>
+<<N_Mo98_Esvco>> <<N_Mo100Esvco>>
+<<N_C_Esvco>> <<N_Si_Esvco>> <<N_Ti_Esvco>>
+;
+
+END: ;
