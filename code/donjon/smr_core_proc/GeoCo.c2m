@@ -2,7 +2,7 @@
 *                                                                 *
 * Procedure :  GeoCo.c2m                                       *
 * Purpose   :  Coarse geometry definition for ALFRED hex core     *
-* Author    :  Marco Lanconelli (2018-2019)                       *
+* Author    :  Marco Sumini, Augusto Di Chicco, Marco Lanconelli  *
 * CALL      :  GEOM := GeoCo ;                                    *
 *                                                                 *
 *******************************************************************

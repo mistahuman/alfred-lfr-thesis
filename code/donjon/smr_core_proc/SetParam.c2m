@@ -2,7 +2,7 @@
 *                                                                 *
 * Procedure :  SetParam.c2m                                       *
 * Purpose   :  Coarse fuelmap definition for ALFRED hex core      *
-* Author    :  Marco Lanconelli (2018-2019)                       *
+* Author    :  Marco Sumini, Augusto Di Chicco, Marco Lanconelli  *
 *                                                                 *
 * CALL      :  Fmap := SetParam Fmap :: (data) ;                *
 *                                                                 *

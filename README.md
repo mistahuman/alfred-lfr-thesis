@@ -1,5 +1,7 @@
 # Thesis, Slides & Paper - Marco Lanconelli's Degree
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **Alma Mater Studiorum, Università di Bologna**  
 Corso di Laurea Magistrale in Ingegneria Energetica — A.A. 2018/2019
 
@@ -10,7 +12,7 @@ Corso di Laurea Magistrale in Ingegneria Energetica — A.A. 2018/2019
 
 ## Abstract
 
-This work presents the modelling and simulation of **ALFRED** (Advanced Lead Fast Reactor European Demonstrator), a Generation-IV Lead-cooled Fast Reactor (LFR). The focus is on the coupling between neutronics and thermohydraulics on the **FEMuS** multi-physics platform. Neutronic calculations were performed with **DRAGON5/DONJON5** to generate homogenised cross-section libraries feeding a coupled full-core steady-state solver.
+This work presents the modelling and simulation of a Generation-IV Lead-cooled Fast Reactor (LFR) inspired by the **ALFRED** (Advanced Lead Fast Reactor European Demonstrator) concept design. The focus is on the coupling between neutronics and thermohydraulics on the **FEMuS** multi-physics platform. Neutronic calculations were performed with **DRAGON5/DONJON5** to generate homogenised cross-section libraries feeding a coupled full-core steady-state solver.
 
 **Key topics:** neutron transport, multi-group cross-section generation, nodal diffusion, FEM thermal-hydraulics, neutronics–thermohydraulics coupling, LFR safety parameters.
 
@@ -24,6 +26,17 @@ This work presents the modelling and simulation of **ALFRED** (Advanced Lead Fas
 | Defence presentation | [slides_lanconelli.pdf](slides-thesis/main/slides_lanconelli.pdf) |
 | Conference presentation | [slides_conference.pdf](slides-conference/main/slides_conference.pdf) |
 | Conference paper | [a_multiphysics_approach_to_lfr_analysis_final.pdf](paper/a_multiphysics_approach_to_lfr_analysis_final.pdf) |
+
+### Related publications
+
+The conference paper was presented at the **IAEA Technical Meeting on Small Modular Fast Reactors** and published in:
+
+> M. Lanconelli, M. Sumini, S. Manservisi — *"A Multiphysics Approach to LFR Analysis"*  
+> in *Benefits and Challenges of Small Modular Fast Reactors*, IAEA-TECDOC-1972, Wien, 2021, pp. 280–291
+
+- [IAEA TECDOC-1972 (full volume)](https://www-pub.iaea.org/MTCD/Publications/PDF/TE-1972web.pdf)
+- [Conference presentation slides](https://conferences.iaea.org/event/204/contributions/15892/attachments/8238/10876/09-presentation_sumini_26_9.pdf)
+- [UniBo CRIS record](https://cris.unibo.it/handle/11585/906623?mode=simple)
 
 ---
 
@@ -41,11 +54,11 @@ The simulation is a four-step pipeline:
 ┌───────────────────────────▼─────────────────────────────────────┐
 │  STEP 1 — Lattice transport (DRAGON5)                           │
 │  Input: JEFF 3.1.2 nuclear data library (315 energy groups)     │
-│                                                                  │
-│  smr_fissile.x2m    →  ACOMPO1  (inner fissile assembly, MOX)  │
-│  smr_fissile_ex.x2m →  ACOMPO3  (outer fissile assembly)       │
-│  smr_solide33.x2m   →  ACOMPO4  (structural/reflector)         │
-│                                                                  │
+│                                                                 │
+│  smr_fissile.x2m    →  ACOMPO1  (inner fissile assembly, MOX)   │
+│  smr_fissile_ex.x2m →  ACOMPO3  (outer fissile assembly)        │
+│  smr_solide33.x2m   →  ACOMPO4  (structural/reflector)          │
+│                                                                 │
 │  Each run: self-shielding → flux (B1) → homogenisation          │
 │  + condensation 315 → 33 groups, over a burnup/temperature grid │
 │  Output: multi-parameter COMPO tables in code/compo/SMRcompo33/ │
@@ -53,28 +66,28 @@ The simulation is a four-step pipeline:
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
 │  STEP 2 — Full-core neutronics (DONJON5)                        │
-│  Input: ACOMPO1, ACOMPO2 (=ACOMPO1), ACOMPO3, ACOMPO4          │
-│                                                                  │
+│  Input: ACOMPO1, ACOMPO2 (=ACOMPO1), ACOMPO3, ACOMPO4           │
+│                                                                 │
 │  smr_core.x2m with procedures:                                  │
 │    GeoCo.c2m       — hexagonal core geometry (9 rings)          │
 │    SetFuelMap.c2m  — assembly-type map                          │
 │    SetParam.c2m    — burnup/temperature parameters              │
 │    alf_N_Pb.c2m    — lead density from temperature              │
-│                                                                  │
+│                                                                 │
 │  Method: nodal diffusion, SPN-3, Raviart-Thomas-Schneider       │
-│  Cases: rods extracted (TBE) / inserted (TBI) / half (THALF)   │
+│  Cases: rods extracted (TBE) / inserted (TBI) / half (THALF)    │
 │  Output: k_effective, 3D power distribution                     │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
 │  STEP 3 — Neutronics–thermohydraulics coupling (FEMuS)          │
 │  Input: power map (DONJON5) + mesh (SALOME)                     │
-│                                                                  │
+│                                                                 │
 │  IniPowCompo.c2m   — initialise coupled power component         │
 │  PowComponent.c2m  — DONJON5 side of the coupling interface     │
-│                                                                  │
+│                                                                 │
 │  Iterative loop until convergence:                              │
-│    DONJON5  →  power distribution  →  FEMuS (FEM heat solver)  │
+│    DONJON5  →  power distribution  →  FEMuS (FEM heat solver)   │
 │    FEMuS    →  temperature/density fields  →  DONJON5           │
 │  Output: converged steady-state neutronics + temperature fields │
 └─────────────────────────────────────────────────────────────────┘
@@ -109,7 +122,7 @@ out of the box even with all the required tools in place.
 
 The code is **not self-contained** and cannot be run without:
 
-- **DRAGON5 / DONJON5** — licensed from École Polytechnique de Montréal ([request access](https://www.polymtl.ca/merlin/))
+- **DRAGON5 / DONJON5** — licensed from École Polytechnique de Montréal
 - **JEFF 3.1.2 nuclear data library** — distributed by OECD/NEA (large binary files, not included in this repository)
 - **FEMuS** multi-physics platform — with HPC dependencies (PETSc, libMesh, HDF5, SALOME MEDCoupling)
 - **SALOME** — open source, required only to regenerate the mesh
@@ -209,6 +222,10 @@ make cleanall     # remove auxiliary files and PDFs
 |------|---------|
 | [DRAGON5](https://www.polymtl.ca/merlin/) | Lattice neutron transport — cross-section generation |
 | [DONJON5](https://www.polymtl.ca/merlin/) | Full-core nodal diffusion solver |
-| [FEMuS](https://github.com/FEMuS) | Multi-physics FEM platform (thermohydraulics + coupling) |
+| FEMuS | Multi-physics FEM platform (thermohydraulics + coupling) — internal tool, Università di Bologna |
 | [SALOME](https://www.salome-platform.org/) | 3D geometry and mesh generation |
 | LaTeX / pdflatex | Document typesetting |
+
+---
+
+*This README was written with the assistance of [Claude](https://claude.ai) (Anthropic).*
